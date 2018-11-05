@@ -47,9 +47,9 @@ const accessLogStream = rfs('access.log', {
 /*
  *  init database
  */
-// mongoose.connect(finalConfig.database, { useNewUrlParser: true })
-//     .then(res => logFactory.log("connect db successfully"))
-//     .catch(err => logFactory.error(err));
+mongoose.connect(finalConfig.database, { useNewUrlParser: true })
+    .then(res => logFactory.log("connect db successfully"))
+    .catch(err => logFactory.error(err));
 
 /*
  *  router

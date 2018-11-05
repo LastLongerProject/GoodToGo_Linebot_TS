@@ -1,5 +1,14 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const serviceProcess_1 = require("../models/serviceProcess");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const client = require('./clientDelegate');
 function isMobilePhone(phone) {
@@ -22,24 +31,63 @@ function recordPostback(event) {
     logFactory.log('Event: postback');
 }
 function followEvent(event) {
-    logFactory.log('Event: added or blocked');
+    logFactory.log('Event: added or unblocked');
     const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號\綁定完成後即可使用本帳號提供的服務！';
     client.textMessage(event, message);
 }
 function unfollowOrUnBoundEvent(event) {
-    if (event.type === 'unfollow')
-        logFactory.log('Event: unfollowed');
-    else
-        logFactory.log('Event: delete bind');
+    return __awaiter(this, void 0, void 0, function* () {
+        if (event.type === 'unfollow')
+            logFactory.log('Event: unfollowed');
+        else
+            logFactory.log('Event: delete bind');
+        try {
+            var result = yield serviceProcess_1.deleteBinding(event);
+            logFactory.log(result);
+            client.textMessage(event, result);
+        }
+        catch (err) {
+            logFactory.error(err);
+        }
+    });
 }
 function getContributionEvent(event) {
-    logFactory.log('Event: get contribution');
+    return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: get contribution');
+        try {
+            let message;
+            var result = yield serviceProcess_1.getContribution(event);
+            switch (result) {
+                case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
+                    message = '請輸入手機號碼以綁定 line id';
+                    return client.textMessage(event, message);
+                default:
+                    return client.textMessage(event, '您的功德數為：' + result);
+            }
+        }
+        catch (err) {
+            logFactory.error(err);
+        }
+    });
 }
 function getRecordEvent(event) {
     logFactory.log('Event: get record');
 }
 function getQRCodeEvent(event) {
-    logFactory.log('Event: get QRCode');
+    return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: get QRCode');
+        try {
+            var result = yield serviceProcess_1.getQrcode(event);
+            if (result === serviceProcess_1.DatabaseState.USER_NOT_FOUND) {
+                let message = '請輸入手機號碼以綁定 line id';
+                return client.textMessage(event, message);
+            }
+            return client.getQrcode(event, result);
+        }
+        catch (err) {
+            logFactory.error(err);
+        }
+    });
 }
 function getContactWayEvent(event) {
     logFactory.log('Event: get contact way');
@@ -48,7 +96,35 @@ function getContactWayEvent(event) {
     client.textMessage(event, message);
 }
 function bindingEvent(event) {
-    logFactory.log('Event: binding');
+    return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: binding');
+        try {
+            let result = yield serviceProcess_1.bindLineId(event);
+            let message;
+            logFactory.log(result);
+            switch (result) {
+                case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
+                    message = "您還不是會員哦！\n請問要註冊成為會員嗎？";
+                    client.registerTemplate(event, message);
+                    break;
+                case serviceProcess_1.BindState.HAS_BOUND:
+                    message = "此手機已經綁定過摟！";
+                    client.textMessage(event, message);
+                    break;
+                case serviceProcess_1.BindState.LINE_HAS_BOUND:
+                    message = "此 line 已經綁定過摟！";
+                    client.textMessage(event, message);
+                    break;
+                case serviceProcess_1.BindState.SUCCESS:
+                    message = "綁定成功！";
+                    client.textMessage(event, message);
+                    break;
+            }
+        }
+        catch (err) {
+            logFactory.error(err);
+        }
+    });
 }
 function registerEvent(event) {
     logFactory.log('Event: register');
@@ -76,7 +152,6 @@ module.exports = {
             getContributionEvent(event);
         }
         else if (event.message.text === "使用") {
-            console.log('use');
             getRecordEvent(event);
         }
         else if (event.message.text === "QRcode") {
@@ -96,11 +171,9 @@ module.exports = {
             yesNoEvent(event);
         }
         else if (isMobilePhone(event.message.text)) {
-            logFactory.log('is mobile');
-            // bindLineId(event);
+            bindingEvent(event);
         }
         else if (isVerificationCode(event.message.text)) {
-            logFactory.log('is verification');
             // request.registerVerification(event);
         }
         else {

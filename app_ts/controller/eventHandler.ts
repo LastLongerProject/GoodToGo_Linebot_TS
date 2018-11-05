@@ -1,6 +1,9 @@
 import * as line from "@line/bot-sdk";
 import { EventMessage } from "@line/bot-sdk";
 import { text } from 'body-parser';
+import {bindLineId, deleteBinding, BindState, getQrcode, DeleteBindState, DatabaseState, getContribution} from '../models/serviceProcess';
+import { loadavg } from "os";
+
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const client = require('./clientDelegate');
 
@@ -26,42 +29,97 @@ function recordPostback(event: any): void {
 }
 
 function followEvent(event: any): void {
-    logFactory.log('Event: added or blocked');
+    logFactory.log('Event: added or unblocked');
 
     const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號\綁定完成後即可使用本帳號提供的服務！'
     client.textMessage(event, message);
 }
 
-function unfollowOrUnBoundEvent(event: any):  void {
+async function unfollowOrUnBoundEvent(event: any): Promise<any> {
     if (event.type === 'unfollow') logFactory.log('Event: unfollowed');
     else logFactory.log('Event: delete bind');
+
+    try {
+        var result = await deleteBinding(event);
+        logFactory.log(result);
+        client.textMessage(event, result);
+    } catch (err) {
+        logFactory.error(err);
+    }
 }
 
-function getContributionEvent(event: any): void {
+async function getContributionEvent(event: any): Promise<any> {
     logFactory.log('Event: get contribution');
+    try {
+        let message: string;
+        var result = await getContribution(event);
+        switch (result) {
+            case DatabaseState.USER_NOT_FOUND:
+                message = '請輸入手機號碼以綁定 line id'
+                return client.textMessage(event, message);
+            default:
+                return client.textMessage(event, '您的功德數為：' + result); 
+        }
+    } catch (err) {
+        logFactory.error(err);
+    }
 }
 
 function getRecordEvent(event: any): void {
     logFactory.log('Event: get record');
 }
 
-function getQRCodeEvent(event: any): void {
+async function getQRCodeEvent(event: any): Promise<any> { 
     logFactory.log('Event: get QRCode');
-
+    try {
+        var result = await getQrcode(event);
+        if (result === DatabaseState.USER_NOT_FOUND) {
+            let message = '請輸入手機號碼以綁定 line id'
+            return client.textMessage(event, message);
+        }
+        return client.getQrcode(event, result);
+    } catch (err) {
+        logFactory.error(err);
+    }
 }
 
 function getContactWayEvent(event: any): void {
     logFactory.log('Event: get contact way');
-
+ 
     const message = "好盒器工作室: (06)200-2341\n" +
     "FB: https://www.facebook.com/good.to.go.tw"
     client.textMessage(event, message);
 }
 
-function bindingEvent(event: any): void {
-    logFactory.log('Event: binding');
-
-}
+async function bindingEvent(event: any): Promise<any> {
+    logFactory.log('Event: binding'); 
+    try {
+        let result = await bindLineId(event);
+        let message: string;
+        logFactory.log(result);
+        switch(result) {
+            case DatabaseState.USER_NOT_FOUND:
+                message = "您還不是會員哦！\n請問要註冊成為會員嗎？"
+                client.registerTemplate(event, message);
+                break;
+            case BindState.HAS_BOUND:
+                message = "此手機已經綁定過摟！"
+                client.textMessage(event, message);
+                break;
+            case BindState.LINE_HAS_BOUND:
+                message = "此 line 已經綁定過摟！"
+                client.textMessage(event, message);
+                break;
+            case BindState.SUCCESS:
+                message = "綁定成功！"
+                client.textMessage(event, message);
+                break;
+        }
+        
+    } catch (err) {
+        logFactory.error(err);  
+    } 
+} 
 
 function registerEvent(event: any): void {
     logFactory.log('Event: register');
@@ -94,7 +152,6 @@ module.exports = {
         } else if (event.message.text === "功德") {
             getContributionEvent(event);
         } else if (event.message.text === "使用") {
-            console.log('use')
             getRecordEvent(event);
         } else if (event.message.text === "QRcode") {
             getQRCodeEvent(event);
@@ -109,11 +166,8 @@ module.exports = {
         } else if (event.message.text === "是" || event.message.text === "否") {
             yesNoEvent(event);
         } else if (isMobilePhone(event.message.text)) {
-            logFactory.log('is mobile');
-            // bindLineId(event);
+            bindingEvent(event);
         } else if (isVerificationCode(event.message.text)) {
-            logFactory.log('is verification');
-
             // request.registerVerification(event);
         } else {
             logFactory.log("Event: not our business");
