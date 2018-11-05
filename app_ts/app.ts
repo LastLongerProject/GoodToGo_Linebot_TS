@@ -8,11 +8,23 @@ import {
     WebhookEvent
 } from '@line/bot-sdk';
 // import * as mongoose from 'mongoose';
-import _ = require('lodash');
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 import rfs from 'rotating-file-stream';
+
+// set config
+
+import _ = require('lodash');
+import { globalAgent } from 'http';
+
+const config = require('./config/config.json')
+
+const defaultConfig: Object = config.development;
+const environment = process.env.NODE_ENV || 'development';
+const environmentConfig = config[environment];
+const finalConfig = _.merge(defaultConfig, environmentConfig);
+global.gConfig = finalConfig;
 
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -20,13 +32,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const eventHandler = require('./controller/eventHandler');
 const logFactory = require('./api/logFactory')('linebot:app');
-const config = require('./config/config.json')
 
-// set config
-const defaultConfig: Object = config.development;
-const environment = process.env.NODE_ENV || 'development';
-const environmentConfig = config[environment];
-const finalConfig = _.merge(defaultConfig, environmentConfig);
 
 const app: express.Application = express();
 const logDirectory = path.join(__dirname, 'log');
@@ -41,17 +47,19 @@ const accessLogStream = rfs('access.log', {
 /*
  *  init database
  */
-mongoose.connect(finalConfig.database, { useNewUrlParser: true })
-    .then(res => logFactory.log("connect db successfully"))
-    .catch(err => logFactory.error(err));
+// mongoose.connect(finalConfig.database, { useNewUrlParser: true })
+//     .then(res => logFactory.log("connect db successfully"))
+//     .catch(err => logFactory.error(err));
 
 /*
  *  router
  */
-app.post('/webhook', middleware(finalConfig.bot), (req,res) => {
+
+app.post('/webhook', middleware(global.gConfig.bot), (req,res) => {
     Promise
         .all(req.body.events.map(eventHandler.bot))
-        .then(result => res.json(result));
+        .then(result => res.json(result))
+        .catch(err => logFactory.error(err));
 });
 
 // view engine setup

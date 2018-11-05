@@ -13,23 +13,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bot_sdk_1 = require("@line/bot-sdk");
 // import * as mongoose from 'mongoose';
-const _ = require("lodash");
 const bodyParser = __importStar(require("body-parser"));
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const rotating_file_stream_1 = __importDefault(require("rotating-file-stream"));
+// set config
+const _ = require("lodash");
+const config = require('./config/config.json');
+const defaultConfig = config.development;
+const environment = process.env.NODE_ENV || 'development';
+const environmentConfig = config[environment];
+const finalConfig = _.merge(defaultConfig, environmentConfig);
+global.gConfig = finalConfig;
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const eventHandler = require('./controller/eventHandler');
 const logFactory = require('./api/logFactory')('linebot:app');
-const config = require('./config/config.json');
-// set config
-const defaultConfig = config.development;
-const environment = process.env.NODE_ENV || 'development';
-const environmentConfig = config[environment];
-const finalConfig = _.merge(defaultConfig, environmentConfig);
 const app = express();
 const logDirectory = path.join(__dirname, 'log');
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
@@ -40,16 +41,17 @@ const accessLogStream = rotating_file_stream_1.default('access.log', {
 /*
  *  init database
  */
-mongoose.connect(finalConfig.database, { useNewUrlParser: true })
-    .then(res => logFactory.log("connect db successfully"))
-    .catch(err => logFactory.error(err));
+// mongoose.connect(finalConfig.database, { useNewUrlParser: true })
+//     .then(res => logFactory.log("connect db successfully"))
+//     .catch(err => logFactory.error(err));
 /*
  *  router
  */
-app.post('/webhook', bot_sdk_1.middleware(finalConfig.bot), (req, res) => {
+app.post('/webhook', bot_sdk_1.middleware(global.gConfig.bot), (req, res) => {
     Promise
         .all(req.body.events.map(eventHandler.bot))
-        .then(result => res.json(result));
+        .then(result => res.json(result))
+        .catch(err => logFactory.error(err));
 });
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
