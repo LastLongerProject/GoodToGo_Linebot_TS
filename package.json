@@ -50,7 +50,7 @@
     },
     "scripts": {
         "tsc": "tsc ./app/app.ts ./app/controller/eventHandler.ts; exit 0",
-        "test": "concurrently --kill-others \"tsc -w\" \"DEBUG='linebot:*' nodemon bin/www.js; exit 0\"",
+        "test": "concurrently --kill-others \"tsc -w;\" \"DEBUG='linebot:*' nodemon bin/www.js; exit 0\"",
         "eslint": "eslint app --ext .ts; exit 0"
     },
     "repository": {
