@@ -3,6 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bot_sdk_1 = require("@line/bot-sdk");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const client = new bot_sdk_1.Client(global.gConfig.bot);
+var registerWilling;
+(function (registerWilling) {
+    registerWilling.YES = "Wanna become member", registerWilling.NO = "Do not wanna become member";
+})(registerWilling = exports.registerWilling || (exports.registerWilling = {}));
 function returnTextMessage(event, message) {
     return client.replyMessage(event.replyToken, {
         type: 'text',
@@ -14,6 +18,7 @@ function returnTextMessage(event, message) {
         }
     });
 }
+exports.textMessage = returnTextMessage;
 function returnQrcode(event, phone) {
     var baseUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=";
     function getQrcodeImage(phone) {
@@ -30,6 +35,7 @@ function returnQrcode(event, phone) {
         }
     });
 }
+exports.getQrcode = returnQrcode;
 function registerTemplate(event, message) {
     return client.replyMessage(event.replyToken, {
         type: "template",
@@ -38,14 +44,14 @@ function registerTemplate(event, message) {
             type: "confirm",
             text: message,
             actions: [{
-                    type: "message",
+                    type: "postback",
                     label: "是",
-                    text: "是"
+                    data: event.message.text
                 },
                 {
-                    type: "message",
+                    type: "postback",
                     label: "否",
-                    text: "否"
+                    data: registerWilling.NO
                 }
             ]
         }
@@ -54,9 +60,5 @@ function registerTemplate(event, message) {
         logFactory.error(JSON.stringify(err.originalError.response.data));
     });
 }
-module.exports = {
-    textMessage: returnTextMessage,
-    getQrcode: returnQrcode,
-    registerTemplate: registerTemplate
-};
+exports.registerTemplate = registerTemplate;
 //# sourceMappingURL=clientDelegate.js.map

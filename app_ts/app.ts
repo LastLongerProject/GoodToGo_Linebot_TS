@@ -14,17 +14,17 @@ import * as fs from 'fs';
 import rfs from 'rotating-file-stream';
 
 // set config
-
 import _ = require('lodash');
-import { globalAgent } from 'http';
 
-const config = require('./config/config.json')
+const config = require('./config/config.json');
 
 const defaultConfig: Object = config.development;
 const environment = process.env.NODE_ENV || 'development';
 const environmentConfig = config[environment];
 const finalConfig = _.merge(defaultConfig, environmentConfig);
 global.gConfig = finalConfig;
+
+import {redisClient} from './models/db/redisClient';
 
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -46,10 +46,27 @@ const accessLogStream = rfs('access.log', {
 
 /*
  *  init database
- */
-mongoose.connect(finalConfig.database, { useNewUrlParser: true })
+ */ 
+
+redisClient.select(5, (err, res) => {
+    if (err) return logFactory.error(err);
+    logFactory.log(res);
+});
+
+redisClient.on('connect', function() {
+    logFactory.log('Redis client connected');
+});
+
+redisClient.on('error', function (err) {
+    logFactory.error('Something went wrong ' + err);
+});
+
+mongoose.connect(global.gConfig.mongodbUrl, { useNewUrlParser: true })
     .then(res => logFactory.log("connect db successfully"))
     .catch(err => logFactory.error(err));
+
+mongoose.set('useCreateIndex', true);
+
 
 /*
  *  router

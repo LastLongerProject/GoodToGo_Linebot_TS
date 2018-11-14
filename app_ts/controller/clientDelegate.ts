@@ -11,6 +11,12 @@ import { text } from 'body-parser';
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const client = new Client(global.gConfig.bot);
 
+export namespace registerWilling {
+    export const 
+        YES = "Wanna become member",
+        NO = "Do not wanna become member";
+}
+
 function returnTextMessage(event: any, message: string): Promise<any> {
     return client.replyMessage(event.replyToken, {
         type: 'text',
@@ -50,14 +56,14 @@ function registerTemplate(event, message) {
             type: "confirm",
             text: message,
             actions: [{
-                    type: "message",
+                    type: "postback",
                     label: "是",
-                    text: "是"
+                    data: event.message.text
                 },
                 {
-                    type: "message",
+                    type: "postback",
                     label: "否",
-                    text: "否"
+                    data: registerWilling.NO
                 }
             ]
         }
@@ -67,8 +73,8 @@ function registerTemplate(event, message) {
     });
 }
  
-module.exports = {
-    textMessage: returnTextMessage,
-    getQrcode: returnQrcode,
-    registerTemplate: registerTemplate
+export  {
+    returnTextMessage as textMessage,
+    returnQrcode as getQrcode,
+    registerTemplate as registerTemplate
 }

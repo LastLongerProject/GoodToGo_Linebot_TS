@@ -5,8 +5,7 @@ var bcrypt = require('bcrypt-nodejs');
 var userSchema = mongoose.Schema({
     user: {
         phone: String,
-        lineId: String,
-        recordIndex: Number
+        lineId: String
     }
 }, {
     strict: false

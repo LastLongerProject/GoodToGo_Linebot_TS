@@ -1,11 +1,26 @@
 import * as line from "@line/bot-sdk";
 import { EventMessage } from "@line/bot-sdk";
 import { text } from 'body-parser';
-import {bindLineId, deleteBinding, BindState, getQrcode, DeleteBindState, DatabaseState, getContribution} from '../models/serviceProcess';
 import { loadavg } from "os";
 
+import {
+    bindLineId, 
+    deleteBinding, 
+    BindState, 
+    getQrcode, 
+    DeleteBindState, 
+    DatabaseState, 
+    getContribution, 
+    addVerificationSignal, 
+    findSignal,
+    FindTemporaryInfoState,
+    getRecord} from '../models/serviceProcess';
+
+import * as client from './clientDelegate';
+import * as request from "../api/request";
+import { failPromise } from "../api/customPromise";
+
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
-const client = require('./clientDelegate');
 
 function isMobilePhone(phone: string): boolean {
     var reg: RegExp = /^[09]{2}[0-9]{8}$/;
@@ -21,6 +36,18 @@ function isVerificationCode(code: string): boolean {
 
     if (res) return true;
     else return false;
+}
+
+async function postbackAction(event: any): Promise<any> {
+    let postbackData = event.postback.data;
+
+    if (isMobilePhone(postbackData)) {
+        logFactory.log(postbackData);
+        return request.register(event, postbackData);
+    } else if (postbackData === client.registerWilling.NO) {
+        let message = "期待您成為好合器會員！"
+        return client.textMessage(event, message);
+    }
 }
 
 function recordPostback(event: any): void {
@@ -41,10 +68,11 @@ async function unfollowOrUnBoundEvent(event: any): Promise<any> {
 
     try {
         var result = await deleteBinding(event);
-        logFactory.log(result);
-        client.textMessage(event, result);
+        const message = '已取消綁定'
+        return client.textMessage(event, message);
     } catch (err) {
         logFactory.error(err);
+        return failPromise(err);
     }
 }
 
@@ -62,11 +90,18 @@ async function getContributionEvent(event: any): Promise<any> {
         }
     } catch (err) {
         logFactory.error(err);
+        return failPromise(err);
     }
 }
 
-function getRecordEvent(event: any): void {
+async function getRecordEvent(event: any): Promise<any> {
     logFactory.log('Event: get record');
+    try {
+        const result = await getRecord(event);
+        logFactory.log(result);
+    } catch (err) {
+        logFactory.error(err);
+    }
 }
 
 async function getQRCodeEvent(event: any): Promise<any> { 
@@ -80,44 +115,46 @@ async function getQRCodeEvent(event: any): Promise<any> {
         return client.getQrcode(event, result);
     } catch (err) {
         logFactory.error(err);
+        return failPromise(err);
     }
 }
 
-function getContactWayEvent(event: any): void {
+function getContactWayEvent(event: any): Promise<any> {
     logFactory.log('Event: get contact way');
  
     const message = "好盒器工作室: (06)200-2341\n" +
     "FB: https://www.facebook.com/good.to.go.tw"
-    client.textMessage(event, message);
+    return client.textMessage(event, message);
 }
 
 async function bindingEvent(event: any): Promise<any> {
     logFactory.log('Event: binding'); 
     try {
-        let result = await bindLineId(event);
+        let result = await bindLineId(event, event.message.text);
         let message: string;
         logFactory.log(result);
         switch(result) {
             case DatabaseState.USER_NOT_FOUND:
-                message = "您還不是會員哦！\n請問要註冊成為會員嗎？"
-                client.registerTemplate(event, message);
+                message = "您還不是會員哦！\n請問要使用 " + event.message.text + " 為帳號註冊成為會員嗎？"
+                return client.registerTemplate(event, message);
                 break;
             case BindState.HAS_BOUND:
                 message = "此手機已經綁定過摟！"
-                client.textMessage(event, message);
+                return client.textMessage(event, message);
                 break;
             case BindState.LINE_HAS_BOUND:
                 message = "此 line 已經綁定過摟！"
-                client.textMessage(event, message);
+                return client.textMessage(event, message);
                 break;
             case BindState.SUCCESS:
                 message = "綁定成功！"
-                client.textMessage(event, message);
+                return client.textMessage(event, message);
                 break;
         }
         
     } catch (err) {
         logFactory.error(err);  
+        return failPromise(err);
     } 
 } 
 
@@ -126,9 +163,16 @@ function registerEvent(event: any): void {
 }
 
 
-function yesNoEvent (event: any): void {
-    logFactory.log('Event: yes no');
-
+async function verificateEvent (event: any): Promise<any> {
+    try {
+        const result = await findSignal(event);
+        if (isMobilePhone(result)) {
+            request.verificate(event, result);
+        }
+    } catch (err) {
+        logFactory.error(err);
+        return failPromise(err);
+    }
 }
 
 
@@ -143,7 +187,7 @@ module.exports = {
             return Promise.resolve(null);
         }
         if (event.type === 'postback') {
-            // recordPostback(event);
+            postbackAction(event);
         }
         if (event.type === 'follow') {
             followEvent(event);
@@ -163,12 +207,10 @@ module.exports = {
             // client.textMessage(event, "請輸入手機號碼");
         } else if (event.message.text === "註冊") {
             registerEvent(event);
-        } else if (event.message.text === "是" || event.message.text === "否") {
-            yesNoEvent(event);
         } else if (isMobilePhone(event.message.text)) {
             bindingEvent(event);
         } else if (isVerificationCode(event.message.text)) {
-            // request.registerVerification(event);
+            verificateEvent(event);
         } else {
             logFactory.log("Event: not our business");
             // client.textMessage(event, "如果有需要任何服務請點選下列表單哦!");

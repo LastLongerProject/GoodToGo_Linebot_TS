@@ -7,10 +7,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const serviceProcess_1 = require("../models/serviceProcess");
+const client = __importStar(require("./clientDelegate"));
+const request = __importStar(require("../api/request"));
+const customPromise_1 = require("../api/customPromise");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
-const client = require('./clientDelegate');
 function isMobilePhone(phone) {
     var reg = /^[09]{2}[0-9]{8}$/;
     var res = reg.test(phone);
@@ -26,6 +35,19 @@ function isVerificationCode(code) {
         return true;
     else
         return false;
+}
+function postbackAction(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let postbackData = event.postback.data;
+        if (isMobilePhone(postbackData)) {
+            logFactory.log(postbackData);
+            return request.register(event, postbackData);
+        }
+        else if (postbackData === client.registerWilling.NO) {
+            let message = "期待您成為好合器會員！";
+            return client.textMessage(event, message);
+        }
+    });
 }
 function recordPostback(event) {
     logFactory.log('Event: postback');
@@ -43,11 +65,12 @@ function unfollowOrUnBoundEvent(event) {
             logFactory.log('Event: delete bind');
         try {
             var result = yield serviceProcess_1.deleteBinding(event);
-            logFactory.log(result);
-            client.textMessage(event, result);
+            const message = '已取消綁定';
+            return client.textMessage(event, message);
         }
         catch (err) {
             logFactory.error(err);
+            return customPromise_1.failPromise(err);
         }
     });
 }
@@ -67,11 +90,21 @@ function getContributionEvent(event) {
         }
         catch (err) {
             logFactory.error(err);
+            return customPromise_1.failPromise(err);
         }
     });
 }
 function getRecordEvent(event) {
-    logFactory.log('Event: get record');
+    return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: get record');
+        try {
+            const result = yield serviceProcess_1.getRecord(event);
+            logFactory.log(result);
+        }
+        catch (err) {
+            logFactory.error(err);
+        }
+    });
 }
 function getQRCodeEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -86,6 +119,7 @@ function getQRCodeEvent(event) {
         }
         catch (err) {
             logFactory.error(err);
+            return customPromise_1.failPromise(err);
         }
     });
 }
@@ -93,44 +127,56 @@ function getContactWayEvent(event) {
     logFactory.log('Event: get contact way');
     const message = "好盒器工作室: (06)200-2341\n" +
         "FB: https://www.facebook.com/good.to.go.tw";
-    client.textMessage(event, message);
+    return client.textMessage(event, message);
 }
 function bindingEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         logFactory.log('Event: binding');
         try {
-            let result = yield serviceProcess_1.bindLineId(event);
+            let result = yield serviceProcess_1.bindLineId(event, event.message.text);
             let message;
             logFactory.log(result);
             switch (result) {
                 case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
-                    message = "您還不是會員哦！\n請問要註冊成為會員嗎？";
-                    client.registerTemplate(event, message);
+                    message = "您還不是會員哦！\n請問要使用 " + event.message.text + " 為帳號註冊成為會員嗎？";
+                    return client.registerTemplate(event, message);
                     break;
                 case serviceProcess_1.BindState.HAS_BOUND:
                     message = "此手機已經綁定過摟！";
-                    client.textMessage(event, message);
+                    return client.textMessage(event, message);
                     break;
                 case serviceProcess_1.BindState.LINE_HAS_BOUND:
                     message = "此 line 已經綁定過摟！";
-                    client.textMessage(event, message);
+                    return client.textMessage(event, message);
                     break;
                 case serviceProcess_1.BindState.SUCCESS:
                     message = "綁定成功！";
-                    client.textMessage(event, message);
+                    return client.textMessage(event, message);
                     break;
             }
         }
         catch (err) {
             logFactory.error(err);
+            return customPromise_1.failPromise(err);
         }
     });
 }
 function registerEvent(event) {
     logFactory.log('Event: register');
 }
-function yesNoEvent(event) {
-    logFactory.log('Event: yes no');
+function verificateEvent(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const result = yield serviceProcess_1.findSignal(event);
+            if (isMobilePhone(result)) {
+                request.verificate(event, result);
+            }
+        }
+        catch (err) {
+            logFactory.error(err);
+            return customPromise_1.failPromise(err);
+        }
+    });
 }
 module.exports = {
     bot: function (event) {
@@ -140,7 +186,7 @@ module.exports = {
             return Promise.resolve(null);
         }
         if (event.type === 'postback') {
-            // recordPostback(event);
+            postbackAction(event);
         }
         if (event.type === 'follow') {
             followEvent(event);
@@ -167,14 +213,11 @@ module.exports = {
         else if (event.message.text === "註冊") {
             registerEvent(event);
         }
-        else if (event.message.text === "是" || event.message.text === "否") {
-            yesNoEvent(event);
-        }
         else if (isMobilePhone(event.message.text)) {
             bindingEvent(event);
         }
         else if (isVerificationCode(event.message.text)) {
-            // request.registerVerification(event);
+            verificateEvent(event);
         }
         else {
             logFactory.log("Event: not our business");
