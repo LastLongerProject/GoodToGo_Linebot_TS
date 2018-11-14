@@ -25,6 +25,7 @@ const environment = process.env.NODE_ENV || 'development';
 const environmentConfig = config[environment];
 const finalConfig = _.merge(defaultConfig, environmentConfig);
 global.gConfig = finalConfig;
+const redisClient_1 = require("./models/db/redisClient");
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
@@ -41,9 +42,21 @@ const accessLogStream = rotating_file_stream_1.default('access.log', {
 /*
  *  init database
  */
-mongoose.connect(finalConfig.database, { useNewUrlParser: true })
+redisClient_1.redisClient.select(5, (err, res) => {
+    if (err)
+        return logFactory.error(err);
+    logFactory.log(res);
+});
+redisClient_1.redisClient.on('connect', function () {
+    logFactory.log('Redis client connected');
+});
+redisClient_1.redisClient.on('error', function (err) {
+    logFactory.error('Something went wrong ' + err);
+});
+mongoose.connect(global.gConfig.mongodbUrl, { useNewUrlParser: true })
     .then(res => logFactory.log("connect db successfully"))
     .catch(err => logFactory.error(err));
+mongoose.set('useCreateIndex', true);
 /*
  *  router
  */

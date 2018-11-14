@@ -1,6 +1,5 @@
-import * as mongoose from 'mongoose';
-import { resolve } from 'path';
-import { rejects } from 'assert';
+import { redisClient, getAsync, setAsync } from './db/redisClient';
+import {successPromise, failPromise} from '../api/customPromise';
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 
@@ -10,7 +9,6 @@ const PlaceID = require('./db/placeIdDB');
 const ContainerType = require('./db/containerTypeDB');
 const TemporaryInfo = require('./db/temporaryInfoDB');
 const RichMenu = require('./db/richMenuDB');
-const client = require('../controller/clientDelegate');
 
 var containerTypeDict: Object;
 var storeDict: Object;
@@ -38,9 +36,74 @@ export namespace QrcodeState {
         SUCCESS = 'Get qrcode successfully'
 }
 
-export namespace getContribute {
+export namespace GetContributeState {
     export const 
         SUCCESS = 'Get contribute successfully'
+}
+
+export namespace FindTemporaryInfoState {
+    export const
+        HAS_SIGNALED = 'ready for user to register member',
+        HAS_NOT_SIGNALED = 'does not have signal for verification'
+}
+
+export namespace AddVerificationSignalState {
+    export const
+        SUCCESS = 'store signal successfully'
+}
+
+namespace GetRecordMethod {
+    export function findRecordAndPush(list: Array<any>, arr: Array<any>): void {
+        
+    }
+    
+    export function spliceArrAndPush(list: Array<any>, splicedArr: Array<any>, pushedArr: Array<any>): void {
+        for (var i = 0; i < list.length; i++) {
+            for (var j = splicedArr.length - 1; j >= 0; j--) {
+                var returnCycle = (typeof list[i].container.cycleCtr === 'undefined') ? 0 : list[i].container.cycleCtr;
+                if ((splicedArr[j].containerCode === list[i].container.id) && (splicedArr[j].cycle === returnCycle)) {
+                    splicedArr[j].returned = true;
+                    splicedArr[j].returnTime = list[i].tradeTime;
+                    splicedArr[j].cycle = undefined;
+                    pushedArr.push(splicedArr[j]);
+                    splicedArr.splice(j, 1);
+                    break;
+                }
+            }
+        }
+    }
+
+    export function exportClientFlexMessage(recordCollection, monthArray) {
+        var recordViewContents:Array<any> = [];
+
+        for (var i = 0; i < (recordCollection.data.length > 5 ? 5 : recordCollection.data.length); i++) {
+            if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
+                monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
+                if (isToday(recordCollection.data[i].time)) {
+                    // recordViewContents.push(recordView.addTimeBar("今天"));
+                } else {
+                    console.log(getYearAndMonthString(recordCollection.data[i].time) + '\n');
+                    // recordViewContents.push(recordView.addTimeBar(getYearAndMonthString(recordCollection.data[i].time)));
+                }
+            }
+
+            // dbUser.user.recordIndex += 1;
+            let type = recordCollection.data[i].type;
+            // let containerType = type === 0 ? recordView.containerType.glass_12oz : type === 7 ? recordView.containerType.bowl :
+            //     type === 2 ? recordView.containerType.plate : type === 4 ? recordView.containerType.icecream : recordView.containerType.glass_16oz;
+            console.log(getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
+
+            // recordViewContents.push(recordView.getContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store));
+        }
+        if (recordViewContents.length === 0) {
+            console.log('期待您的使用');
+            // recordViewContents.push(recordView.getContent(recordView.containerType.nothing, "期待您的使用！"));
+        }
+    }
+}
+
+async function settingData(): Promise<any> {
+    
 }
 
 ContainerType.find({}, {}, {
@@ -51,28 +114,26 @@ ContainerType.find({}, {}, {
         containerTypeDict = docs;
     }).catch(err => logFactory.error(err));
 
+async function getPlaceId(): Promise<any> {
+    const result = await PlaceID.find({}, {}, {
+        sort: {
+            ID: 1
+        }
+    }).exec();
+    if(result) return Promise.resolve(result);
+}
+
 PlaceID.find({}, {}, {
         sort: {
             ID: 1
         }
-    }).then((err, docs) => {
-        storeDict = docs;
+    }).then(docs => {
+        storeDict = docs; 
+        console.log(storeDict)
     }).catch(err => logFactory.error(err));
 
-function successPromise(param) {
-    return new Promise((resolve, reject) => {
-        resolve(param);
-    });
-}
-
-function failPromise(param) {
-    return new Promise((resolve, reject) => {
-        reject(param);
-    });
-}
-
-async function bindLineId(event) {
-    var dbUser = await User.findOne({'user.phone': event.message.text}).exec();
+async function bindLineId(event: any, phone: string): Promise<any> { 
+    var dbUser = await User.findOne({'user.phone': phone}).exec();
 
     if (!dbUser) {
         return successPromise(DatabaseState.USER_NOT_FOUND);
@@ -98,7 +159,7 @@ async function bindLineId(event) {
     }
 }
 
-async function deleteBinding(event) {
+async function deleteBinding(event: any): Promise<any> {
     try {
         const dbUser = await User.findOne( {'user.lineId': event.source.userId} ).exec();
 
@@ -116,12 +177,13 @@ async function deleteBinding(event) {
         }
     } catch (err) {
         logFactory.error(err);
+        return failPromise(err);
     }
 }
 
-async function getQrcode(event) {
+async function getQrcode(event: any): Promise<any> {
     try {
-        var dbUser = await User.findOne({ 'user.lineId': event.source.userId });
+        var dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
 
         if(!dbUser) {
             logFactory.log(DatabaseState.USER_NOT_FOUND);
@@ -135,7 +197,7 @@ async function getQrcode(event) {
     }
 } 
 
-async function getContribution(event) {
+async function getContribution(event: any): Promise<any> {
     try {
         var dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
 
@@ -143,17 +205,13 @@ async function getContribution(event) {
             logFactory.log(DatabaseState.USER_NOT_FOUND);
             return successPromise(DatabaseState.USER_NOT_FOUND);
         } else {
-            try {
-                var amount = await 
+            var amount = await 
                 Trade.count({
                     'tradeType.action': 'Rent',
                     'newUser.phone': dbUser.user.phone
                 }).exec();
 
-                return successPromise(amount);
-            } catch (err) {
-                return failPromise(err);
-            }   
+            return successPromise(amount);
         }
     } catch (err) {
         logFactory.error(err);
@@ -161,7 +219,95 @@ async function getContribution(event) {
     }
 }
 
-export {bindLineId, deleteBinding, getQrcode, getContribution};
+
+async function addVerificationSignal(event: any, phone: string): Promise<any>{
+    try {
+        const result = await setAsync(event.source.userId, phone, 'EX', 180);
+        return successPromise(AddVerificationSignalState.SUCCESS);
+    } catch (err) {
+        return failPromise(err);
+    }
+}
+
+async function findSignal(event: any): Promise<any> {
+    try {
+        const result = await getAsync(event.source.userId);
+
+        logFactory.log(result);
+
+        if (!result) {  
+            return successPromise(FindTemporaryInfoState.HAS_NOT_SIGNALED);   
+        }
+        logFactory.log('result from findTemporaryInfo: ' + result);
+
+        return successPromise(result);
+    } catch (err) {
+        failPromise(err);
+    }
+    
+}
+
+function deleteSignal(event: any) {
+    redisClient.del(event.source.userId);
+}
+
+async function getRecord(event: any): Promise<any> {
+    try {
+        let dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
+        if (!dbUser) return successPromise(DatabaseState.USER_NOT_FOUND);
+
+        var returned = [];
+        var inUsed: Array<any> = [];
+        var recordCollection = {};
+
+        const rentList = await Trade.find({
+            'tradeType.action': 'Rent',
+            'newUser.phone': dbUser.user.phone
+        }).exec();
+        rentList.sort(function (a,b) {
+            return b.tradeTime - a.tradeTime;
+        });
+
+        for (let i = 0; i < rentList.length; i++) {
+            let record = {
+                container: '#' + intReLength(rentList[i].container.id, 3),
+                containerCode: rentList[i].container.id,
+                time: rentList[i].tradeTime,
+                type: rentList[i].container.typeCode,
+                store: storeDict[rentList[i].oriUser.storeId].name,
+                cycle: (rentList[i].container.cycleCtr === undefined) ? 0 : rentList[i].container.cycleCtr,
+                return: false
+            };
+    
+            inUsed.push(record);
+        }
+        const returnList = await Trade.find({
+            'tradeType.action': 'Return',
+            "oriUser.phone": dbUser.user.phone
+        }).exec();
+
+        returnList.sort(function(a, b) { return b.tradeTime - a.tradeTime; });
+        recordCollection['usingAmount'] -= returnList.length;
+        GetRecordMethod.spliceArrAndPush(returnList, inUsed, returned);
+        recordCollection['data'] = inUsed;
+
+        for (var i = 0; i < returned.length; i++) {
+            recordCollection['data'].push(returned[i]);
+        }
+
+        let recordViewContents = [];
+        let monthArray = [];
+
+        dbUser.user.recordIndex = 0;
+        GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
+        return successPromise('success');
+    } catch(err) {
+        logFactory.error(err);
+        return failPromise(err);
+    }
+}
+
+export {bindLineId, deleteBinding, getQrcode, getContribution, addVerificationSignal, findSignal, deleteSignal, getRecord};
 
 function getTimeString(DateObject: Date): string {
     var tmpHour = DateObject.getHours() + 8;
