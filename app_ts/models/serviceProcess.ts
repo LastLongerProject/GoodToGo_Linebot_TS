@@ -53,10 +53,6 @@ export namespace AddVerificationSignalState {
 }
 
 namespace GetRecordMethod {
-    export function findRecordAndPush(list: Array<any>, arr: Array<any>): void {
-        
-    }
-    
     export function spliceArrAndPush(list: Array<any>, splicedArr: Array<any>, pushedArr: Array<any>): void {
         for (var i = 0; i < list.length; i++) {
             for (var j = splicedArr.length - 1; j >= 0; j--) {
@@ -102,10 +98,6 @@ namespace GetRecordMethod {
     }
 }
 
-async function settingData(): Promise<any> {
-    
-}
-
 ContainerType.find({}, {}, {
         sort: {
             typeCode: 1
@@ -114,22 +106,12 @@ ContainerType.find({}, {}, {
         containerTypeDict = docs;
     }).catch(err => logFactory.error(err));
 
-async function getPlaceId(): Promise<any> {
-    const result = await PlaceID.find({}, {}, {
-        sort: {
-            ID: 1
-        }
-    }).exec();
-    if(result) return Promise.resolve(result);
-}
-
 PlaceID.find({}, {}, {
         sort: {
             ID: 1
         }
     }).then(docs => {
         storeDict = docs; 
-        console.log(storeDict)
     }).catch(err => logFactory.error(err));
 
 async function bindLineId(event: any, phone: string): Promise<any> { 
@@ -274,7 +256,7 @@ async function getRecord(event: any): Promise<any> {
                 containerCode: rentList[i].container.id,
                 time: rentList[i].tradeTime,
                 type: rentList[i].container.typeCode,
-                store: storeDict[rentList[i].oriUser.storeId].name,
+                store: storeDict[rentList[i].oriUser.storeID].name,
                 cycle: (rentList[i].container.cycleCtr === undefined) ? 0 : rentList[i].container.cycleCtr,
                 return: false
             };
