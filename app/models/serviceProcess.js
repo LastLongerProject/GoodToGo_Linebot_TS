@@ -49,9 +49,6 @@ var AddVerificationSignalState;
 })(AddVerificationSignalState = exports.AddVerificationSignalState || (exports.AddVerificationSignalState = {}));
 var GetRecordMethod;
 (function (GetRecordMethod) {
-    function findRecordAndPush(list, arr) {
-    }
-    GetRecordMethod.findRecordAndPush = findRecordAndPush;
     function spliceArrAndPush(list, splicedArr, pushedArr) {
         for (var i = 0; i < list.length; i++) {
             for (var j = splicedArr.length - 1; j >= 0; j--) {
@@ -102,24 +99,12 @@ ContainerType.find({}, {}, {
 }).then(docs => {
     containerTypeDict = docs;
 }).catch(err => logFactory.error(err));
-function getPlaceId() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const result = yield PlaceID.find({}, {}, {
-            sort: {
-                ID: 1
-            }
-        }).exec();
-        if (result)
-            return Promise.resolve(result);
-    });
-}
 PlaceID.find({}, {}, {
     sort: {
         ID: 1
     }
 }).then(docs => {
     storeDict = docs;
-    console.log(storeDict);
 }).catch(err => logFactory.error(err));
 function bindLineId(event, phone) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -275,7 +260,7 @@ function getRecord(event) {
                     containerCode: rentList[i].container.id,
                     time: rentList[i].tradeTime,
                     type: rentList[i].container.typeCode,
-                    store: storeDict[rentList[i].oriUser.storeId].name,
+                    store: storeDict[rentList[i].oriUser.storeID].name,
                     cycle: (rentList[i].container.cycleCtr === undefined) ? 0 : rentList[i].container.cycleCtr,
                     return: false
                 };
