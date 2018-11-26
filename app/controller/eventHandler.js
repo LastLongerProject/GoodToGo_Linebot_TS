@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -19,15 +19,8 @@ const serviceProcess_1 = require("../models/serviceProcess");
 const client = __importStar(require("./clientDelegate"));
 const request = __importStar(require("../api/request"));
 const customPromise_1 = require("../api/customPromise");
+const api_1 = require("../api/api");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
-function isMobilePhone(phone) {
-    var reg = /^[09]{2}[0-9]{8}$/;
-    var res = reg.test(phone);
-    if (res)
-        return true;
-    else
-        return false;
-}
 function isVerificationCode(code) {
     var reg = /[0-9]{6}/;
     var res = reg.test(code);
@@ -39,7 +32,8 @@ function isVerificationCode(code) {
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
-        if (isMobilePhone(postbackData)) {
+        console.log(postbackData);
+        if (api_1.isMobilePhone(postbackData)) {
             logFactory.log(postbackData);
             return request.register(event, postbackData);
         }
@@ -99,7 +93,7 @@ function getRecordEvent(event) {
         logFactory.log('Event: get record');
         try {
             const result = yield serviceProcess_1.getRecord(event);
-            logFactory.log(result);
+            client.flexMessage(event, result.getView());
         }
         catch (err) {
             logFactory.error(err);
@@ -140,19 +134,18 @@ function bindingEvent(event) {
                 case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
                     message = "您還不是會員哦！\n請問要使用 " + event.message.text + " 為帳號註冊成為會員嗎？";
                     return client.registerTemplate(event, message);
-                    break;
                 case serviceProcess_1.BindState.HAS_BOUND:
                     message = "此手機已經綁定過摟！";
                     return client.textMessage(event, message);
-                    break;
                 case serviceProcess_1.BindState.LINE_HAS_BOUND:
                     message = "此 line 已經綁定過摟！";
                     return client.textMessage(event, message);
-                    break;
                 case serviceProcess_1.BindState.SUCCESS:
                     message = "綁定成功！";
                     return client.textMessage(event, message);
-                    break;
+                case serviceProcess_1.BindState.IS_NOT_MOBILEPHONE:
+                    message = "請輸入要綁定的手機號碼！";
+                    return client.textMessage(event, message);
             }
         }
         catch (err) {
@@ -168,7 +161,7 @@ function verificateEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield serviceProcess_1.findSignal(event);
-            if (isMobilePhone(result)) {
+            if (api_1.isMobilePhone(result)) {
                 request.verificate(event, result);
             }
         }
@@ -213,7 +206,7 @@ module.exports = {
         else if (event.message.text === "註冊") {
             registerEvent(event);
         }
-        else if (isMobilePhone(event.message.text)) {
+        else if (api_1.isMobilePhone(event.message.text)) {
             bindingEvent(event);
         }
         else if (isVerificationCode(event.message.text)) {

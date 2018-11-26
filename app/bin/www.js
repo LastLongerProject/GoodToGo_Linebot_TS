@@ -4,8 +4,8 @@
  * Module dependencies.
  */
 
-var app = require('../app/app.js');
-var logFactory = require('../app/api/logFactory.js')('linebot:server');
+var app = require('../app.js');
+var logFactory = require('../api/logFactory.js')('linebot:server');
 var http = require('http');
 
 /**

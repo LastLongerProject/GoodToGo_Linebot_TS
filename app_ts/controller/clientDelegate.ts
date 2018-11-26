@@ -26,7 +26,7 @@ function returnTextMessage(event: any, message: string): Promise<any> {
             logFactory.error(JSON.stringify(err.originalError.response.config.data));
             logFactory.error(JSON.stringify(err.originalError.response.data));
         }
-    });
+    });  
 }
 
 
@@ -72,9 +72,18 @@ function registerTemplate(event, message) {
         logFactory.error(JSON.stringify(err.originalError.response.data));
     });
 }
+
+function returnFlexMessage(event, flex) {
+    console.log(flex.body)
+    return client.replyMessage(event.replyToken, flex).catch(err => {
+        logFactory.error(JSON.stringify(err.originalError.response.config.data));
+        logFactory.error(JSON.stringify(err.originalError.response.data));
+    });;
+}
  
 export  {
     returnTextMessage as textMessage,
     returnQrcode as getQrcode,
-    registerTemplate as registerTemplate
+    registerTemplate as registerTemplate,
+    returnFlexMessage as flexMessage
 }

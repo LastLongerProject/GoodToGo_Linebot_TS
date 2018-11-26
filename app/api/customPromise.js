@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function successPromise(param) {
     return new Promise((resolve, reject) => {

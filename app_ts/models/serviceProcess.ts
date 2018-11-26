@@ -1,5 +1,8 @@
 import { redisClient, getAsync, setAsync } from './db/redisClient';
 import {successPromise, failPromise} from '../api/customPromise';
+import { isMobilePhone } from '../api/api';
+import { container } from '../etl/models/container';
+import { recordView } from '../etl/view/recordView';
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 
@@ -17,7 +20,8 @@ export namespace BindState {
     export const
         SUCCESS = 'Successfully bound with line',
         HAS_BOUND = 'This phone has bound with line',
-        LINE_HAS_BOUND = 'Line has bound with another phone'
+        LINE_HAS_BOUND = 'Line has bound with another phone',
+        IS_NOT_MOBILEPHONE = "The input is not mobile phone"
 }
 
 export namespace DeleteBindState {
@@ -69,38 +73,35 @@ namespace GetRecordMethod {
         }
     }
 
-    export function exportClientFlexMessage(recordCollection, monthArray) {
-        var recordViewContents:Array<any> = [];
-
+    export function exportClientFlexMessage(recordCollection, monthArray): any {
+        let view = recordView();
         for (var i = 0; i < (recordCollection.data.length > 5 ? 5 : recordCollection.data.length); i++) {
             if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                 monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                 if (isToday(recordCollection.data[i].time)) {
-                    // recordViewContents.push(recordView.addTimeBar("今天"));
+                    view.pushTimeBar("今天");
                 } else {
-                    console.log(getYearAndMonthString(recordCollection.data[i].time) + '\n');
-                    // recordViewContents.push(recordView.addTimeBar(getYearAndMonthString(recordCollection.data[i].time)));
+                    view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
                 }
             }
-
+  
             // dbUser.user.recordIndex += 1;
             let type = recordCollection.data[i].type;
-            // let containerType = type === 0 ? recordView.containerType.glass_12oz : type === 7 ? recordView.containerType.bowl :
-            //     type === 2 ? recordView.containerType.plate : type === 4 ? recordView.containerType.icecream : recordView.containerType.glass_16oz;
-            console.log(getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
+            let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString :
+                type === 2 ? container.plate.toString : type === 4 ? container.icecream.toString : container.glass_16oz.toString;
+            view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
+        }
+        if (view.getView().body.contents.length === 0) {
+            view.pushBodyContent(container.nothing.toString, "期待您的使用！")
+        }
 
-            // recordViewContents.push(recordView.getContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store));
-        }
-        if (recordViewContents.length === 0) {
-            console.log('期待您的使用');
-            // recordViewContents.push(recordView.getContent(recordView.containerType.nothing, "期待您的使用！"));
-        }
+        return view;
     }
 }
-
+ 
 ContainerType.find({}, {}, {
         sort: {
-            typeCode: 1
+            typeCode: 1 
         }
     }).then(docs => {
         containerTypeDict = docs;
@@ -115,6 +116,7 @@ PlaceID.find({}, {}, {
     }).catch(err => logFactory.error(err));
 
 async function bindLineId(event: any, phone: string): Promise<any> { 
+    if(!isMobilePhone(phone)) return successPromise(BindState.IS_NOT_MOBILEPHONE);
     var dbUser = await User.findOne({'user.phone': phone}).exec();
 
     if (!dbUser) {
@@ -277,18 +279,17 @@ async function getRecord(event: any): Promise<any> {
             recordCollection['data'].push(returned[i]);
         }
 
-        let recordViewContents = [];
         let monthArray = [];
-
+ 
         dbUser.user.recordIndex = 0;
-        GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
-        return successPromise('success');
+        let view = GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
+        return successPromise(view); 
     } catch(err) {
         logFactory.error(err);
         return failPromise(err);
     }
 }
-
+  
 export {bindLineId, deleteBinding, getQrcode, getContribution, addVerificationSignal, findSignal, deleteSignal, getRecord};
 
 function getTimeString(DateObject: Date): string {
@@ -327,5 +328,5 @@ function isToday(d: Date): boolean {
     }
     return false;
 }
-
+ 
 
