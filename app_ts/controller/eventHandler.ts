@@ -19,16 +19,11 @@ import {
 import * as client from './clientDelegate';
 import * as request from "../api/request";
 import { failPromise } from "../api/customPromise";
+import { isMobilePhone } from '../api/api';
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 
-function isMobilePhone(phone: string): boolean {
-    var reg: RegExp = /^[09]{2}[0-9]{8}$/;
-    var res: boolean = reg.test(phone);
 
-    if (res) return true;
-    else return false;
-}
 
 function isVerificationCode(code: string): boolean {
     var reg: RegExp = /[0-9]{6}/;
@@ -40,7 +35,7 @@ function isVerificationCode(code: string): boolean {
 
 async function postbackAction(event: any): Promise<any> {
     let postbackData = event.postback.data;
-
+    console.log(postbackData)
     if (isMobilePhone(postbackData)) {
         logFactory.log(postbackData);
         return request.register(event, postbackData);
@@ -98,7 +93,7 @@ async function getRecordEvent(event: any): Promise<any> {
     logFactory.log('Event: get record');
     try {
         const result = await getRecord(event);
-        logFactory.log(result);
+        client.flexMessage(event, result.getView());
     } catch (err) {
         logFactory.error(err);
     }
@@ -112,7 +107,7 @@ async function getQRCodeEvent(event: any): Promise<any> {
             let message = '請輸入手機號碼以綁定 line id'
             return client.textMessage(event, message);
         }
-        return client.getQrcode(event, result);
+        return client.getQrcode(event, result);  
     } catch (err) {
         logFactory.error(err);
         return failPromise(err);
@@ -135,23 +130,21 @@ async function bindingEvent(event: any): Promise<any> {
         logFactory.log(result);
         switch(result) {
             case DatabaseState.USER_NOT_FOUND:
-                message = "您還不是會員哦！\n請問要使用 " + event.message.text + " 為帳號註冊成為會員嗎？"
+                message = "您還不是會員哦！\n請問要使用 " + event.message.text + " 為帳號註冊成為會員嗎？";
                 return client.registerTemplate(event, message);
-                break;
             case BindState.HAS_BOUND:
-                message = "此手機已經綁定過摟！"
+                message = "此手機已經綁定過摟！";
                 return client.textMessage(event, message);
-                break;
             case BindState.LINE_HAS_BOUND:
-                message = "此 line 已經綁定過摟！"
+                message = "此 line 已經綁定過摟！";
                 return client.textMessage(event, message);
-                break;
             case BindState.SUCCESS:
-                message = "綁定成功！"
+                message = "綁定成功！";
                 return client.textMessage(event, message);
-                break;
+            case BindState.IS_NOT_MOBILEPHONE:
+                message = "請輸入要綁定的手機號碼！";
+                return client.textMessage(event, message);
         }
-        
     } catch (err) {
         logFactory.error(err);  
         return failPromise(err);

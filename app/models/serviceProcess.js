@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -10,6 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const redisClient_1 = require("./db/redisClient");
 const customPromise_1 = require("../api/customPromise");
+const api_1 = require("../api/api");
+const container_1 = require("../etl/models/container");
+const recordView_1 = require("../etl/view/recordView");
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
@@ -21,7 +24,7 @@ var containerTypeDict;
 var storeDict;
 var BindState;
 (function (BindState) {
-    BindState.SUCCESS = 'Successfully bound with line', BindState.HAS_BOUND = 'This phone has bound with line', BindState.LINE_HAS_BOUND = 'Line has bound with another phone';
+    BindState.SUCCESS = 'Successfully bound with line', BindState.HAS_BOUND = 'This phone has bound with line', BindState.LINE_HAS_BOUND = 'Line has bound with another phone', BindState.IS_NOT_MOBILEPHONE = "The input is not mobile phone";
 })(BindState = exports.BindState || (exports.BindState = {}));
 var DeleteBindState;
 (function (DeleteBindState) {
@@ -66,29 +69,27 @@ var GetRecordMethod;
     }
     GetRecordMethod.spliceArrAndPush = spliceArrAndPush;
     function exportClientFlexMessage(recordCollection, monthArray) {
-        var recordViewContents = [];
+        let view = recordView_1.recordView();
         for (var i = 0; i < (recordCollection.data.length > 5 ? 5 : recordCollection.data.length); i++) {
             if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                 monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                 if (isToday(recordCollection.data[i].time)) {
-                    // recordViewContents.push(recordView.addTimeBar("今天"));
+                    view.pushTimeBar("今天");
                 }
                 else {
-                    console.log(getYearAndMonthString(recordCollection.data[i].time) + '\n');
-                    // recordViewContents.push(recordView.addTimeBar(getYearAndMonthString(recordCollection.data[i].time)));
+                    view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
                 }
             }
             // dbUser.user.recordIndex += 1;
             let type = recordCollection.data[i].type;
-            // let containerType = type === 0 ? recordView.containerType.glass_12oz : type === 7 ? recordView.containerType.bowl :
-            //     type === 2 ? recordView.containerType.plate : type === 4 ? recordView.containerType.icecream : recordView.containerType.glass_16oz;
-            console.log(getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
-            // recordViewContents.push(recordView.getContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store));
+            let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString :
+                type === 2 ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
+            view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
         }
-        if (recordViewContents.length === 0) {
-            console.log('期待您的使用');
-            // recordViewContents.push(recordView.getContent(recordView.containerType.nothing, "期待您的使用！"));
+        if (view.getView().body.contents.length === 0) {
+            view.pushBodyContent(container_1.container.nothing.toString, "期待您的使用！");
         }
+        return view;
     }
     GetRecordMethod.exportClientFlexMessage = exportClientFlexMessage;
 })(GetRecordMethod || (GetRecordMethod = {}));
@@ -108,6 +109,8 @@ PlaceID.find({}, {}, {
 }).catch(err => logFactory.error(err));
 function bindLineId(event, phone) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!api_1.isMobilePhone(phone))
+            return customPromise_1.successPromise(BindState.IS_NOT_MOBILEPHONE);
         var dbUser = yield User.findOne({ 'user.phone': phone }).exec();
         if (!dbUser) {
             return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
@@ -277,11 +280,10 @@ function getRecord(event) {
             for (var i = 0; i < returned.length; i++) {
                 recordCollection['data'].push(returned[i]);
             }
-            let recordViewContents = [];
             let monthArray = [];
             dbUser.user.recordIndex = 0;
-            GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
-            return customPromise_1.successPromise('success');
+            let view = GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
+            return customPromise_1.successPromise(view);
         }
         catch (err) {
             logFactory.error(err);

@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const bot_sdk_1 = require("@line/bot-sdk");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
@@ -61,4 +61,13 @@ function registerTemplate(event, message) {
     });
 }
 exports.registerTemplate = registerTemplate;
+function returnFlexMessage(event, flex) {
+    console.log(flex.body);
+    return client.replyMessage(event.replyToken, flex).catch(err => {
+        logFactory.error(JSON.stringify(err.originalError.response.config.data));
+        logFactory.error(JSON.stringify(err.originalError.response.data));
+    });
+    ;
+}
+exports.flexMessage = returnFlexMessage;
 //# sourceMappingURL=clientDelegate.js.map

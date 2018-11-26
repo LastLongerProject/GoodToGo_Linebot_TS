@@ -1,9 +1,17 @@
 {
     "ignore": [
         ".git",
-        "node_modules/**/node_modules"
+        "node_modules/**/node_modules",
+        ".map"
     ],
-    "events": {
-        "restart": "osascript -e 'display notification \"App restarted due to:\n'$FILENAME'\" with title \"nodemon\"'"
-    }
+    "watch": [
+        "./app/"
+    ],
+    "verbose": true,
+    "env": {
+        "NODE_ENV": "development",
+        "PORT": 5000,
+        "DEBUG": "linebot:*"
+    },
+    "ext": "js json njk css js "
 }
