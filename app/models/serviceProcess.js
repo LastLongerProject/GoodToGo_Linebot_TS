@@ -50,6 +50,10 @@ var AddVerificationSignalState;
 (function (AddVerificationSignalState) {
     AddVerificationSignalState.SUCCESS = 'store signal successfully';
 })(AddVerificationSignalState = exports.AddVerificationSignalState || (exports.AddVerificationSignalState = {}));
+var GetRecordState;
+(function (GetRecordState) {
+    GetRecordState.GET_MORE = "getMoreRecord";
+})(GetRecordState = exports.GetRecordState || (exports.GetRecordState = {}));
 var GetRecordMethod;
 (function (GetRecordMethod) {
     function spliceArrAndPush(list, splicedArr, pushedArr) {
@@ -68,28 +72,46 @@ var GetRecordMethod;
         }
     }
     GetRecordMethod.spliceArrAndPush = spliceArrAndPush;
-    function exportClientFlexMessage(recordCollection, monthArray) {
-        let view = recordView_1.recordView();
-        for (var i = 0; i < (recordCollection.data.length > 5 ? 5 : recordCollection.data.length); i++) {
-            if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
-                monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
-                if (isToday(recordCollection.data[i].time)) {
-                    view.pushTimeBar("今天");
-                }
-                else {
-                    view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
-                }
+    function exportClientFlexMessage(recordCollection, monthArray, event, getMore) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let MAX_DISPLAY_AMOUNT = 5;
+            let view = recordView_1.recordView();
+            var recordIndex;
+            if (getMore) {
+                recordIndex = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
+                recordIndex = recordIndex === null ? 0 : Number(recordIndex);
             }
-            // dbUser.user.recordIndex += 1;
-            let type = recordCollection.data[i].type;
-            let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString :
-                type === 2 ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
-            view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
-        }
-        if (view.getView().body.contents.length === 0) {
-            view.pushBodyContent(container_1.container.nothing.toString, "期待您的使用！");
-        }
-        return view;
+            else {
+                recordIndex = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
+                recordIndex = 0;
+            }
+            let index = 0;
+            for (let i = recordIndex; i < (recordCollection.data.length > recordIndex + MAX_DISPLAY_AMOUNT ? recordIndex + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
+                if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
+                    monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
+                    if (isToday(recordCollection.data[i].time)) {
+                        if (i !== 0)
+                            view.pushSeparator();
+                        view.pushTimeBar("今天");
+                    }
+                    else {
+                        if (i !== 0)
+                            view.pushSeparator();
+                        view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
+                    }
+                }
+                index += 1;
+                let type = recordCollection.data[i].type;
+                let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString :
+                    type === 2 ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
+                view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
+            }
+            if (view.getView().contents.body.contents.length === 0) {
+                view.pushBodyContent(container_1.container.nothing.toString, "期待您的使用！");
+            }
+            redisClient_1.setAsync(event.source.userId + '_recordIndex', recordIndex + index);
+            return customPromise_1.successPromise(view);
+        });
     }
     GetRecordMethod.exportClientFlexMessage = exportClientFlexMessage;
 })(GetRecordMethod || (GetRecordMethod = {}));
@@ -241,7 +263,7 @@ function deleteSignal(event) {
     redisClient_1.redisClient.del(event.source.userId);
 }
 exports.deleteSignal = deleteSignal;
-function getRecord(event) {
+function getRecord(event, getMore) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
@@ -281,8 +303,7 @@ function getRecord(event) {
                 recordCollection['data'].push(returned[i]);
             }
             let monthArray = [];
-            dbUser.user.recordIndex = 0;
-            let view = GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
+            let view = yield GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray, event, getMore);
             return customPromise_1.successPromise(view);
         }
         catch (err) {
@@ -315,7 +336,8 @@ function intReLength(data, length) {
     return str;
 }
 function getYearAndMonthString(DateObject) {
-    return DateObject.getFullYear().toString() + "年" + DateObject.getMonth().toString() + "月";
+    console.log(DateObject.getMonth());
+    return DateObject.getFullYear().toString() + "年" + (DateObject.getMonth() + 1).toString() + "月";
 }
 function isToday(d) {
     let today = new Date();

@@ -41,6 +41,9 @@ function postbackAction(event) {
             let message = "期待您成為好合器會員！";
             return client.textMessage(event, message);
         }
+        else if (postbackData === serviceProcess_1.GetRecordState.GET_MORE) {
+            return getMoreRecordEvent(event);
+        }
     });
 }
 function recordPostback(event) {
@@ -92,7 +95,19 @@ function getRecordEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         logFactory.log('Event: get record');
         try {
-            const result = yield serviceProcess_1.getRecord(event);
+            const result = yield serviceProcess_1.getRecord(event, false);
+            client.flexMessage(event, result.getView());
+        }
+        catch (err) {
+            logFactory.error(err);
+        }
+    });
+}
+function getMoreRecordEvent(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: get more record');
+        try {
+            const result = yield serviceProcess_1.getRecord(event, true);
             client.flexMessage(event, result.getView());
         }
         catch (err) {
