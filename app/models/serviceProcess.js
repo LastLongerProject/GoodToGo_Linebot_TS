@@ -75,7 +75,8 @@ var GetRecordMethod;
     function exportClientFlexMessage(recordCollection, event, getMore) {
         return __awaiter(this, void 0, void 0, function* () {
             let MAX_DISPLAY_AMOUNT = 5;
-            let view = new recordView_1.recordView();
+            let view = new recordView_1.RecordView();
+            console.log(view.getView().contents.body);
             var monthArray = Array();
             var recordIndex;
             if (getMore) {
@@ -86,6 +87,7 @@ var GetRecordMethod;
                 recordIndex = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
                 recordIndex = 0;
             }
+            console.log(recordIndex);
             let index = 0;
             for (let i = recordIndex; i < (recordCollection.data.length > recordIndex + MAX_DISPLAY_AMOUNT ? recordIndex + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
                 if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {

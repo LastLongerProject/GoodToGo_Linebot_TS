@@ -2,75 +2,71 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../models/container");
 const flexMessage_1 = require("../models/flexMessage");
-let header = flexMessage_1.headerTemplate();
-let separator = flexMessage_1.separatorTemplate();
-let headerText = {
-    type: flexMessage_1.FlexMessage.ComponetType.text,
-    text: "使用中容器",
-    size: flexMessage_1.FlexMessage.Size.xl,
-    weight: flexMessage_1.FlexMessage.Weight.bold,
-    color: "#ffffff"
-};
-header.setContents([headerText]);
-let body = {
-    type: flexMessage_1.FlexMessage.ComponetType.box,
-    layout: flexMessage_1.FlexMessage.Layout.vertical,
-    spacing: flexMessage_1.FlexMessage.Spacing.lg,
-    contents: Array()
-};
-let footerButton = {
-    type: flexMessage_1.FlexMessage.ComponetType.button,
-    action: {
-        type: "postback",
-        label: "顯示更多",
-        data: "getMoreRecord",
-        displayText: "顯示更多"
-    },
-    style: "link",
-    color: "#8FD5E8"
-};
-let footer = {
-    type: flexMessage_1.FlexMessage.ComponetType.box,
-    layout: flexMessage_1.FlexMessage.Layout.vertical,
-    contents: [separator.getSeparator(), footerButton]
-};
-let styles = {
-    header: {
-        backgroundColor: "#00bbdc"
+class RecordView {
+    constructor() {
+        this.header = flexMessage_1.headerTemplate();
+        this.separator = flexMessage_1.separatorTemplate();
+        this.headerText = {
+            type: flexMessage_1.FlexMessage.ComponetType.text,
+            text: "使用中容器",
+            size: flexMessage_1.FlexMessage.Size.xl,
+            weight: flexMessage_1.FlexMessage.Weight.bold,
+            color: "#ffffff"
+        };
+        this.footerButton = {
+            type: flexMessage_1.FlexMessage.ComponetType.button,
+            action: {
+                type: "postback",
+                label: "顯示更多",
+                data: "getMoreRecord",
+                displayText: "顯示更多"
+            },
+            style: "link",
+            color: "#8FD5E8"
+        };
+        this.footer = {
+            type: flexMessage_1.FlexMessage.ComponetType.box,
+            layout: flexMessage_1.FlexMessage.Layout.vertical,
+            contents: [this.separator.getSeparator(), this.footerButton]
+        };
+        this.styles = {
+            header: {
+                backgroundColor: "#00bbdc"
+            }
+        };
+        this.body = {
+            type: flexMessage_1.FlexMessage.ComponetType.box,
+            layout: flexMessage_1.FlexMessage.Layout.vertical,
+            spacing: flexMessage_1.FlexMessage.Spacing.lg,
+            contents: Array()
+        };
+        this.view = {
+            type: flexMessage_1.FlexMessage.Container.bubble,
+            header: this.header.getHeader(),
+            body: this.body,
+            footer: this.footer,
+            styles: this.styles
+        };
+        this.header.setContents([this.headerText]);
     }
-};
-function recordView() {
-    let view = {
-        type: flexMessage_1.FlexMessage.Container.bubble,
-        header: header.getHeader(),
-        body: body,
-        footer: footer,
-        styles: styles
-    };
-    function pushBodyContent(containerType, dateAndStore) {
-        view.body.contents.push(getBodyContent(containerType, dateAndStore));
+    pushBodyContent(containerType, dateAndStore) {
+        this.view.body.contents.push(getBodyContent(containerType, dateAndStore));
     }
-    function pushTimeBar(label) {
-        view.body.contents.push(addTimeBar(label));
+    pushTimeBar(label) {
+        this.view.body.contents.push(addTimeBar(label));
     }
-    function pushSeparator() {
-        view.body.contents.push(separator.getSeparator());
+    pushSeparator() {
+        this.view.body.contents.push(this.separator.getSeparator());
     }
-    function getView() {
+    getView() {
         return {
             type: "flex",
             altText: "使用容器數量",
-            contents: view
+            contents: this.view
         };
     }
-    return {
-        pushBodyContent,
-        pushTimeBar,
-        getView,
-        pushSeparator
-    };
 }
-exports.recordView = recordView;
+exports.RecordView = RecordView;
 ;
 function getBodyContent(containerType, dateAndStore) {
     return {

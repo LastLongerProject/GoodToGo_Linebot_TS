@@ -2,7 +2,7 @@ import { redisClient, getAsync, setAsync } from './db/redisClient';
 import {successPromise, failPromise} from '../api/customPromise';
 import { isMobilePhone } from '../api/api';
 import { container } from '../etl/models/container';
-import { recordView } from '../etl/view/recordView';
+import { RecordView } from '../etl/view/recordView';
 import { Double } from 'bson';
 import * as path from 'path';
 
@@ -83,7 +83,8 @@ namespace GetRecordMethod {
     export async function exportClientFlexMessage(recordCollection, event, getMore): Promise<any> {
         let MAX_DISPLAY_AMOUNT = 5;
         
-        let view = new recordView();
+        let view = new RecordView();
+        console.log(view.getView().contents.body)
 
         var monthArray = Array<any>();
         var recordIndex: any;
@@ -95,7 +96,7 @@ namespace GetRecordMethod {
             recordIndex = await setAsync(event.source.userId + '_recordIndex', 0);
             recordIndex = 0;
         }
-
+        console.log(recordIndex)
         let index = 0;
 
         for (let i = recordIndex; i < (recordCollection.data.length > recordIndex + MAX_DISPLAY_AMOUNT ? recordIndex + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
@@ -106,8 +107,6 @@ namespace GetRecordMethod {
                     view.pushTimeBar("今天");
                 } else {
                     if (i !== 0) view.pushSeparator()
-                    console.log(getYearAndMonthString(recordCollection.data[i].time))
-                    console.log(recordCollection.data[i].time)
                     view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
                 }                
             }
