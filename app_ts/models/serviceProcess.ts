@@ -80,10 +80,12 @@ namespace GetRecordMethod {
         }
     }
 
-    export async function exportClientFlexMessage(recordCollection, monthArray, event, getMore): Promise<any> {
+    export async function exportClientFlexMessage(recordCollection, event, getMore): Promise<any> {
         let MAX_DISPLAY_AMOUNT = 5;
         
-        let view = recordView();
+        let view = new recordView();
+
+        var monthArray = Array<any>();
         var recordIndex: any;
 
         if(getMore) {
@@ -104,6 +106,8 @@ namespace GetRecordMethod {
                     view.pushTimeBar("今天");
                 } else {
                     if (i !== 0) view.pushSeparator()
+                    console.log(getYearAndMonthString(recordCollection.data[i].time))
+                    console.log(recordCollection.data[i].time)
                     view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
                 }                
             }
@@ -302,10 +306,8 @@ async function getRecord(event: any, getMore: boolean): Promise<any> {
         for (var i = 0; i < returned.length; i++) {
             recordCollection['data'].push(returned[i]);
         }
-
-        let monthArray = [];
  
-        let view = await GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray, event, getMore);
+        let view = await GetRecordMethod.exportClientFlexMessage(recordCollection, event, getMore);
         return successPromise(view); 
     } catch(err) {
         logFactory.error(err);
@@ -341,7 +343,6 @@ function intReLength(data, length: number): string {
 }
 
 function getYearAndMonthString(DateObject: Date): string {
-    console.log(DateObject.getMonth());
     return DateObject.getFullYear().toString() + "年" + (DateObject.getMonth() + 1).toString() + "月"
 }
 
