@@ -72,10 +72,11 @@ var GetRecordMethod;
         }
     }
     GetRecordMethod.spliceArrAndPush = spliceArrAndPush;
-    function exportClientFlexMessage(recordCollection, monthArray, event, getMore) {
+    function exportClientFlexMessage(recordCollection, event, getMore) {
         return __awaiter(this, void 0, void 0, function* () {
             let MAX_DISPLAY_AMOUNT = 5;
-            let view = recordView_1.recordView();
+            let view = new recordView_1.recordView();
+            var monthArray = Array();
             var recordIndex;
             if (getMore) {
                 recordIndex = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
@@ -97,6 +98,8 @@ var GetRecordMethod;
                     else {
                         if (i !== 0)
                             view.pushSeparator();
+                        console.log(getYearAndMonthString(recordCollection.data[i].time));
+                        console.log(recordCollection.data[i].time);
                         view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
                     }
                 }
@@ -302,8 +305,7 @@ function getRecord(event, getMore) {
             for (var i = 0; i < returned.length; i++) {
                 recordCollection['data'].push(returned[i]);
             }
-            let monthArray = [];
-            let view = yield GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray, event, getMore);
+            let view = yield GetRecordMethod.exportClientFlexMessage(recordCollection, event, getMore);
             return customPromise_1.successPromise(view);
         }
         catch (err) {
@@ -336,7 +338,6 @@ function intReLength(data, length) {
     return str;
 }
 function getYearAndMonthString(DateObject) {
-    console.log(DateObject.getMonth());
     return DateObject.getFullYear().toString() + "年" + (DateObject.getMonth() + 1).toString() + "月";
 }
 function isToday(d) {

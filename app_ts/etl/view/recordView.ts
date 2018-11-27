@@ -45,7 +45,7 @@ let styles = {
     }
 };
 
-function recordView() {
+function recordView(): void {
     let view = {
         type: FlexMessage.Container.bubble,
         header: header.getHeader(),
