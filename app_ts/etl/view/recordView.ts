@@ -1,88 +1,78 @@
 import { container } from "../models/container"
 import { headerTemplate, separatorTemplate, FlexMessage } from "../models/flexMessage"
-
-let header = headerTemplate();
-let separator = separatorTemplate();
-
-let headerText = {
-    type: FlexMessage.ComponetType.text,
-    text: "使用中容器",
-    size: FlexMessage.Size.xl,
-    weight: FlexMessage.Weight.bold,
-    color: "#ffffff"
-};
-
-header.setContents([headerText]);
-
-let body = {
-    type: FlexMessage.ComponetType.box,
-    layout: FlexMessage.Layout.vertical,
-    spacing: FlexMessage.Spacing.lg,
-    contents: Array<any>()
-};
-
-let footerButton = {
-    type: FlexMessage.ComponetType.button,
-    action: {
-        type: "postback",
-        label: "顯示更多",
-        data: "getMoreRecord",
-        displayText: "顯示更多"
-    },
-    style: "link",
-    color: "#8FD5E8"
-};
-
-let footer = {
-    type: FlexMessage.ComponetType.box, 
-    layout: FlexMessage.Layout.vertical,
-    contents:[separator.getSeparator(), footerButton]
-};
-
-let styles = {
-    header: {
-        backgroundColor: "#00bbdc"
+class RecordView {
+    private header = headerTemplate();
+    private separator = separatorTemplate();
+    constructor() {
+        this.header.setContents([this.headerText]);
     }
-};
+    private headerText = {
+        type: FlexMessage.ComponetType.text,
+        text: "使用中容器",
+        size: FlexMessage.Size.xl,
+        weight: FlexMessage.Weight.bold,
+        color: "#ffffff"
+    };
+    private footerButton = {
+        type: FlexMessage.ComponetType.button,
+        action: {
+            type: "postback",
+            label: "顯示更多",
+            data: "getMoreRecord",
+            displayText: "顯示更多"
+        },
+        style: "link",
+        color: "#8FD5E8"
+    };
 
-function recordView(): void {
-    let view = {
+    private footer = {
+        type: FlexMessage.ComponetType.box, 
+        layout: FlexMessage.Layout.vertical,
+        contents:[this.separator.getSeparator(), this.footerButton]
+    };
+
+    private styles = {
+        header: {
+            backgroundColor: "#00bbdc"
+        }
+    };
+
+    private body = {
+        type: FlexMessage.ComponetType.box,
+        layout: FlexMessage.Layout.vertical,
+        spacing: FlexMessage.Spacing.lg,
+        contents: Array<any>()
+    };
+    private view = {
         type: FlexMessage.Container.bubble,
-        header: header.getHeader(),
-        body: body,
-        footer: footer,
-        styles: styles
+        header: this.header.getHeader(),
+        body: this.body,
+        footer: this.footer,
+        styles: this.styles
     }
 
-    function pushBodyContent(containerType: any, dateAndStore: String) {
-        view.body.contents.push(getBodyContent(containerType, dateAndStore));
+    public pushBodyContent(containerType: any, dateAndStore: String) {
+        this.view.body.contents.push(getBodyContent(containerType, dateAndStore));
     }
 
-    function pushTimeBar(label: String) {
-        view.body.contents.push(addTimeBar(label));
+    public pushTimeBar(label: String) {
+        this.view.body.contents.push(addTimeBar(label));
     }
 
-    function pushSeparator() {
-        view.body.contents.push(separator.getSeparator());
+    public pushSeparator() {
+        this.view.body.contents.push(this.separator.getSeparator());
     }
 
-    function getView() {
+    public getView() {
         return {
             type: "flex",
             altText: "使用容器數量",
-            contents: view
+            contents: this.view
         };
-    }
-
-    return {
-        pushBodyContent,
-        pushTimeBar,
-        getView,
-        pushSeparator
     }
 };
 
-export {recordView};
+export {RecordView};
 
 function getBodyContent(containerType, dateAndStore: String): any{
     return {
