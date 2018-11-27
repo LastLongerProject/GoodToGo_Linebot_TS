@@ -14,7 +14,8 @@ import {
     addVerificationSignal, 
     findSignal,
     FindTemporaryInfoState,
-    getRecord} from '../models/serviceProcess';
+    getRecord,
+    GetRecordState} from '../models/serviceProcess';
 
 import * as client from './clientDelegate';
 import * as request from "../api/request";
@@ -42,6 +43,8 @@ async function postbackAction(event: any): Promise<any> {
     } else if (postbackData === client.registerWilling.NO) {
         let message = "期待您成為好合器會員！"
         return client.textMessage(event, message);
+    } else if (postbackData === GetRecordState.GET_MORE) {
+        return getMoreRecordEvent(event);
     }
 }
 
@@ -92,7 +95,17 @@ async function getContributionEvent(event: any): Promise<any> {
 async function getRecordEvent(event: any): Promise<any> {
     logFactory.log('Event: get record');
     try {
-        const result = await getRecord(event);
+        const result = await getRecord(event, false);
+        client.flexMessage(event, result.getView());
+    } catch (err) {
+        logFactory.error(err);
+    }
+}
+
+async function getMoreRecordEvent(event: any): Promise<any> {
+    logFactory.log('Event: get more record');
+    try {
+        const result = await getRecord(event, true);
         client.flexMessage(event, result.getView());
     } catch (err) {
         logFactory.error(err);

@@ -62,7 +62,6 @@ function registerTemplate(event, message) {
 }
 exports.registerTemplate = registerTemplate;
 function returnFlexMessage(event, flex) {
-    console.log(flex.body);
     return client.replyMessage(event.replyToken, flex).catch(err => {
         logFactory.error(JSON.stringify(err.originalError.response.config.data));
         logFactory.error(JSON.stringify(err.originalError.response.data));

@@ -1,58 +1,54 @@
 import { container } from "../models/container"
+import { headerTemplate, separatorTemplate, FlexMessage } from "../models/flexMessage"
+
+let header = headerTemplate();
+let separator = separatorTemplate();
 
 let headerText = {
-    type: "text",
+    type: FlexMessage.ComponetType.text,
     text: "使用中容器",
-    size: "xl",
-    weight: "bold",
+    size: FlexMessage.Size.xl,
+    weight: FlexMessage.Weight.bold,
     color: "#ffffff"
 };
 
-let header = {
-    type: "box",
-    layout: "vertical",
-    contents: [headerText]
-};
+header.setContents([headerText]);
 
 let body = {
-    type: "box",
-    layout: "vertical",
-    spacing: "lg",
+    type: FlexMessage.ComponetType.box,
+    layout: FlexMessage.Layout.vertical,
+    spacing: FlexMessage.Spacing.lg,
     contents: Array<any>()
 };
 
 let footerButton = {
-    type: "button",
-    layout: "horizontal",
+    type: FlexMessage.ComponetType.button,
     action: {
         type: "postback",
-        label: "查看更多",
+        label: "顯示更多",
         data: "getMoreRecord",
-        displayText: "查看更多"
+        displayText: "顯示更多"
     },
-    style: "primary",
-    color: "#0000ff"
+    style: "link",
+    color: "#8FD5E8"
 };
 
 let footer = {
-    type: "box", 
-    layout: "horizontal",
-    contents:[footerButton]
+    type: FlexMessage.ComponetType.box, 
+    layout: FlexMessage.Layout.vertical,
+    contents:[separator.getSeparator(), footerButton]
 };
 
 let styles = {
     header: {
         backgroundColor: "#00bbdc"
-    },
-    footer: {
-        separator: true
     }
 };
 
 function recordView() {
     let view = {
-        type: "bubble",
-        header: header,
+        type: FlexMessage.Container.bubble,
+        header: header.getHeader(),
         body: body,
         footer: footer,
         styles: styles
@@ -66,45 +62,55 @@ function recordView() {
         view.body.contents.push(addTimeBar(label));
     }
 
+    function pushSeparator() {
+        view.body.contents.push(separator.getSeparator());
+    }
+
     function getView() {
-        return view;
+        return {
+            type: "flex",
+            altText: "使用容器數量",
+            contents: view
+        };
     }
 
     return {
-        pushBodyContent: pushBodyContent,
-        pushTimeBar: pushTimeBar,
-        getView: getView
+        pushBodyContent,
+        pushTimeBar,
+        getView,
+        pushSeparator
     }
 };
 
+export {recordView};
+
 function getBodyContent(containerType, dateAndStore: String): any{
-    console.log(containerType);
     return {
-        type: "box",
-        layout: "horizontal",
+        type: FlexMessage.ComponetType.box,
+        layout: FlexMessage.Layout.horizontal,
         contents: [{
-            type: "image",
-            url: container[String(containerType)].image,
-            size: "xs",
-            gravity: "center",
+            type: FlexMessage.ComponetType.image,
+            url: container[containerType].imageUrl,
+            size: FlexMessage.Size.xs,
+            gravity: FlexMessage.Gravity.center,
             flex: 1
         }, {
-            type: "text",
-            text: container[String(containerType)].name,
-            size: "md",
+            type: FlexMessage.ComponetType.text,
+            text: container[containerType].name,
+            size: FlexMessage.Size.md,
             color: "#565656",
-            gravity: "center",
-            align: "start",
-            weight: "bold",
+            gravity: FlexMessage.Gravity.center,
+            align: FlexMessage.Align.start,
+            weight: FlexMessage.Weight.bold,
             flex: 4
         }, {
-            type: "text",
+            type: FlexMessage.ComponetType.text,
             text: dateAndStore,
-            size: "xs",
+            size: FlexMessage.Size.xs,
             color: "#C0C0C8",
             wrap: true,
-            gravity: "bottom",
-            align: "end",
+            gravity: FlexMessage.Gravity.bottom,
+            align: FlexMessage.Align.end,
             flex: 5
         }]
     };
@@ -112,12 +118,10 @@ function getBodyContent(containerType, dateAndStore: String): any{
 
 function addTimeBar(date: String) {
     return {
-        type: "text",
-        text: "date",
-        size: "md",
-        weight: "bold",
+        type: FlexMessage.ComponetType.text,
+        text: date,
+        size: FlexMessage.Size.md,
+        weight: FlexMessage.Weight.bold,
         color: "#04B7E6"
     }
 }
-
-export {recordView};

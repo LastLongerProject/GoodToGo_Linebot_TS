@@ -1,53 +1,48 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../models/container");
+const flexMessage_1 = require("../models/flexMessage");
+let header = flexMessage_1.headerTemplate();
+let separator = flexMessage_1.separatorTemplate();
 let headerText = {
-    type: "text",
+    type: flexMessage_1.FlexMessage.ComponetType.text,
     text: "使用中容器",
-    size: "xl",
-    weight: "bold",
+    size: flexMessage_1.FlexMessage.Size.xl,
+    weight: flexMessage_1.FlexMessage.Weight.bold,
     color: "#ffffff"
 };
-let header = {
-    type: "box",
-    layout: "vertical",
-    contents: [headerText]
-};
+header.setContents([headerText]);
 let body = {
-    type: "box",
-    layout: "vertical",
-    spacing: "lg",
+    type: flexMessage_1.FlexMessage.ComponetType.box,
+    layout: flexMessage_1.FlexMessage.Layout.vertical,
+    spacing: flexMessage_1.FlexMessage.Spacing.lg,
     contents: Array()
 };
 let footerButton = {
-    type: "button",
-    layout: "horizontal",
+    type: flexMessage_1.FlexMessage.ComponetType.button,
     action: {
         type: "postback",
-        label: "查看更多",
+        label: "顯示更多",
         data: "getMoreRecord",
-        displayText: "查看更多"
+        displayText: "顯示更多"
     },
-    style: "primary",
-    color: "#0000ff"
+    style: "link",
+    color: "#8FD5E8"
 };
 let footer = {
-    type: "box",
-    layout: "horizontal",
-    contents: [footerButton]
+    type: flexMessage_1.FlexMessage.ComponetType.box,
+    layout: flexMessage_1.FlexMessage.Layout.vertical,
+    contents: [separator.getSeparator(), footerButton]
 };
 let styles = {
     header: {
         backgroundColor: "#00bbdc"
-    },
-    footer: {
-        separator: true
     }
 };
 function recordView() {
     let view = {
-        type: "bubble",
-        header: header,
+        type: flexMessage_1.FlexMessage.Container.bubble,
+        header: header.getHeader(),
         body: body,
         footer: footer,
         styles: styles
@@ -58,55 +53,62 @@ function recordView() {
     function pushTimeBar(label) {
         view.body.contents.push(addTimeBar(label));
     }
+    function pushSeparator() {
+        view.body.contents.push(separator.getSeparator());
+    }
     function getView() {
-        return view;
+        return {
+            type: "flex",
+            altText: "使用容器數量",
+            contents: view
+        };
     }
     return {
-        pushBodyContent: pushBodyContent,
-        pushTimeBar: pushTimeBar,
-        getView: getView
+        pushBodyContent,
+        pushTimeBar,
+        getView,
+        pushSeparator
     };
 }
 exports.recordView = recordView;
 ;
 function getBodyContent(containerType, dateAndStore) {
-    console.log(containerType);
     return {
-        type: "box",
-        layout: "horizontal",
+        type: flexMessage_1.FlexMessage.ComponetType.box,
+        layout: flexMessage_1.FlexMessage.Layout.horizontal,
         contents: [{
-                type: "image",
-                url: container_1.container[String(containerType)].image,
-                size: "xs",
-                gravity: "center",
+                type: flexMessage_1.FlexMessage.ComponetType.image,
+                url: container_1.container[containerType].imageUrl,
+                size: flexMessage_1.FlexMessage.Size.xs,
+                gravity: flexMessage_1.FlexMessage.Gravity.center,
                 flex: 1
             }, {
-                type: "text",
-                text: container_1.container[String(containerType)].name,
-                size: "md",
+                type: flexMessage_1.FlexMessage.ComponetType.text,
+                text: container_1.container[containerType].name,
+                size: flexMessage_1.FlexMessage.Size.md,
                 color: "#565656",
-                gravity: "center",
-                align: "start",
-                weight: "bold",
+                gravity: flexMessage_1.FlexMessage.Gravity.center,
+                align: flexMessage_1.FlexMessage.Align.start,
+                weight: flexMessage_1.FlexMessage.Weight.bold,
                 flex: 4
             }, {
-                type: "text",
+                type: flexMessage_1.FlexMessage.ComponetType.text,
                 text: dateAndStore,
-                size: "xs",
+                size: flexMessage_1.FlexMessage.Size.xs,
                 color: "#C0C0C8",
                 wrap: true,
-                gravity: "bottom",
-                align: "end",
+                gravity: flexMessage_1.FlexMessage.Gravity.bottom,
+                align: flexMessage_1.FlexMessage.Align.end,
                 flex: 5
             }]
     };
 }
 function addTimeBar(date) {
     return {
-        type: "text",
-        text: "date",
-        size: "md",
-        weight: "bold",
+        type: flexMessage_1.FlexMessage.ComponetType.text,
+        text: date,
+        size: flexMessage_1.FlexMessage.Size.md,
+        weight: flexMessage_1.FlexMessage.Weight.bold,
         color: "#04B7E6"
     };
 }

@@ -3,6 +3,8 @@ import {successPromise, failPromise} from '../api/customPromise';
 import { isMobilePhone } from '../api/api';
 import { container } from '../etl/models/container';
 import { recordView } from '../etl/view/recordView';
+import { Double } from 'bson';
+import * as path from 'path';
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 
@@ -56,6 +58,11 @@ export namespace AddVerificationSignalState {
         SUCCESS = 'store signal successfully'
 }
 
+export namespace GetRecordState {
+    export const 
+        GET_MORE = "getMoreRecord"
+}
+
 namespace GetRecordMethod {
     export function spliceArrAndPush(list: Array<any>, splicedArr: Array<any>, pushedArr: Array<any>): void {
         for (var i = 0; i < list.length; i++) {
@@ -73,29 +80,46 @@ namespace GetRecordMethod {
         }
     }
 
-    export function exportClientFlexMessage(recordCollection, monthArray): any {
+    export async function exportClientFlexMessage(recordCollection, monthArray, event, getMore): Promise<any> {
+        let MAX_DISPLAY_AMOUNT = 5;
+        
         let view = recordView();
-        for (var i = 0; i < (recordCollection.data.length > 5 ? 5 : recordCollection.data.length); i++) {
+        var recordIndex: any;
+
+        if(getMore) {
+            recordIndex = await getAsync(event.source.userId + '_recordIndex');
+            recordIndex = recordIndex === null ? 0 : Number(recordIndex);
+        } else {
+            recordIndex = await setAsync(event.source.userId + '_recordIndex', 0);
+            recordIndex = 0;
+        }
+
+        let index = 0;
+
+        for (let i = recordIndex; i < (recordCollection.data.length > recordIndex + MAX_DISPLAY_AMOUNT ? recordIndex + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
             if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                 monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                 if (isToday(recordCollection.data[i].time)) {
+                    if (i !== 0) view.pushSeparator()
                     view.pushTimeBar("今天");
                 } else {
+                    if (i !== 0) view.pushSeparator()
                     view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
-                }
+                }                
             }
-  
-            // dbUser.user.recordIndex += 1;
+
+            index += 1;
             let type = recordCollection.data[i].type;
             let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString :
                 type === 2 ? container.plate.toString : type === 4 ? container.icecream.toString : container.glass_16oz.toString;
             view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
         }
-        if (view.getView().body.contents.length === 0) {
+        if (view.getView().contents.body.contents.length === 0) {
             view.pushBodyContent(container.nothing.toString, "期待您的使用！")
         }
 
-        return view;
+        setAsync(event.source.userId + '_recordIndex', recordIndex + index);
+        return successPromise(view);
     }
 }
  
@@ -235,7 +259,7 @@ function deleteSignal(event: any) {
     redisClient.del(event.source.userId);
 }
 
-async function getRecord(event: any): Promise<any> {
+async function getRecord(event: any, getMore: boolean): Promise<any> {
     try {
         let dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
         if (!dbUser) return successPromise(DatabaseState.USER_NOT_FOUND);
@@ -281,8 +305,7 @@ async function getRecord(event: any): Promise<any> {
 
         let monthArray = [];
  
-        dbUser.user.recordIndex = 0;
-        let view = GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray);
+        let view = await GetRecordMethod.exportClientFlexMessage(recordCollection, monthArray, event, getMore);
         return successPromise(view); 
     } catch(err) {
         logFactory.error(err);
@@ -318,7 +341,8 @@ function intReLength(data, length: number): string {
 }
 
 function getYearAndMonthString(DateObject: Date): string {
-    return DateObject.getFullYear().toString() + "年" + DateObject.getMonth().toString() + "月"
+    console.log(DateObject.getMonth());
+    return DateObject.getFullYear().toString() + "年" + (DateObject.getMonth() + 1).toString() + "月"
 }
 
 function isToday(d: Date): boolean {
