@@ -7,6 +7,8 @@ import {
     WebhookEvent
 } from '@line/bot-sdk';
 import { text } from 'body-parser';
+import { QrcodeView } from '../etl/view/qrcodeView';
+import { FlexMessage } from '../etl/models/flexMessage';
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const client = new Client(global.gConfig.bot);
@@ -30,22 +32,30 @@ function returnTextMessage(event: any, message: string): Promise<any> {
 }
 
 
-function returnQrcode(event, phone) {
+function returnQrcode(event, phone: string) {
     var baseUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="
-    function getQrcodeImage(phone) {
-        return baseUrl + phone;
-    }
- 
-    return client.replyMessage(event.replyToken, {
+    let view = new QrcodeView();
+    let insertDash = phone.substring(0,4) + "-" + phone.substring(4,7) + "-" + phone.substring(7);
+    
+    let qrcode = {
         type: 'image',
-        originalContentUrl: baseUrl + phone,
-        previewImageUrl: baseUrl + phone
-    }).catch((err) => {
-        if (err) {
-            logFactory.error(JSON.stringify(err.originalError.response.config.data));
-            logFactory.error(JSON.stringify(err.originalError.response.data));
-        }
-    });
+        url: baseUrl + phone,
+        margin: FlexMessage.Margin.xxl,
+        size: FlexMessage.Margin.xl
+    }
+
+    let phoneObj = {
+        type: FlexMessage.ComponetType.text,
+        text: insertDash,
+        size: FlexMessage.Size.md,
+        align: FlexMessage.Align.center
+    }
+
+    view.pushBodyContent(phoneObj);
+    view.pushBodyContent(qrcode);
+    view.pushSpacer();
+    let flex = view.getView();
+    return returnFlexMessage(event, flex);
 }
 
 function registerTemplate(event, message) {

@@ -1,3 +1,5 @@
+import { container } from "../models/container"
+
 function header(): any {
     let header = {
         type: "box",
@@ -37,6 +39,68 @@ function separator(): any {
         setMargin,
         getSeparator
     }
+}
+
+function spacer(): any {
+    let spacer = {
+        type: "spacer",
+        size: FlexMessage.Size.md
+    }
+
+    function setSize(size: string) {
+        spacer.size = size
+    }
+
+    function getSpacer() {
+        return spacer;
+    }
+
+    return {
+        setSize,
+        getSpacer
+    }
+}
+
+function addTimeBar(date: String) {
+    return {
+        type: FlexMessage.ComponetType.text,
+        text: date,
+        size: FlexMessage.Size.md,
+        weight: FlexMessage.Weight.bold,
+        color: "#04B7E6"
+    }
+}
+
+function getBodyContent(containerType, dateAndStore: String): any{
+    return {
+        type: FlexMessage.ComponetType.box,
+        layout: FlexMessage.Layout.horizontal,
+        contents: [{
+            type: FlexMessage.ComponetType.image,
+            url: container[containerType].imageUrl,
+            size: FlexMessage.Size.xs,
+            gravity: FlexMessage.Gravity.center,
+            flex: 1
+        }, {
+            type: FlexMessage.ComponetType.text,
+            text: container[containerType].name,
+            size: FlexMessage.Size.md,
+            color: "#565656",
+            gravity: FlexMessage.Gravity.center,
+            align: FlexMessage.Align.start,
+            weight: FlexMessage.Weight.bold,
+            flex: 4
+        }, {
+            type: FlexMessage.ComponetType.text,
+            text: dateAndStore,
+            size: FlexMessage.Size.xs,
+            color: "#C0C0C8",
+            wrap: true,
+            gravity: FlexMessage.Gravity.bottom,
+            align: FlexMessage.Align.end,
+            flex: 5
+        }]
+    };
 }
 
 function buttonStyle(): any {
@@ -128,5 +192,8 @@ namespace FlexMessage {
 export {
     header as headerTemplate,
     separator as separatorTemplate,
-    FlexMessage
+    spacer as spacerTemplate,
+    FlexMessage,
+    addTimeBar,
+    getBodyContent
 }

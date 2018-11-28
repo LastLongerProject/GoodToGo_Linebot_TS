@@ -15,12 +15,13 @@ import {
     findSignal,
     FindTemporaryInfoState,
     getRecord,
-    GetRecordState} from '../models/serviceProcess';
+    DataType} from '../models/serviceProcess';
 
 import * as client from './clientDelegate';
 import * as request from "../api/request";
 import { failPromise } from "../api/customPromise";
 import { isMobilePhone } from '../api/api';
+import { ContrubtionView } from "../etl/view/contributionView";
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 
@@ -36,21 +37,15 @@ function isVerificationCode(code: string): boolean {
 
 async function postbackAction(event: any): Promise<any> {
     let postbackData = event.postback.data;
-    console.log(postbackData)
     if (isMobilePhone(postbackData)) {
         logFactory.log(postbackData);
         return request.register(event, postbackData);
     } else if (postbackData === client.registerWilling.NO) {
         let message = "期待您成為好合器會員！"
         return client.textMessage(event, message);
-    } else if (postbackData === GetRecordState.GET_MORE) {
-        return getMoreRecordEvent(event);
+    } else if (postbackData === DataType.GetMoreInused || postbackData === DataType.Inused || postbackData === DataType.Record || postbackData === DataType.GetMoreRecord ) {
+        return getDataEvent(event, Number(postbackData));
     }
-}
-
-function recordPostback(event: any): void {
-    logFactory.log('Event: postback');
-
 }
 
 function followEvent(event: any): void {
@@ -65,7 +60,7 @@ async function unfollowOrUnBoundEvent(event: any): Promise<any> {
     else logFactory.log('Event: delete bind');
 
     try {
-        var result = await deleteBinding(event);
+        deleteBinding(event);
         const message = '已取消綁定'
         return client.textMessage(event, message);
     } catch (err) {
@@ -76,36 +71,28 @@ async function unfollowOrUnBoundEvent(event: any): Promise<any> {
 
 async function getContributionEvent(event: any): Promise<any> {
     logFactory.log('Event: get contribution');
-    try {
-        let message: string;
-        var result = await getContribution(event);
-        switch (result) {
-            case DatabaseState.USER_NOT_FOUND:
-                message = '請輸入手機號碼以綁定 line id'
-                return client.textMessage(event, message);
-            default:
-                return client.textMessage(event, '您的功德數為：' + result); 
-        }
-    } catch (err) {
-        logFactory.error(err);
-        return failPromise(err);
-    }
+    // try {
+    //     let message: string;
+    //     var result = await getContribution(event);
+    //     switch (result) {
+    //         case DatabaseState.USER_NOT_FOUND:
+    //             message = '請輸入手機號碼以綁定 line id'
+    //             return client.textMessage(event, message);
+    //         default:
+    //             return client.textMessage(event, '您的功德數為：' + result); 
+    //     }
+    // } catch (err) {
+    //     logFactory.error(err);
+    //     return failPromise(err);
+    // }
+    let view = new ContrubtionView();
+    return client.flexMessage(event, view.getView());
 }
 
-async function getRecordEvent(event: any): Promise<any> {
-    logFactory.log('Event: get record');
+async function getDataEvent(event: any, type): Promise<any> {
+    logFactory.log('Event: get data');
     try {
-        const result = await getRecord(event, false);
-        client.flexMessage(event, result.getView());
-    } catch (err) {
-        logFactory.error(err);
-    }
-}
-
-async function getMoreRecordEvent(event: any): Promise<any> {
-    logFactory.log('Event: get more record');
-    try {
-        const result = await getRecord(event, true);
+        const result = await getRecord(event, type);
         client.flexMessage(event, result.getView());
     } catch (err) {
         logFactory.error(err);
@@ -119,8 +106,8 @@ async function getQRCodeEvent(event: any): Promise<any> {
         if (result === DatabaseState.USER_NOT_FOUND) {
             let message = '請輸入手機號碼以綁定 line id'
             return client.textMessage(event, message);
-        }
-        return client.getQrcode(event, result);  
+        } else 
+            return client.getQrcode(event, result);  
     } catch (err) {
         logFactory.error(err);
         return failPromise(err);
@@ -197,15 +184,15 @@ module.exports = {
         }
         if (event.type === 'follow') {
             followEvent(event);
-        } else if (event.type === 'unfollow' || event.message.text === '取消') {
+        } else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             unfollowOrUnBoundEvent(event);
-        } else if (event.message.text === "功德") {
+        } else if (event.message.text === "我的好杯幣") {
             getContributionEvent(event);
-        } else if (event.message.text === "使用") {
-            getRecordEvent(event);
-        } else if (event.message.text === "QRcode") {
+        } else if (event.message.text === "使用中容器") {
+            getDataEvent(event, DataType.Inused);
+        } else if (event.message.text === "我的會員卡") {
             getQRCodeEvent(event);
-        } else if (event.message.text === "聯絡客服") {
+        } else if (event.message.text === "聯絡好盒器") {
             getContactWayEvent(event);
             
         } else if (event.message.text === "綁定") {

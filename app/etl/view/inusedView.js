@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
 const serviceProcess_1 = require("../../models/serviceProcess");
-class RecordView {
+class InusedView {
     constructor() {
         this.header = flexMessage_1.headerTemplate();
         this.separator = flexMessage_1.separatorTemplate();
         this.headerText = {
             type: flexMessage_1.FlexMessage.ComponetType.text,
-            text: "歷史紀錄",
+            text: "使用中容器",
             size: flexMessage_1.FlexMessage.Size.xl,
             weight: flexMessage_1.FlexMessage.Weight.bold,
             color: "#ffffff"
@@ -18,19 +18,19 @@ class RecordView {
             action: {
                 type: "postback",
                 label: "顯示更多",
-                data: String(serviceProcess_1.DataType.GetMoreRecord),
+                data: String(serviceProcess_1.DataType.GetMoreInused),
                 displayText: "顯示更多"
             },
             style: "link",
             color: "#8FD5E8"
         };
-        this.footerButton_getInused = {
+        this.footerButton_getRecord = {
             type: flexMessage_1.FlexMessage.ComponetType.button,
             action: {
                 type: "postback",
-                label: "查看使用中容器",
-                data: String(serviceProcess_1.DataType.Inused),
-                displayText: "查看使用中容器"
+                label: "查看歷史紀錄",
+                data: String(serviceProcess_1.DataType.Record),
+                displayText: "查看歷史紀錄"
             },
             style: "link",
             color: "#8FD5E8"
@@ -38,7 +38,7 @@ class RecordView {
         this.footer = {
             type: flexMessage_1.FlexMessage.ComponetType.box,
             layout: flexMessage_1.FlexMessage.Layout.vertical,
-            contents: [this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getInused]
+            contents: [this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getRecord]
         };
         this.styles = {
             header: {
@@ -77,6 +77,6 @@ class RecordView {
         };
     }
 }
-exports.RecordView = RecordView;
+exports.InusedView = InusedView;
 ;
-//# sourceMappingURL=recordView.js.map
+//# sourceMappingURL=inusedView.js.map
