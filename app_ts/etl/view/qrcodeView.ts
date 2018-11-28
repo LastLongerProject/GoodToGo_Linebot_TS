@@ -1,47 +1,32 @@
-import { View } from "./view"
-import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent } from "../models/flexMessage"
-import { DataType } from '../../models/serviceProcess';
-class RecordView implements View {
+import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent, spacerTemplate } from "../models/flexMessage"
+import { View } from './view';
+class QrcodeView implements View {
     private header = headerTemplate();
     private separator = separatorTemplate();
+    private spacer = spacerTemplate()
     constructor() {
         this.header.setContents([this.headerText]);
+        this.separator.setMargin(FlexMessage.Margin.xl);
     }
     private headerText = {
         type: FlexMessage.ComponetType.text,
-        text: "歷史紀錄",
+        text: "我的會員卡",
         size: FlexMessage.Size.xl,
         weight: FlexMessage.Weight.bold,
         color: "#ffffff"
     };
-    private footerButton_getMore = {
-        type: FlexMessage.ComponetType.button,
-        action: {
-            type: "postback",
-            label: "顯示更多",
-            data: String(DataType.GetMoreRecord),
-            displayText: "顯示更多"
-        },
-        style: "link",
-        color: "#8FD5E8"
+    private footerText = {
+        type: FlexMessage.ComponetType.text,
+        text: "請將手機提供給店舖夥伴掃描",
+        color: "#484848",
+        align: FlexMessage.Align.center,
+        margin: FlexMessage.Margin.lg
     };
-
-    private footerButton_getInused = {
-        type: FlexMessage.ComponetType.button,
-        action: {
-            type: "postback",
-            label: "查看使用中容器",
-            data: String(DataType.Inused),
-            displayText: "查看使用中容器"
-        },
-        style: "link",
-        color: "#8FD5E8"
-    }
 
     private footer = {
         type: FlexMessage.ComponetType.box, 
         layout: FlexMessage.Layout.vertical,
-        contents:[this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getInused]
+        contents:[this.separator.getSeparator(), this.footerText]
     };
 
     private styles = {
@@ -56,6 +41,7 @@ class RecordView implements View {
         spacing: FlexMessage.Spacing.lg,
         contents: Array<any>()
     };
+
     private view = {
         type: FlexMessage.Container.bubble,
         header: this.header.getHeader(),
@@ -64,8 +50,8 @@ class RecordView implements View {
         styles: this.styles
     }
 
-    public pushBodyContent(containerType: any, dateAndStore: String) {
-        this.view.body.contents.push(getBodyContent(containerType, dateAndStore));
+    public pushBodyContent(data) {
+        this.view.body.contents.push(data);
     }
 
     public pushTimeBar(label: String) {
@@ -74,6 +60,10 @@ class RecordView implements View {
 
     public pushSeparator() {
         this.view.body.contents.push(this.separator.getSeparator());
+    }
+
+    public pushSpacer() {
+        this.view.body.contents.push(this.spacer.getSpacer());
     }
 
     public getView() {
@@ -85,4 +75,4 @@ class RecordView implements View {
     }
 };
 
-export {RecordView};
+export {QrcodeView};

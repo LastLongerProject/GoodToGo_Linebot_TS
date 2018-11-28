@@ -20,6 +20,7 @@ const client = __importStar(require("./clientDelegate"));
 const request = __importStar(require("../api/request"));
 const customPromise_1 = require("../api/customPromise");
 const api_1 = require("../api/api");
+const contributionView_1 = require("../etl/view/contributionView");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 function isVerificationCode(code) {
     var reg = /[0-9]{6}/;
@@ -32,7 +33,6 @@ function isVerificationCode(code) {
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
-        console.log(postbackData);
         if (api_1.isMobilePhone(postbackData)) {
             logFactory.log(postbackData);
             return request.register(event, postbackData);
@@ -41,13 +41,10 @@ function postbackAction(event) {
             let message = "期待您成為好合器會員！";
             return client.textMessage(event, message);
         }
-        else if (postbackData === serviceProcess_1.GetRecordState.GET_MORE) {
-            return getMoreRecordEvent(event);
+        else if (postbackData === serviceProcess_1.DataType.GetMoreInused || postbackData === serviceProcess_1.DataType.Inused || postbackData === serviceProcess_1.DataType.Record || postbackData === serviceProcess_1.DataType.GetMoreRecord) {
+            return getDataEvent(event, Number(postbackData));
         }
     });
-}
-function recordPostback(event) {
-    logFactory.log('Event: postback');
 }
 function followEvent(event) {
     logFactory.log('Event: added or unblocked');
@@ -61,7 +58,7 @@ function unfollowOrUnBoundEvent(event) {
         else
             logFactory.log('Event: delete bind');
         try {
-            var result = yield serviceProcess_1.deleteBinding(event);
+            serviceProcess_1.deleteBinding(event);
             const message = '已取消綁定';
             return client.textMessage(event, message);
         }
@@ -74,40 +71,29 @@ function unfollowOrUnBoundEvent(event) {
 function getContributionEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         logFactory.log('Event: get contribution');
-        try {
-            let message;
-            var result = yield serviceProcess_1.getContribution(event);
-            switch (result) {
-                case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
-                    message = '請輸入手機號碼以綁定 line id';
-                    return client.textMessage(event, message);
-                default:
-                    return client.textMessage(event, '您的功德數為：' + result);
-            }
-        }
-        catch (err) {
-            logFactory.error(err);
-            return customPromise_1.failPromise(err);
-        }
+        // try {
+        //     let message: string;
+        //     var result = await getContribution(event);
+        //     switch (result) {
+        //         case DatabaseState.USER_NOT_FOUND:
+        //             message = '請輸入手機號碼以綁定 line id'
+        //             return client.textMessage(event, message);
+        //         default:
+        //             return client.textMessage(event, '您的功德數為：' + result); 
+        //     }
+        // } catch (err) {
+        //     logFactory.error(err);
+        //     return failPromise(err);
+        // }
+        let view = new contributionView_1.ContrubtionView();
+        return client.flexMessage(event, view.getView());
     });
 }
-function getRecordEvent(event) {
+function getDataEvent(event, type) {
     return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: get record');
+        logFactory.log('Event: get data');
         try {
-            const result = yield serviceProcess_1.getRecord(event, false);
-            client.flexMessage(event, result.getView());
-        }
-        catch (err) {
-            logFactory.error(err);
-        }
-    });
-}
-function getMoreRecordEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: get more record');
-        try {
-            const result = yield serviceProcess_1.getRecord(event, true);
+            const result = yield serviceProcess_1.getRecord(event, type);
             client.flexMessage(event, result.getView());
         }
         catch (err) {
@@ -124,7 +110,8 @@ function getQRCodeEvent(event) {
                 let message = '請輸入手機號碼以綁定 line id';
                 return client.textMessage(event, message);
             }
-            return client.getQrcode(event, result);
+            else
+                return client.getQrcode(event, result);
         }
         catch (err) {
             logFactory.error(err);
@@ -199,19 +186,19 @@ module.exports = {
         if (event.type === 'follow') {
             followEvent(event);
         }
-        else if (event.type === 'unfollow' || event.message.text === '取消') {
+        else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             unfollowOrUnBoundEvent(event);
         }
-        else if (event.message.text === "功德") {
+        else if (event.message.text === "我的好杯幣") {
             getContributionEvent(event);
         }
-        else if (event.message.text === "使用") {
-            getRecordEvent(event);
+        else if (event.message.text === "使用中容器") {
+            getDataEvent(event, serviceProcess_1.DataType.Inused);
         }
-        else if (event.message.text === "QRcode") {
+        else if (event.message.text === "我的會員卡") {
             getQRCodeEvent(event);
         }
-        else if (event.message.text === "聯絡客服") {
+        else if (event.message.text === "聯絡好盒器") {
             getContactWayEvent(event);
         }
         else if (event.message.text === "綁定") {

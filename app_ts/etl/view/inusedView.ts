@@ -1,7 +1,7 @@
-import { View } from "./view"
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent } from "../models/flexMessage"
+import { View } from './view';
 import { DataType } from '../../models/serviceProcess';
-class RecordView implements View {
+class InusedView implements View {
     private header = headerTemplate();
     private separator = separatorTemplate();
     constructor() {
@@ -9,7 +9,7 @@ class RecordView implements View {
     }
     private headerText = {
         type: FlexMessage.ComponetType.text,
-        text: "歷史紀錄",
+        text: "使用中容器",
         size: FlexMessage.Size.xl,
         weight: FlexMessage.Weight.bold,
         color: "#ffffff"
@@ -19,20 +19,20 @@ class RecordView implements View {
         action: {
             type: "postback",
             label: "顯示更多",
-            data: String(DataType.GetMoreRecord),
+            data: String(DataType.GetMoreInused),
             displayText: "顯示更多"
         },
         style: "link",
         color: "#8FD5E8"
     };
 
-    private footerButton_getInused = {
+    private footerButton_getRecord = {
         type: FlexMessage.ComponetType.button,
         action: {
             type: "postback",
-            label: "查看使用中容器",
-            data: String(DataType.Inused),
-            displayText: "查看使用中容器"
+            label: "查看歷史紀錄",
+            data: String(DataType.Record),
+            displayText: "查看歷史紀錄"
         },
         style: "link",
         color: "#8FD5E8"
@@ -41,7 +41,7 @@ class RecordView implements View {
     private footer = {
         type: FlexMessage.ComponetType.box, 
         layout: FlexMessage.Layout.vertical,
-        contents:[this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getInused]
+        contents:[this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getRecord]
     };
 
     private styles = {
@@ -85,4 +85,5 @@ class RecordView implements View {
     }
 };
 
-export {RecordView};
+export {InusedView};
+

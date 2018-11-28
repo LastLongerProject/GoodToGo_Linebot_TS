@@ -1,5 +1,6 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const container_1 = require("../models/container");
 function header() {
     let header = {
         type: "box",
@@ -35,6 +36,65 @@ function separator() {
     };
 }
 exports.separatorTemplate = separator;
+function spacer() {
+    let spacer = {
+        type: "spacer",
+        size: FlexMessage.Size.md
+    };
+    function setSize(size) {
+        spacer.size = size;
+    }
+    function getSpacer() {
+        return spacer;
+    }
+    return {
+        setSize,
+        getSpacer
+    };
+}
+exports.spacerTemplate = spacer;
+function addTimeBar(date) {
+    return {
+        type: FlexMessage.ComponetType.text,
+        text: date,
+        size: FlexMessage.Size.md,
+        weight: FlexMessage.Weight.bold,
+        color: "#04B7E6"
+    };
+}
+exports.addTimeBar = addTimeBar;
+function getBodyContent(containerType, dateAndStore) {
+    return {
+        type: FlexMessage.ComponetType.box,
+        layout: FlexMessage.Layout.horizontal,
+        contents: [{
+                type: FlexMessage.ComponetType.image,
+                url: container_1.container[containerType].imageUrl,
+                size: FlexMessage.Size.xs,
+                gravity: FlexMessage.Gravity.center,
+                flex: 1
+            }, {
+                type: FlexMessage.ComponetType.text,
+                text: container_1.container[containerType].name,
+                size: FlexMessage.Size.md,
+                color: "#565656",
+                gravity: FlexMessage.Gravity.center,
+                align: FlexMessage.Align.start,
+                weight: FlexMessage.Weight.bold,
+                flex: 4
+            }, {
+                type: FlexMessage.ComponetType.text,
+                text: dateAndStore,
+                size: FlexMessage.Size.xs,
+                color: "#C0C0C8",
+                wrap: true,
+                gravity: FlexMessage.Gravity.bottom,
+                align: FlexMessage.Align.end,
+                flex: 5
+            }]
+    };
+}
+exports.getBodyContent = getBodyContent;
 function buttonStyle() {
     return {
         link: "link",

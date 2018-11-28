@@ -13,6 +13,7 @@ const customPromise_1 = require("../api/customPromise");
 const api_1 = require("../api/api");
 const container_1 = require("../etl/models/container");
 const recordView_1 = require("../etl/view/recordView");
+const inusedView_1 = require("../etl/view/inusedView");
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
@@ -50,62 +51,76 @@ var AddVerificationSignalState;
 (function (AddVerificationSignalState) {
     AddVerificationSignalState.SUCCESS = 'store signal successfully';
 })(AddVerificationSignalState = exports.AddVerificationSignalState || (exports.AddVerificationSignalState = {}));
-var GetRecordState;
-(function (GetRecordState) {
-    GetRecordState.GET_MORE = "getMoreRecord";
-})(GetRecordState = exports.GetRecordState || (exports.GetRecordState = {}));
-var GetRecordMethod;
-(function (GetRecordMethod) {
-    function spliceArrAndPush(list, splicedArr, pushedArr) {
-        for (var i = 0; i < list.length; i++) {
-            for (var j = splicedArr.length - 1; j >= 0; j--) {
-                var returnCycle = (typeof list[i].container.cycleCtr === 'undefined') ? 0 : list[i].container.cycleCtr;
-                if ((splicedArr[j].containerCode === list[i].container.id) && (splicedArr[j].cycle === returnCycle)) {
-                    splicedArr[j].returned = true;
-                    splicedArr[j].returnTime = list[i].tradeTime;
-                    splicedArr[j].cycle = undefined;
-                    pushedArr.push(splicedArr[j]);
-                    splicedArr.splice(j, 1);
+exports.DataType = Object.freeze({
+    "Record": 0,
+    "Inused": 1,
+    "GetMoreRecord": 2,
+    "GetMoreInused": 3
+});
+exports.RewardType = Object.freeze({
+    "Lottery": 4,
+    "Redeem": 5
+});
+var GetDataMethod;
+(function (GetDataMethod) {
+    function spliceArrAndPush(returnList, inUsed, returned) {
+        for (var i = 0; i < returnList.length; i++) {
+            for (var j = inUsed.length - 1; j >= 0; j--) {
+                var returnCycle = (typeof returnList[i].container.cycleCtr === 'undefined') ? 0 : returnList[i].container.cycleCtr;
+                if ((inUsed[j].containerCode === returnList[i].container.id) && (inUsed[j].cycle === returnCycle)) {
+                    inUsed[j].returned = true;
+                    inUsed[j].returnTime = returnList[i].tradeTime;
+                    inUsed[j].cycle = undefined;
+                    returned.push(inUsed[j]);
+                    inUsed.splice(j, 1);
                     break;
                 }
             }
         }
     }
-    GetRecordMethod.spliceArrAndPush = spliceArrAndPush;
-    function exportClientFlexMessage(recordCollection, event, getMore) {
+    GetDataMethod.spliceArrAndPush = spliceArrAndPush;
+    function exportClientFlexMessage(recordCollection, event, type) {
         return __awaiter(this, void 0, void 0, function* () {
             let MAX_DISPLAY_AMOUNT = 5;
-            let view = new recordView_1.RecordView();
-            console.log(view.getView().contents.body);
+            let view;
             var monthArray = Array();
-            var recordIndex;
-            if (getMore) {
-                recordIndex = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
-                recordIndex = recordIndex === null ? 0 : Number(recordIndex);
+            var index;
+            if (type === exports.DataType.GetMoreRecord) {
+                view = new recordView_1.RecordView();
+                index = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
+                index = index === null ? 0 : Number(index);
+            }
+            else if (type === exports.DataType.Record) {
+                view = new recordView_1.RecordView();
+                index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
+                index = 0;
+            }
+            else if (type === exports.DataType.Inused) {
+                view = new inusedView_1.InusedView();
+                index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', 0);
+                index = 0;
             }
             else {
-                recordIndex = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
-                recordIndex = 0;
+                view = new inusedView_1.InusedView();
+                index = yield redisClient_1.getAsync(event.source.userId + '_inusedIndex');
+                index = index === null ? 0 : Number(index);
             }
-            console.log(recordIndex);
-            let index = 0;
-            for (let i = recordIndex; i < (recordCollection.data.length > recordIndex + MAX_DISPLAY_AMOUNT ? recordIndex + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
+            let tempIndex = 0;
+            for (let i = index; i < (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT ? index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
                 if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                     monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                     if (isToday(recordCollection.data[i].time)) {
-                        if (i !== 0)
+                        if (i !== index)
                             view.pushSeparator();
                         view.pushTimeBar("今天");
                     }
                     else {
-                        if (i !== 0)
+                        if (i !== index)
                             view.pushSeparator();
-                        console.log(getYearAndMonthString(recordCollection.data[i].time));
-                        console.log(recordCollection.data[i].time);
                         view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
                     }
                 }
-                index += 1;
+                tempIndex += 1;
                 let type = recordCollection.data[i].type;
                 let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString :
                     type === 2 ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
@@ -114,12 +129,17 @@ var GetRecordMethod;
             if (view.getView().contents.body.contents.length === 0) {
                 view.pushBodyContent(container_1.container.nothing.toString, "期待您的使用！");
             }
-            redisClient_1.setAsync(event.source.userId + '_recordIndex', recordIndex + index);
+            if (type === exports.DataType.Record || type === exports.DataType.GetMoreRecord) {
+                redisClient_1.setAsync(event.source.userId + '_recordIndex', index + tempIndex);
+            }
+            else {
+                redisClient_1.setAsync(event.source.userId + '_inusedIndex', index + tempIndex);
+            }
             return customPromise_1.successPromise(view);
         });
     }
-    GetRecordMethod.exportClientFlexMessage = exportClientFlexMessage;
-})(GetRecordMethod || (GetRecordMethod = {}));
+    GetDataMethod.exportClientFlexMessage = exportClientFlexMessage;
+})(GetDataMethod || (GetDataMethod = {}));
 ContainerType.find({}, {}, {
     sort: {
         typeCode: 1
@@ -268,7 +288,7 @@ function deleteSignal(event) {
     redisClient_1.redisClient.del(event.source.userId);
 }
 exports.deleteSignal = deleteSignal;
-function getRecord(event, getMore) {
+function getRecord(event, type) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
@@ -302,12 +322,17 @@ function getRecord(event, getMore) {
             }).exec();
             returnList.sort(function (a, b) { return b.tradeTime - a.tradeTime; });
             recordCollection['usingAmount'] -= returnList.length;
-            GetRecordMethod.spliceArrAndPush(returnList, inUsed, returned);
-            recordCollection['data'] = inUsed;
-            for (var i = 0; i < returned.length; i++) {
-                recordCollection['data'].push(returned[i]);
+            GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
+            if (type === exports.DataType.Record || type === exports.DataType.GetMoreRecord) {
+                recordCollection['data'] = [];
+                for (var i = 0; i < returned.length; i++) {
+                    recordCollection['data'].push(returned[i]);
+                }
             }
-            let view = yield GetRecordMethod.exportClientFlexMessage(recordCollection, event, getMore);
+            else {
+                recordCollection['data'] = inUsed;
+            }
+            let view = yield GetDataMethod.exportClientFlexMessage(recordCollection, event, type);
             return customPromise_1.successPromise(view);
         }
         catch (err) {
