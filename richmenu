@@ -93,7 +93,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
                                                   "data": "聯絡好盒器"
 
         }}]}'
-formal:richmenu-66897107a58eed7f3fb27f7051937ac7
+formal:richmenu-3fadedf3308f9fa5173bdf5a9f93adda
 testrichmenu-70099967387ac62058de8608e18dd06e
 
 curl -v -X POST https://api.line.me/v2/bot/richmenu \
@@ -153,7 +153,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
 formal: richmenu-2c93cc00b1c56640a2caa06580dac8f4
 test: richmenu-045d8521e7145722379d9de15f6be215
 
-curl -v -X POST https://api.line.me/v2/bot/richmenu/richmenu-66897107a58eed7f3fb27f7051937ac7/content \
+curl -v -X POST https://api.line.me/v2/bot/richmenu/richmenu-3fadedf3308f9fa5173bdf5a9f93adda/content \
 -H "Authorization: Bearer {gxS3/xEi58GEq7dF+m1Fw47WRw+Jmwm+lXfd9Z/dBJVET3mmfJu5mdF6mPYpH4D6frASHurqDUEsWkg6SXaJSuvf3BmoBIV0yMVfyZior38v7zlyV4Gnqqp0lIaoB545Q0l2Bx28bX1M0CaXNNZDfwdB04t89/1O/w1cDnyilFU=}" \
 -H "Content-Type: image/jpeg" \
 -T image.jpg

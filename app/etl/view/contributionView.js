@@ -35,7 +35,7 @@ class ContrubtionView {
         };
         this.bodyImage = {
             type: flexMessage_1.FlexMessage.ComponetType.image,
-            url: "https://imgur.com/YZqrKDC.png",
+            url: "https://imgur.com/xunv0i4.png",
             size: "full"
         };
         this.styles = {
@@ -52,26 +52,32 @@ class ContrubtionView {
             spacing: flexMessage_1.FlexMessage.Spacing.lg,
             contents: Array()
         };
+        this.hero = {
+            type: flexMessage_1.FlexMessage.ComponetType.image,
+            url: "https://imgur.com/xunv0i4.png",
+            size: "full",
+            aspectMode: "cover"
+        };
         this.view = {
             type: flexMessage_1.FlexMessage.Container.bubble,
-            body: this.body,
+            hero: this.hero,
             footer: this.footer,
             styles: this.styles
         };
         this.separator.setMargin(flexMessage_1.FlexMessage.Margin.none);
-        this.view.body.contents.push(this.bodyImage);
+        // this.view.body.contents.push(this.bodyImage);
     }
     pushBodyContent(data) {
-        this.view.body.contents.push(data);
+        // this.view.body.contents.push(data);
     }
     pushTimeBar(label) {
-        this.view.body.contents.push(flexMessage_1.addTimeBar(label));
+        // this.view.body.contents.push(addTimeBar(label));
     }
     pushSeparator() {
-        this.view.body.contents.push(this.separator.getSeparator());
+        // this.view.body.contents.push(this.separator.getSeparator());
     }
     pushSpacer() {
-        this.view.body.contents.push(this.spacer.getSpacer());
+        // this.view.body.contents.push(this.spacer.getSpacer());
     }
     getView() {
         return {
