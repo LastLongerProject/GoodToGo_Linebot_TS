@@ -24,7 +24,7 @@ import { isMobilePhone } from '../api/api';
 import { ContrubtionView } from "../etl/view/contributionView";
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
-
+const richMenu = require('../api/richMenuScript');
 
 
 function isVerificationCode(code: string): boolean {
@@ -61,6 +61,7 @@ async function unfollowOrUnBoundEvent(event: any): Promise<any> {
 
     try {
         deleteBinding(event);
+        richMenu.bindRichmenuToUser("before", event.source.userId);
         const message = '已取消綁定'
         return client.textMessage(event, message);
     } catch (err) {
@@ -140,10 +141,11 @@ async function bindingEvent(event: any): Promise<any> {
                 return client.textMessage(event, message);
             case BindState.SUCCESS:
                 message = "綁定成功！";
+                richMenu.bindRichmenuToUser("after", event.source.userId);
                 return client.textMessage(event, message);
             case BindState.IS_NOT_MOBILEPHONE:
                 message = "請輸入要綁定的手機號碼！";
-                return client.textMessage(event, message);
+                return client.textMessage(event, message); 
         }
     } catch (err) {
         logFactory.error(err);  
@@ -195,7 +197,7 @@ module.exports = {
         } else if (event.message.text === "聯絡好盒器") {
             getContactWayEvent(event);
             
-        } else if (event.message.text === "綁定") {
+        } else if (event.message.text === "綁定手機") {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
         } else if (event.message.text === "註冊") {
