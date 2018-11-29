@@ -22,6 +22,7 @@ const customPromise_1 = require("../api/customPromise");
 const api_1 = require("../api/api");
 const contributionView_1 = require("../etl/view/contributionView");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
+const richMenu = require('../api/richMenuScript');
 function isVerificationCode(code) {
     var reg = /[0-9]{6}/;
     var res = reg.test(code);
@@ -59,6 +60,7 @@ function unfollowOrUnBoundEvent(event) {
             logFactory.log('Event: delete bind');
         try {
             serviceProcess_1.deleteBinding(event);
+            richMenu.bindRichmenuToUser("before", event.source.userId);
             const message = '已取消綁定';
             return client.textMessage(event, message);
         }
@@ -144,6 +146,7 @@ function bindingEvent(event) {
                     return client.textMessage(event, message);
                 case serviceProcess_1.BindState.SUCCESS:
                     message = "綁定成功！";
+                    richMenu.bindRichmenuToUser("after", event.source.userId);
                     return client.textMessage(event, message);
                 case serviceProcess_1.BindState.IS_NOT_MOBILEPHONE:
                     message = "請輸入要綁定的手機號碼！";
@@ -201,7 +204,7 @@ module.exports = {
         else if (event.message.text === "聯絡好盒器") {
             getContactWayEvent(event);
         }
-        else if (event.message.text === "綁定") {
+        else if (event.message.text === "綁定手機") {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
         }

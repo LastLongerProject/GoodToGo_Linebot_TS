@@ -1,5 +1,5 @@
 curl -v -X POST https://api.line.me/v2/bot/richmenu \
--H 'Authorization: Bearer {JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU=}' \
+-H 'Authorization: Bearer {gxS3/xEi58GEq7dF+m1Fw47WRw+Jmwm+lXfd9Z/dBJVET3mmfJu5mdF6mPYpH4D6frASHurqDUEsWkg6SXaJSuvf3BmoBIV0yMVfyZior38v7zlyV4Gnqqp0lIaoB545Q0l2Bx28bX1M0CaXNNZDfwdB04t89/1O/w1cDnyilFU=}' \
 -H 'Content-Type: application/json' \
 -d \
 '{
@@ -93,24 +93,81 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
                                                   "data": "聯絡好盒器"
 
         }}]}'
+formal:richmenu-66897107a58eed7f3fb27f7051937ac7
+testrichmenu-70099967387ac62058de8608e18dd06e
 
-richmenu-70099967387ac62058de8608e18dd06e
+curl -v -X POST https://api.line.me/v2/bot/richmenu \
+-H 'Authorization: Bearer {gxS3/xEi58GEq7dF+m1Fw47WRw+Jmwm+lXfd9Z/dBJVET3mmfJu5mdF6mPYpH4D6frASHurqDUEsWkg6SXaJSuvf3BmoBIV0yMVfyZior38v7zlyV4Gnqqp0lIaoB545Q0l2Bx28bX1M0CaXNNZDfwdB04t89/1O/w1cDnyilFU=}' \
+-H 'Content-Type: application/json' \
+-d \
+'{
+    "size": {
+      "width": 2500,
+      "height": 1686
+    },
+    "selected": false,
+    "name": "test menu",
+    "chatBarText": "Tap here",
+    "areas": [
+      {
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1666,
+          "height": 1686
+        },
+        "action": {
+          "type": "postback",
+          "text": "綁定手機",
+                    "data": "綁定手機"
 
-curl -v -X POST https://api.line.me/v2/bot/richmenu/{richmenu-70099967387ac62058de8608e18dd06e}/content \
--H "Authorization: Bearer {JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU=}" \
+        }
+      },
+ {
+        "bounds": {
+          "x": 1668,
+          "y": 0,
+          "width": 832,
+          "height": 842
+        },
+        "action": {
+          "type": "postback",
+          "text": "哪裡有好盒器",
+          "data": "哪裡有好盒器"
+        }
+      },
+ {
+        "bounds": {
+          "x": 1668,
+          "y": 844,
+          "width": 832,
+          "height": 842
+        },
+        "action": {
+          "type": "postback",
+          "text": "聯絡好盒器",
+                    "data": "聯絡好盒器"
+
+        }
+      }]}'
+formal: richmenu-2c93cc00b1c56640a2caa06580dac8f4
+test: richmenu-045d8521e7145722379d9de15f6be215
+
+curl -v -X POST https://api.line.me/v2/bot/richmenu/richmenu-66897107a58eed7f3fb27f7051937ac7/content \
+-H "Authorization: Bearer {gxS3/xEi58GEq7dF+m1Fw47WRw+Jmwm+lXfd9Z/dBJVET3mmfJu5mdF6mPYpH4D6frASHurqDUEsWkg6SXaJSuvf3BmoBIV0yMVfyZior38v7zlyV4Gnqqp0lIaoB545Q0l2Bx28bX1M0CaXNNZDfwdB04t89/1O/w1cDnyilFU=}" \
 -H "Content-Type: image/jpeg" \
 -T image.jpg
 
 curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{richmenu-70099967387ac62058de8608e18dd06e} \
 -H "Authorization: Bearer {JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU=}"
 
-curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/richmenu-70099967387ac62058de8608e18dd06e \
--H "Authorization: Bearer JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU="
+curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/richmenu-2c93cc00b1c56640a2caa06580dac8f4 \
+-H "Authorization: Bearer gxS3/xEi58GEq7dF+m1Fw47WRw+Jmwm+lXfd9Z/dBJVET3mmfJu5mdF6mPYpH4D6frASHurqDUEsWkg6SXaJSuvf3BmoBIV0yMVfyZior38v7zlyV4Gnqqp0lIaoB545Q0l2Bx28bX1M0CaXNNZDfwdB04t89/1O/w1cDnyilFU="
 
 curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{richmenu-70099967387ac62058de8608e18dd06e} \
 -H 'Authorization: Bearer {JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU=}'
 
-curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{richmenu-70099967387ac62058de8608e18dd06e} \
+curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{ricmenu-70099967387ac62058de8608e18dd06e}h \
 -H 'Authorization: Bearer {JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU=}'
 
 curl -v -X DELETE https://api.line.me/v2/bot/user/all/richmenu \
