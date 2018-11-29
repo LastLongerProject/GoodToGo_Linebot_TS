@@ -44,6 +44,15 @@ function returnQrcode(event, phone) {
     return returnFlexMessage(event, flex);
 }
 exports.getQrcode = returnQrcode;
+function returnCustomObject(event, obj) {
+    return client.replyMessage(event.replyToken, obj).catch((err) => {
+        if (err) {
+            logFactory.error(JSON.stringify(err.originalError.response.config.data));
+            logFactory.error(JSON.stringify(err.originalError.response.data));
+        }
+    });
+}
+exports.customMessage = returnCustomObject;
 function registerTemplate(event, message) {
     return client.replyMessage(event.replyToken, {
         type: "template",

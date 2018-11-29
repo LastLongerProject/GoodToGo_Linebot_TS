@@ -21,6 +21,8 @@ const request = __importStar(require("../api/request"));
 const customPromise_1 = require("../api/customPromise");
 const api_1 = require("../api/api");
 const contributionView_1 = require("../etl/view/contributionView");
+const serviceProcess_2 = require("../models/serviceProcess");
+const flexMessage_1 = require("../etl/models/flexMessage");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
 function isVerificationCode(code) {
@@ -42,8 +44,11 @@ function postbackAction(event) {
             let message = "期待您成為好合器會員！";
             return client.textMessage(event, message);
         }
-        else if (postbackData === serviceProcess_1.DataType.GetMoreInused || postbackData === serviceProcess_1.DataType.Inused || postbackData === serviceProcess_1.DataType.Record || postbackData === serviceProcess_1.DataType.GetMoreRecord) {
+        else if (Number(postbackData) === serviceProcess_1.DataType.GetMoreInused || Number(postbackData) === serviceProcess_1.DataType.Inused || Number(postbackData) === serviceProcess_1.DataType.Record || Number(postbackData) === serviceProcess_1.DataType.GetMoreRecord) {
             return getDataEvent(event, Number(postbackData));
+        }
+        else if (Number(postbackData) === serviceProcess_2.RewardType.Lottery || Number(postbackData) === serviceProcess_2.RewardType.Redeem) {
+            return getRewardImage(event, Number(postbackData));
         }
     });
 }
@@ -102,6 +107,17 @@ function getDataEvent(event, type) {
             logFactory.error(err);
         }
     });
+}
+function getRewardImage(event, type) {
+    let lotteryImage = "https://i.imgur.com/MwljlRm.jpg";
+    let redeemImgae = "https://imgur.com/l2xiXxb.jpg";
+    let url = type === serviceProcess_2.RewardType.Lottery ? lotteryImage : redeemImgae;
+    let image = {
+        type: flexMessage_1.FlexMessage.ComponetType.image,
+        originalContentUrl: url,
+        previewImageUrl: url
+    };
+    return client.customMessage(event, image);
 }
 function getQRCodeEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {

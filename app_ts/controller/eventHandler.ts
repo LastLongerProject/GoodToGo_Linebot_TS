@@ -22,6 +22,8 @@ import * as request from "../api/request";
 import { failPromise } from "../api/customPromise";
 import { isMobilePhone } from '../api/api';
 import { ContrubtionView } from "../etl/view/contributionView";
+import { RewardType } from '../models/serviceProcess';
+import { FlexMessage } from "../etl/models/flexMessage";
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
@@ -43,8 +45,10 @@ async function postbackAction(event: any): Promise<any> {
     } else if (postbackData === client.registerWilling.NO) {
         let message = "期待您成為好合器會員！"
         return client.textMessage(event, message);
-    } else if (postbackData === DataType.GetMoreInused || postbackData === DataType.Inused || postbackData === DataType.Record || postbackData === DataType.GetMoreRecord ) {
+    } else if (Number(postbackData) === DataType.GetMoreInused || Number(postbackData) === DataType.Inused || Number(postbackData) === DataType.Record || Number(postbackData) === DataType.GetMoreRecord ) {
         return getDataEvent(event, Number(postbackData));
+    } else if (Number(postbackData) === RewardType.Lottery || Number(postbackData) === RewardType.Redeem) {
+        return getRewardImage(event, Number(postbackData));
     }
 }
 
@@ -98,6 +102,19 @@ async function getDataEvent(event: any, type): Promise<any> {
     } catch (err) {
         logFactory.error(err);
     }
+}
+
+function getRewardImage(event, type) {
+    let lotteryImage = "https://i.imgur.com/MwljlRm.jpg";
+    let redeemImgae = "https://imgur.com/l2xiXxb.jpg";
+    let url = type === RewardType.Lottery ? lotteryImage : redeemImgae;
+    let image = {
+        type: FlexMessage.ComponetType.image,
+        originalContentUrl: url,
+        previewImageUrl: url
+    }
+
+    return client.customMessage(event, image);    
 }
 
 async function getQRCodeEvent(event: any): Promise<any> { 

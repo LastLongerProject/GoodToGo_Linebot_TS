@@ -58,6 +58,15 @@ function returnQrcode(event, phone: string) {
     return returnFlexMessage(event, flex);
 }
 
+function returnCustomObject(event, obj) {
+    return client.replyMessage(event.replyToken, obj).catch((err) => {
+        if (err) {
+            logFactory.error(JSON.stringify(err.originalError.response.config.data));
+            logFactory.error(JSON.stringify(err.originalError.response.data));
+        }
+    });
+}
+
 function registerTemplate(event, message) {
     return client.replyMessage(event.replyToken, {
         type: "template",
@@ -94,5 +103,6 @@ export  {
     returnTextMessage as textMessage,
     returnQrcode as getQrcode,
     registerTemplate as registerTemplate,
-    returnFlexMessage as flexMessage
+    returnFlexMessage as flexMessage,
+    returnCustomObject as customMessage
 }
