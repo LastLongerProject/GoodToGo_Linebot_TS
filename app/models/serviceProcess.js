@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const redisClient_1 = require("./db/redisClient");
 const customPromise_1 = require("../api/customPromise");
-const api_1 = require("../api/api");
+const tool_1 = require("../api/tool");
 const container_1 = require("../etl/models/container");
 const recordView_1 = require("../etl/view/recordView");
 const inusedView_1 = require("../etl/view/inusedView");
@@ -25,7 +25,7 @@ var containerTypeDict;
 var storeDict;
 var BindState;
 (function (BindState) {
-    BindState.SUCCESS = 'Successfully bound with line', BindState.HAS_BOUND = 'This phone has bound with line', BindState.LINE_HAS_BOUND = 'Line has bound with another phone', BindState.IS_NOT_MOBILEPHONE = "The input is not mobile phone";
+    BindState.SUCCESS = 'Successfully bound with line', BindState.HAS_BOUND = 'This phone has bound with line', BindState.LINE_HAS_BOUND = 'Line has bound with another phone', BindState.IS_NOT_MOBILEPHONE = 'The input is not mobile phone';
 })(BindState = exports.BindState || (exports.BindState = {}));
 var DeleteBindState;
 (function (DeleteBindState) {
@@ -52,22 +52,25 @@ var AddVerificationSignalState;
     AddVerificationSignalState.SUCCESS = 'store signal successfully';
 })(AddVerificationSignalState = exports.AddVerificationSignalState || (exports.AddVerificationSignalState = {}));
 exports.DataType = Object.freeze({
-    "Record": 0,
-    "Inused": 1,
-    "GetMoreRecord": 2,
-    "GetMoreInused": 3
+    Record: 0,
+    Inused: 1,
+    GetMoreRecord: 2,
+    GetMoreInused: 3,
 });
 exports.RewardType = Object.freeze({
-    "Lottery": 4,
-    "Redeem": 5
+    Lottery: 4,
+    Redeem: 5,
 });
 var GetDataMethod;
 (function (GetDataMethod) {
     function spliceArrAndPush(returnList, inUsed, returned) {
         for (var i = 0; i < returnList.length; i++) {
             for (var j = inUsed.length - 1; j >= 0; j--) {
-                var returnCycle = (typeof returnList[i].container.cycleCtr === 'undefined') ? 0 : returnList[i].container.cycleCtr;
-                if ((inUsed[j].containerCode === returnList[i].container.id) && (inUsed[j].cycle === returnCycle)) {
+                var returnCycle = typeof returnList[i].container.cycleCtr === 'undefined'
+                    ? 0
+                    : returnList[i].container.cycleCtr;
+                if (inUsed[j].containerCode === returnList[i].container.id &&
+                    inUsed[j].cycle === returnCycle) {
                     inUsed[j].returned = true;
                     inUsed[j].returnTime = returnList[i].tradeTime;
                     inUsed[j].cycle = undefined;
@@ -106,13 +109,16 @@ var GetDataMethod;
                 index = index === null ? 0 : Number(index);
             }
             let tempIndex = 0;
-            for (let i = index; i < (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT ? index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
+            for (let i = index; i <
+                (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT
+                    ? index + MAX_DISPLAY_AMOUNT
+                    : recordCollection.data.length); i++) {
                 if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                     monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                     if (isToday(recordCollection.data[i].time)) {
                         if (i !== index)
                             view.pushSeparator();
-                        view.pushTimeBar("今天");
+                        view.pushTimeBar('今天');
                     }
                     else {
                         if (i !== index)
@@ -122,12 +128,21 @@ var GetDataMethod;
                 }
                 tempIndex += 1;
                 let type = recordCollection.data[i].type;
-                let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString :
-                    type === 2 ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
-                view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) + "\n" + recordCollection.data[i].store);
+                let containerType = type === 0
+                    ? container_1.container.glass_12oz.toString
+                    : type === 7
+                        ? container_1.container.bowl.toString
+                        : type === 2
+                            ? container_1.container.plate.toString
+                            : type === 4
+                                ? container_1.container.icecream.toString
+                                : container_1.container.glass_16oz.toString;
+                view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) +
+                    '\n' +
+                    recordCollection.data[i].store);
             }
             if (view.getView().contents.body.contents.length === 0) {
-                view.pushBodyContent(container_1.container.nothing.toString, "期待您的使用！");
+                view.pushBodyContent(container_1.container.nothing.toString, '期待您的使用！');
             }
             if (type === exports.DataType.Record || type === exports.DataType.GetMoreRecord) {
                 redisClient_1.setAsync(event.source.userId + '_recordIndex', index + tempIndex);
@@ -142,21 +157,25 @@ var GetDataMethod;
 })(GetDataMethod || (GetDataMethod = {}));
 ContainerType.find({}, {}, {
     sort: {
-        typeCode: 1
-    }
-}).then(docs => {
+        typeCode: 1,
+    },
+})
+    .then(docs => {
     containerTypeDict = docs;
-}).catch(err => logFactory.error(err));
+})
+    .catch(err => logFactory.error(err));
 PlaceID.find({}, {}, {
     sort: {
-        ID: 1
-    }
-}).then(docs => {
+        ID: 1,
+    },
+})
+    .then(docs => {
     storeDict = docs;
-}).catch(err => logFactory.error(err));
+})
+    .catch(err => logFactory.error(err));
 function bindLineId(event, phone) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!api_1.isMobilePhone(phone))
+        if (!tool_1.isMobilePhone(phone))
             return customPromise_1.successPromise(BindState.IS_NOT_MOBILEPHONE);
         var dbUser = yield User.findOne({ 'user.phone': phone }).exec();
         if (!dbUser) {
@@ -191,7 +210,9 @@ exports.bindLineId = bindLineId;
 function deleteBinding(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
+            const dbUser = yield User.findOne({
+                'user.lineId': event.source.userId,
+            }).exec();
             if (!dbUser) {
                 logFactory.log(DeleteBindState.LINE_HAS_NOT_BOUND);
                 return customPromise_1.successPromise(DeleteBindState.LINE_HAS_NOT_BOUND);
@@ -216,7 +237,9 @@ exports.deleteBinding = deleteBinding;
 function getQrcode(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            var dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
+            var dbUser = yield User.findOne({
+                'user.lineId': event.source.userId,
+            }).exec();
             if (!dbUser) {
                 logFactory.log(DatabaseState.USER_NOT_FOUND);
                 return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
@@ -235,7 +258,9 @@ exports.getQrcode = getQrcode;
 function getContribution(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            var dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
+            var dbUser = yield User.findOne({
+                'user.lineId': event.source.userId,
+            }).exec();
             if (!dbUser) {
                 logFactory.log(DatabaseState.USER_NOT_FOUND);
                 return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
@@ -243,7 +268,7 @@ function getContribution(event) {
             else {
                 var amount = yield Trade.count({
                     'tradeType.action': 'Rent',
-                    'newUser.phone': dbUser.user.phone
+                    'newUser.phone': dbUser.user.phone,
                 }).exec();
                 return customPromise_1.successPromise(amount);
             }
@@ -291,7 +316,9 @@ exports.deleteSignal = deleteSignal;
 function getRecord(event, type) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
+            let dbUser = yield User.findOne({
+                'user.lineId': event.source.userId,
+            }).exec();
             if (!dbUser)
                 return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
             var returned = [];
@@ -299,7 +326,7 @@ function getRecord(event, type) {
             var recordCollection = {};
             const rentList = yield Trade.find({
                 'tradeType.action': 'Rent',
-                'newUser.phone': dbUser.user.phone
+                'newUser.phone': dbUser.user.phone,
             }).exec();
             rentList.sort(function (a, b) {
                 return b.tradeTime - a.tradeTime;
@@ -311,16 +338,20 @@ function getRecord(event, type) {
                     time: rentList[i].tradeTime,
                     type: rentList[i].container.typeCode,
                     store: storeDict[rentList[i].oriUser.storeID].name,
-                    cycle: (rentList[i].container.cycleCtr === undefined) ? 0 : rentList[i].container.cycleCtr,
-                    return: false
+                    cycle: rentList[i].container.cycleCtr === undefined
+                        ? 0
+                        : rentList[i].container.cycleCtr,
+                    return: false,
                 };
                 inUsed.push(record);
             }
             const returnList = yield Trade.find({
                 'tradeType.action': 'Return',
-                "oriUser.phone": dbUser.user.phone
+                'oriUser.phone': dbUser.user.phone,
             }).exec();
-            returnList.sort(function (a, b) { return b.tradeTime - a.tradeTime; });
+            returnList.sort(function (a, b) {
+                return b.tradeTime - a.tradeTime;
+            });
             recordCollection['usingAmount'] -= returnList.length;
             GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
             if (type === exports.DataType.Record || type === exports.DataType.GetMoreRecord) {
@@ -345,10 +376,18 @@ exports.getRecord = getRecord;
 function getTimeString(DateObject) {
     var tmpHour = DateObject.getHours() + 8;
     var dayFormatted = intReLength(dayFormatter(DateObject), 2);
-    var monthFormatted = intReLength((DateObject.getMonth() + 1), 2);
-    var hoursFormatted = intReLength((tmpHour >= 24) ? tmpHour - 24 : tmpHour, 2);
+    var monthFormatted = intReLength(DateObject.getMonth() + 1, 2);
+    var hoursFormatted = intReLength(tmpHour >= 24 ? tmpHour - 24 : tmpHour, 2);
     var minutesFormatted = intReLength(DateObject.getMinutes(), 2);
-    return DateObject.getFullYear() + "/" + monthFormatted + "/" + dayFormatted + " " + hoursFormatted + ":" + minutesFormatted;
+    return (DateObject.getFullYear() +
+        '/' +
+        monthFormatted +
+        '/' +
+        dayFormatted +
+        ' ' +
+        hoursFormatted +
+        ':' +
+        minutesFormatted);
 }
 function dayFormatter(dateToFormat) {
     if (dateToFormat.getHours() >= 16)
@@ -359,17 +398,22 @@ function intReLength(data, length) {
     var str = data.toString();
     if (length - str.length) {
         for (let j = 0; j <= length - str.length; j++) {
-            str = "0" + str;
+            str = '0' + str;
         }
     }
     return str;
 }
 function getYearAndMonthString(DateObject) {
-    return DateObject.getFullYear().toString() + "年" + (DateObject.getMonth() + 1).toString() + "月";
+    return (DateObject.getFullYear().toString() +
+        '年' +
+        (DateObject.getMonth() + 1).toString() +
+        '月');
 }
 function isToday(d) {
     let today = new Date();
-    if (d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDay() === today.getDay()) {
+    if (d.getFullYear() === today.getFullYear() &&
+        d.getMonth() === today.getMonth() &&
+        d.getDay() === today.getDay()) {
         return true;
     }
     return false;

@@ -1,14 +1,14 @@
 const logFactory = require('debug');
 
-module.exports = function log(namespace) {
+export function log(namespace) {
     const log = logFactory(namespace);
     const error = logFactory(namespace);
-    log.log = function(...args) {
-        console.log(...args);
+    log.log = function (...args: Array<any>) {
+        console.log(...args[Symbol.iterator]);
     };
 
     return {
         log,
-        error
+        error,
     };
-}
+};

@@ -20,14 +20,14 @@ import {
 import * as client from './clientDelegate';
 import * as request from "../api/request";
 import { failPromise } from "../api/customPromise";
-import { isMobilePhone } from '../api/api';
+import { isMobilePhone } from '../api/tool';
 import { ContrubtionView } from "../etl/view/contributionView";
 import { RewardType } from '../models/serviceProcess';
 import { FlexMessage } from "../etl/models/flexMessage";
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
-
+ 
 
 function isVerificationCode(code: string): boolean {
     var reg: RegExp = /[0-9]{6}/;

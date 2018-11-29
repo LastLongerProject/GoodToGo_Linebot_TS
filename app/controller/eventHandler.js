@@ -19,7 +19,7 @@ const serviceProcess_1 = require("../models/serviceProcess");
 const client = __importStar(require("./clientDelegate"));
 const request = __importStar(require("../api/request"));
 const customPromise_1 = require("../api/customPromise");
-const api_1 = require("../api/api");
+const tool_1 = require("../api/tool");
 const contributionView_1 = require("../etl/view/contributionView");
 const serviceProcess_2 = require("../models/serviceProcess");
 const flexMessage_1 = require("../etl/models/flexMessage");
@@ -36,7 +36,7 @@ function isVerificationCode(code) {
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
-        if (api_1.isMobilePhone(postbackData)) {
+        if (tool_1.isMobilePhone(postbackData)) {
             logFactory.log(postbackData);
             return request.register(event, postbackData);
         }
@@ -182,7 +182,7 @@ function verificateEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield serviceProcess_1.findSignal(event);
-            if (api_1.isMobilePhone(result)) {
+            if (tool_1.isMobilePhone(result)) {
                 request.verificate(event, result);
             }
         }
@@ -227,7 +227,7 @@ module.exports = {
         else if (event.message.text === "註冊") {
             registerEvent(event);
         }
-        else if (api_1.isMobilePhone(event.message.text)) {
+        else if (tool_1.isMobilePhone(event.message.text)) {
             bindingEvent(event);
         }
         else if (isVerificationCode(event.message.text)) {
