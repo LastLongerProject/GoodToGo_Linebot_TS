@@ -21,19 +21,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const request_1 = __importDefault(require("request"));
 const client = __importStar(require("../controller/clientDelegate"));
 const serviceProcess_1 = require("../models/serviceProcess");
+const tool_1 = require("./tool");
 const logFactory = require('./logFactory.js')('linebot:request');
 var RegisterState;
 (function (RegisterState) {
     RegisterState.SUCCESS = 'register success', RegisterState.IN_VERIFICATION = 'wait for verification', RegisterState.SERVER_ERROR = 'server error';
 })(RegisterState = exports.RegisterState || (exports.RegisterState = {}));
-function randomHexString(amount) {
-    var text = '';
-    var charSet = "0123456789ABCDEF";
-    for (var i = 0; i < amount; i++) {
-        text += charSet.charAt(Math.floor(Math.random() * charSet.length));
-    }
-    return text;
-}
 function register(event, phone) {
     return __awaiter(this, void 0, void 0, function* () {
         const requestObject = {
@@ -42,13 +35,13 @@ function register(event, phone) {
             json: true,
             headers: {
                 'User-Agent': 'goodtogo_linebot',
-                'reqID': randomHexString(10),
-                'reqTime': Date.now()
+                reqID: tool_1.randomHexString(10),
+                reqTime: Date.now(),
             },
             body: {
                 phone: phone,
-                password: ""
-            }
+                password: '',
+            },
         };
         request_1.default(requestObject, (error, response, body) => {
             if (error)
@@ -56,15 +49,17 @@ function register(event, phone) {
             if (response.body.code === undefined) {
                 logFactory.log(body);
                 const message = "已寄簡訊認證到您的手機囉！\n請輸入收到的驗證碼～\n若想取消請輸入'否'\n(驗證將在 3 分鐘後過期)";
-                return serviceProcess_1.addVerificationSignal(event, phone).then(res => {
+                return serviceProcess_1.addVerificationSignal(event, phone)
+                    .then(res => {
                     client.textMessage(event, message);
-                }).catch(err => {
+                })
+                    .catch(err => {
                     client.textMessage(event, '伺服器出現錯誤\n請向好合器反應或稍後再試');
                     logFactory.error(err);
                 });
             }
             logFactory.error('fail code is: ' + response.body.code);
-            const message = "伺服器出現問題\n請稍後再試";
+            const message = '伺服器出現問題\n請稍後再試';
             return client.textMessage(event, message);
         });
     });
@@ -78,14 +73,14 @@ function verificate(event, phone) {
             json: true,
             headers: {
                 'User-Agent': 'goodtogo_linebot',
-                'reqID': randomHexString(10),
-                'reqTime': Date.now()
+                reqID: tool_1.randomHexString(10),
+                reqTime: Date.now(),
             },
             body: {
                 phone: phone,
-                password: "",
-                verification_code: event.message.text
-            }
+                password: '',
+                verification_code: event.message.text,
+            },
         };
         request_1.default(requestObject, (error, response, body) => {
             if (error)
@@ -93,14 +88,17 @@ function verificate(event, phone) {
             if (response.body.code === undefined) {
                 serviceProcess_1.deleteSignal(event);
                 serviceProcess_1.bindLineId(event, phone);
-                const message = "恭喜您成為好合器會員囉！";
+                const message = '恭喜您成為好合器會員囉！';
                 return client.textMessage(event, message);
             }
             logFactory.error('fail code is: ' + response.body.code);
-            const message = "伺服器出現問題\n請稍後再試";
+            const message = '伺服器出現問題\n請稍後再試';
             return client.textMessage(event, message);
         });
     });
 }
 exports.verificate = verificate;
+function request_module(resquestObject, callback) {
+    request_1.default(resquestObject, callback);
+}
 //# sourceMappingURL=request.js.map

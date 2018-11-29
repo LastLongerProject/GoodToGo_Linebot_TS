@@ -1,4 +1,4 @@
-const logFactory = require('debug');
+﻿const logFactory = require('debug');
 
 module.exports = function log(namespace) {
     const log = logFactory(namespace);
@@ -9,6 +9,6 @@ module.exports = function log(namespace) {
 
     return {
         log,
-        error
+        error,
     };
-}
+};
