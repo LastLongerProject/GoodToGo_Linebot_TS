@@ -4,7 +4,7 @@ import * as bodyParser from 'body-parser';
 import { RewardType } from "../../models/serviceProcess";
 class ContrubtionView implements View {
     private separator = separatorTemplate();
-    private spacer = spacerTemplate()
+    private spacer = spacerTemplate();
     private footerButton_lottery = {
         type: FlexMessage.ComponetType.button,
         action: {
