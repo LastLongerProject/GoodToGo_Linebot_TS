@@ -227,9 +227,6 @@ module.exports = {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
         }
-        else if (event.message.text === "註冊") {
-            registerEvent(event);
-        }
         else if (tool_1.isMobilePhone(event.message.text)) {
             bindingEvent(event);
         }
