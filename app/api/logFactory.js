@@ -1,14 +1,14 @@
-﻿const logFactory = require('debug');
-
+﻿"use strict";
+var factory = require('debug');
 module.exports = function log(namespace) {
-    const log = logFactory(namespace);
-    const error = logFactory(namespace);
-    log.log = function(...args) {
-        console.log(...args);
+    const log = factory(namespace);
+    const error = factory(namespace);
+    log.log = function (...args) {
+        console.log(...args[Symbol.iterator]());
     };
-
     return {
         log,
         error,
     };
 };
+//# sourceMappingURL=logFactory.js.map
