@@ -217,8 +217,6 @@ module.exports = {
         } else if (event.message.text === "綁定手機") {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
-        } else if (event.message.text === "註冊") {
-            registerEvent(event);
         } else if (isMobilePhone(event.message.text)) {
             bindingEvent(event);
         } else if (isVerificationCode(event.message.text)) {
