@@ -23,6 +23,7 @@ const tool_1 = require("../api/tool");
 const contributionView_1 = require("../etl/view/contributionView");
 const serviceProcess_2 = require("../models/serviceProcess");
 const flexMessage_1 = require("../etl/models/flexMessage");
+const qrcodeView_1 = require("../etl/view/qrcodeView");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
 function isVerificationCode(code) {
@@ -128,8 +129,10 @@ function getQRCodeEvent(event) {
                 let message = '請輸入手機號碼以綁定 line id';
                 return client.textMessage(event, message);
             }
-            else
-                return client.getQrcode(event, result);
+            else {
+                let view = new qrcodeView_1.QrcodeView(result);
+                return client.flexMessage(event, view.getView());
+            }
         }
         catch (err) {
             logFactory.error(err);
