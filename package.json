@@ -61,7 +61,7 @@
     },
     "scripts": {
         "tsc": "tsc -w",
-        "test": "nodemon bin/www.js",
+        "test": "nodemon app/bin/www.js",
         "eslint": "eslint app --ext .ts; exit 0"
     },
     "repository": {
