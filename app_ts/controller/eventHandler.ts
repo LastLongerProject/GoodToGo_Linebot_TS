@@ -24,6 +24,7 @@ import { isMobilePhone } from '../api/tool';
 import { ContrubtionView } from "../etl/view/contributionView";
 import { RewardType } from '../models/serviceProcess';
 import { FlexMessage } from "../etl/models/flexMessage";
+import { QrcodeView } from '../etl/view/qrcodeView';
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
@@ -62,7 +63,6 @@ function followEvent(event: any): void {
 async function unfollowOrUnBoundEvent(event: any): Promise<any> {
     if (event.type === 'unfollow') logFactory.log('Event: unfollowed');
     else logFactory.log('Event: delete bind');
-
     try {
         deleteBinding(event);
         richMenu.bindRichmenuToUser("before", event.source.userId);
@@ -124,8 +124,10 @@ async function getQRCodeEvent(event: any): Promise<any> {
         if (result === DatabaseState.USER_NOT_FOUND) {
             let message = '請輸入手機號碼以綁定 line id'
             return client.textMessage(event, message);
-        } else 
-            return client.getQrcode(event, result);  
+        } else {
+            let view = new QrcodeView(result);
+            return client.flexMessage(event, view.getView());
+        }
     } catch (err) {
         logFactory.error(err);
         return failPromise(err);
