@@ -4,7 +4,7 @@ import * as bodyParser from 'body-parser';
 import { RewardType } from "../../models/serviceProcess";
 class ContrubtionView implements View {
     private separator = separatorTemplate();
-    private spacer = spacerTemplate()
+    private spacer = spacerTemplate();
     private footerButton_lottery = {
         type: FlexMessage.ComponetType.button,
         action: {
@@ -37,7 +37,7 @@ class ContrubtionView implements View {
 
     private bodyImage = {
         type: FlexMessage.ComponetType.image,
-        url: "https://imgur.com/YZqrKDC.png",
+        url: "https://imgur.com/xunv0i4.png",
         size: "full"
     }
 
@@ -56,30 +56,38 @@ class ContrubtionView implements View {
         spacing: FlexMessage.Spacing.lg,
         contents: Array<any>()
     };
+
+    private hero = {
+        type: FlexMessage.ComponetType.image,
+        url: "https://imgur.com/xunv0i4.png",
+        size: "full",
+        aspectMode: "cover"
+    }
+
     private view = {
         type: FlexMessage.Container.bubble,
-        body: this.body,
+        hero: this.hero,
         footer: this.footer,
         styles: this.styles
     }
     constructor() {
         this.separator.setMargin(FlexMessage.Margin.none);
-        this.view.body.contents.push(this.bodyImage);
+        // this.view.body.contents.push(this.bodyImage);
     }
     public pushBodyContent(data) {
-        this.view.body.contents.push(data);
+        // this.view.body.contents.push(data);
     }
 
     public pushTimeBar(label: String) {
-        this.view.body.contents.push(addTimeBar(label));
+        // this.view.body.contents.push(addTimeBar(label));
     }
 
     public pushSeparator() {
-        this.view.body.contents.push(this.separator.getSeparator());
+        // this.view.body.contents.push(this.separator.getSeparator());
     }
 
     public pushSpacer() {
-        this.view.body.contents.push(this.spacer.getSpacer());
+        // this.view.body.contents.push(this.spacer.getSpacer());
     }
 
     public getView() {

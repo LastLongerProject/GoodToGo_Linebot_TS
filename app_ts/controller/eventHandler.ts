@@ -20,12 +20,15 @@ import {
 import * as client from './clientDelegate';
 import * as request from "../api/request";
 import { failPromise } from "../api/customPromise";
-import { isMobilePhone } from '../api/api';
+import { isMobilePhone } from '../api/tool';
 import { ContrubtionView } from "../etl/view/contributionView";
+import { RewardType } from '../models/serviceProcess';
+import { FlexMessage } from "../etl/models/flexMessage";
+import { QrcodeView } from '../etl/view/qrcodeView';
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
-
+ 
 
 function isVerificationCode(code: string): boolean {
     var reg: RegExp = /[0-9]{6}/;
@@ -43,8 +46,10 @@ async function postbackAction(event: any): Promise<any> {
     } else if (postbackData === client.registerWilling.NO) {
         let message = "期待您成為好合器會員！"
         return client.textMessage(event, message);
-    } else if (postbackData === DataType.GetMoreInused || postbackData === DataType.Inused || postbackData === DataType.Record || postbackData === DataType.GetMoreRecord ) {
+    } else if (Number(postbackData) === DataType.GetMoreInused || Number(postbackData) === DataType.Inused || Number(postbackData) === DataType.Record || Number(postbackData) === DataType.GetMoreRecord ) {
         return getDataEvent(event, Number(postbackData));
+    } else if (Number(postbackData) === RewardType.Lottery || Number(postbackData) === RewardType.Redeem) {
+        return getRewardImage(event, Number(postbackData));
     }
 }
 
@@ -58,7 +63,6 @@ function followEvent(event: any): void {
 async function unfollowOrUnBoundEvent(event: any): Promise<any> {
     if (event.type === 'unfollow') logFactory.log('Event: unfollowed');
     else logFactory.log('Event: delete bind');
-
     try {
         deleteBinding(event);
         richMenu.bindRichmenuToUser("before", event.source.userId);
@@ -100,6 +104,19 @@ async function getDataEvent(event: any, type): Promise<any> {
     }
 }
 
+function getRewardImage(event, type) {
+    let lotteryImage = "https://i.imgur.com/MwljlRm.jpg";
+    let redeemImgae = "https://imgur.com/l2xiXxb.jpg";
+    let url = type === RewardType.Lottery ? lotteryImage : redeemImgae;
+    let image = {
+        type: FlexMessage.ComponetType.image,
+        originalContentUrl: url,
+        previewImageUrl: url
+    }
+
+    return client.customMessage(event, image);    
+}
+
 async function getQRCodeEvent(event: any): Promise<any> { 
     logFactory.log('Event: get QRCode');
     try {
@@ -107,8 +124,10 @@ async function getQRCodeEvent(event: any): Promise<any> {
         if (result === DatabaseState.USER_NOT_FOUND) {
             let message = '請輸入手機號碼以綁定 line id'
             return client.textMessage(event, message);
-        } else 
-            return client.getQrcode(event, result);  
+        } else {
+            let view = new QrcodeView(result);
+            return client.flexMessage(event, view.getView());
+        }
     } catch (err) {
         logFactory.error(err);
         return failPromise(err);
@@ -200,8 +219,6 @@ module.exports = {
         } else if (event.message.text === "綁定手機") {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
-        } else if (event.message.text === "註冊") {
-            registerEvent(event);
         } else if (isMobilePhone(event.message.text)) {
             bindingEvent(event);
         } else if (isVerificationCode(event.message.text)) {

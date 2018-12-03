@@ -19,8 +19,11 @@ const serviceProcess_1 = require("../models/serviceProcess");
 const client = __importStar(require("./clientDelegate"));
 const request = __importStar(require("../api/request"));
 const customPromise_1 = require("../api/customPromise");
-const api_1 = require("../api/api");
+const tool_1 = require("../api/tool");
 const contributionView_1 = require("../etl/view/contributionView");
+const serviceProcess_2 = require("../models/serviceProcess");
+const flexMessage_1 = require("../etl/models/flexMessage");
+const qrcodeView_1 = require("../etl/view/qrcodeView");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
 function isVerificationCode(code) {
@@ -34,7 +37,7 @@ function isVerificationCode(code) {
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
-        if (api_1.isMobilePhone(postbackData)) {
+        if (tool_1.isMobilePhone(postbackData)) {
             logFactory.log(postbackData);
             return request.register(event, postbackData);
         }
@@ -42,8 +45,11 @@ function postbackAction(event) {
             let message = "期待您成為好合器會員！";
             return client.textMessage(event, message);
         }
-        else if (postbackData === serviceProcess_1.DataType.GetMoreInused || postbackData === serviceProcess_1.DataType.Inused || postbackData === serviceProcess_1.DataType.Record || postbackData === serviceProcess_1.DataType.GetMoreRecord) {
+        else if (Number(postbackData) === serviceProcess_1.DataType.GetMoreInused || Number(postbackData) === serviceProcess_1.DataType.Inused || Number(postbackData) === serviceProcess_1.DataType.Record || Number(postbackData) === serviceProcess_1.DataType.GetMoreRecord) {
             return getDataEvent(event, Number(postbackData));
+        }
+        else if (Number(postbackData) === serviceProcess_2.RewardType.Lottery || Number(postbackData) === serviceProcess_2.RewardType.Redeem) {
+            return getRewardImage(event, Number(postbackData));
         }
     });
 }
@@ -103,6 +109,17 @@ function getDataEvent(event, type) {
         }
     });
 }
+function getRewardImage(event, type) {
+    let lotteryImage = "https://i.imgur.com/MwljlRm.jpg";
+    let redeemImgae = "https://imgur.com/l2xiXxb.jpg";
+    let url = type === serviceProcess_2.RewardType.Lottery ? lotteryImage : redeemImgae;
+    let image = {
+        type: flexMessage_1.FlexMessage.ComponetType.image,
+        originalContentUrl: url,
+        previewImageUrl: url
+    };
+    return client.customMessage(event, image);
+}
 function getQRCodeEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         logFactory.log('Event: get QRCode');
@@ -112,8 +129,10 @@ function getQRCodeEvent(event) {
                 let message = '請輸入手機號碼以綁定 line id';
                 return client.textMessage(event, message);
             }
-            else
-                return client.getQrcode(event, result);
+            else {
+                let view = new qrcodeView_1.QrcodeView(result);
+                return client.flexMessage(event, view.getView());
+            }
         }
         catch (err) {
             logFactory.error(err);
@@ -166,7 +185,7 @@ function verificateEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield serviceProcess_1.findSignal(event);
-            if (api_1.isMobilePhone(result)) {
+            if (tool_1.isMobilePhone(result)) {
                 request.verificate(event, result);
             }
         }
@@ -211,7 +230,7 @@ module.exports = {
         else if (event.message.text === "註冊") {
             registerEvent(event);
         }
-        else if (api_1.isMobilePhone(event.message.text)) {
+        else if (tool_1.isMobilePhone(event.message.text)) {
             bindingEvent(event);
         }
         else if (isVerificationCode(event.message.text)) {
