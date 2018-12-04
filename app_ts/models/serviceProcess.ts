@@ -3,10 +3,17 @@ import { successPromise, failPromise } from '../api/customPromise';
 import { isMobilePhone } from '../api/tool';
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
+<<<<<<< HEAD
 
 import { InusedView } from '../etl/view/inusedView';
 import { View } from '../etl/view/view';
 import { BindState, DatabaseState, DeleteBindState } from '../api/enumManager';
+=======
+import { Double } from 'bson';
+import * as path from 'path';
+import { InusedView } from '../etl/view/inusedView';
+import { View } from '../etl/view/view';
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 
@@ -20,6 +27,42 @@ const RichMenu = require('./db/richMenuDB');
 var containerTypeDict: Object;
 var storeDict: Object;
 
+<<<<<<< HEAD
+=======
+export namespace BindState {
+    export const SUCCESS = 'Successfully bound with line',
+        HAS_BOUND = 'This phone has bound with line',
+        LINE_HAS_BOUND = 'Line has bound with another phone',
+        IS_NOT_MOBILEPHONE = 'The input is not mobile phone';
+}
+
+export namespace DeleteBindState {
+    export const LINE_HAS_NOT_BOUND = 'Line has not bound with a phone num',
+        SUCCESS = 'Unbind successfully';
+}
+
+export namespace DatabaseState {
+    export const USER_NOT_FOUND = 'Does not find user in db';
+}
+
+export namespace QrcodeState {
+    export const SUCCESS = 'Get qrcode successfully';
+}
+
+export namespace GetContributeState {
+    export const SUCCESS = 'Get contribute successfully';
+}
+
+export namespace FindTemporaryInfoState {
+    export const HAS_SIGNALED = 'ready for user to register member',
+        HAS_NOT_SIGNALED = 'does not have signal for verification';
+}
+
+export namespace AddVerificationSignalState {
+    export const SUCCESS = 'store signal successfully';
+}
+
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
 export var DataType = Object.freeze({
     Record: 0,
     Inused: 1,
@@ -178,7 +221,11 @@ PlaceID.find(
 
 async function bindLineId(event: any, phone: string): Promise<any> {
     if (!isMobilePhone(phone))
+<<<<<<< HEAD
         return successPromise(BindState.IS_NOT_PHONE);
+=======
+        return successPromise(BindState.IS_NOT_MOBILEPHONE);
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
     var dbUser = await User.findOne({ 'user.phone': phone }).exec();
 
     if (!dbUser) {
@@ -187,7 +234,11 @@ async function bindLineId(event: any, phone: string): Promise<any> {
         let doc = await User.findOne({ 'user.lineId': event.source.userId }).exec();
         if (!doc) {
             if (typeof dbUser.user.lineId !== 'undefined') {
+<<<<<<< HEAD
                 return successPromise(BindState.PHONE_HAS_BOUND);
+=======
+                return successPromise(BindState.HAS_BOUND);
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
             } else {
                 dbUser.user.lineId = event.source.userId;
                 try {

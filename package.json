@@ -24,7 +24,7 @@
         "request": "^2.85.0",
         "rotating-file-stream": "^1.3.9",
         "serve-favicon": "~2.4.5",
-        "typescript": "^3.1.5"
+        "typescript": "^3.2.1"
     },
     "devDependencies": {
         "@types/chai": "^4.1.7",
@@ -61,7 +61,7 @@
     },
     "scripts": {
         "tsc": "tsc -w",
-        "test": "nodemon bin/www.js",
+        "test": "nodemon app/bin/www.js",
         "eslint": "eslint app --ext .ts; exit 0"
     },
     "repository": {

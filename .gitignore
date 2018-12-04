@@ -35,6 +35,10 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+<<<<<<< HEAD
+=======
+config/
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
 
 # TypeScript v1 declaration files
 typings/
@@ -44,6 +48,10 @@ typings/
 
 # Optional eslint cache
 .eslintcache
+<<<<<<< HEAD
+=======
+.eslintrc.js
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
 
 # Optional REPL history
 .node_repl_history
@@ -59,3 +67,9 @@ typings/
 
 # next.js build output
 .next
+<<<<<<< HEAD
+=======
+
+.DS_Store
+.vscode/
+>>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
