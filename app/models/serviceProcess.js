@@ -23,44 +23,6 @@ const TemporaryInfo = require('./db/temporaryInfoDB');
 const RichMenu = require('./db/richMenuDB');
 var containerTypeDict;
 var storeDict;
-var BindState;
-(function (BindState) {
-    BindState.SUCCESS = 'Successfully bound with line', BindState.HAS_BOUND = 'This phone has bound with line', BindState.LINE_HAS_BOUND = 'Line has bound with another phone', BindState.IS_NOT_MOBILEPHONE = 'The input is not mobile phone';
-})(BindState = exports.BindState || (exports.BindState = {}));
-var DeleteBindState;
-(function (DeleteBindState) {
-    DeleteBindState.LINE_HAS_NOT_BOUND = 'Line has not bound with a phone num', DeleteBindState.SUCCESS = 'Unbind successfully';
-})(DeleteBindState = exports.DeleteBindState || (exports.DeleteBindState = {}));
-var DatabaseState;
-(function (DatabaseState) {
-    DatabaseState.USER_NOT_FOUND = 'Does not find user in db';
-})(DatabaseState = exports.DatabaseState || (exports.DatabaseState = {}));
-var QrcodeState;
-(function (QrcodeState) {
-    QrcodeState.SUCCESS = 'Get qrcode successfully';
-})(QrcodeState = exports.QrcodeState || (exports.QrcodeState = {}));
-var GetContributeState;
-(function (GetContributeState) {
-    GetContributeState.SUCCESS = 'Get contribute successfully';
-})(GetContributeState = exports.GetContributeState || (exports.GetContributeState = {}));
-var FindTemporaryInfoState;
-(function (FindTemporaryInfoState) {
-    FindTemporaryInfoState.HAS_SIGNALED = 'ready for user to register member', FindTemporaryInfoState.HAS_NOT_SIGNALED = 'does not have signal for verification';
-})(FindTemporaryInfoState = exports.FindTemporaryInfoState || (exports.FindTemporaryInfoState = {}));
-var AddVerificationSignalState;
-(function (AddVerificationSignalState) {
-    AddVerificationSignalState.SUCCESS = 'store signal successfully';
-})(AddVerificationSignalState = exports.AddVerificationSignalState || (exports.AddVerificationSignalState = {}));
-exports.DataType = Object.freeze({
-    Record: 0,
-    Inused: 1,
-    GetMoreRecord: 2,
-    GetMoreInused: 3,
-});
-exports.RewardType = Object.freeze({
-    Lottery: 4,
-    Redeem: 5,
-});
 var GetDataMethod;
 (function (GetDataMethod) {
     function spliceArrAndPush(returnList, inUsed, returned) {
@@ -88,17 +50,17 @@ var GetDataMethod;
             let view;
             var monthArray = Array();
             var index;
-            if (type === exports.DataType.GetMoreRecord) {
+            if (type === DataType.GetMoreRecord) {
                 view = new recordView_1.RecordView();
                 index = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
                 index = index === null ? 0 : Number(index);
             }
-            else if (type === exports.DataType.Record) {
+            else if (type === DataType.Record) {
                 view = new recordView_1.RecordView();
                 index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
                 index = 0;
             }
-            else if (type === exports.DataType.Inused) {
+            else if (type === DataType.Inused) {
                 view = new inusedView_1.InusedView();
                 index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', 0);
                 index = 0;
@@ -144,7 +106,7 @@ var GetDataMethod;
             if (view.getView().contents.body.contents.length === 0) {
                 view.pushBodyContent(container_1.container.nothing.toString, '期待您的使用！');
             }
-            if (type === exports.DataType.Record || type === exports.DataType.GetMoreRecord) {
+            if (type === DataType.Record || type === DataType.GetMoreRecord) {
                 redisClient_1.setAsync(event.source.userId + '_recordIndex', index + tempIndex);
             }
             else {
@@ -176,23 +138,23 @@ PlaceID.find({}, {}, {
 function bindLineId(event, phone) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!tool_1.isMobilePhone(phone))
-            return customPromise_1.successPromise(BindState.IS_NOT_MOBILEPHONE);
+            return customPromise_1.successPromise("The input is not phone number" /* IS_NOT_PHONE */);
         var dbUser = yield User.findOne({ 'user.phone': phone }).exec();
         if (!dbUser) {
-            return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
+            return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
         }
         else {
             let doc = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
             if (!doc) {
                 if (typeof dbUser.user.lineId !== 'undefined') {
-                    return customPromise_1.successPromise(BindState.HAS_BOUND);
+                    return customPromise_1.successPromise("The phone has already bound with another line account" /* PHONE_HAS_BOUND */);
                 }
                 else {
                     dbUser.user.lineId = event.source.userId;
                     try {
                         var saveRes = yield dbUser.save();
                         if (saveRes)
-                            return customPromise_1.successPromise(BindState.SUCCESS);
+                            return customPromise_1.successPromise("Successfullt bound with line" /* SUCCESS */);
                     }
                     catch (err) {
                         logFactory.error(err);
@@ -201,7 +163,7 @@ function bindLineId(event, phone) {
                 }
             }
             else {
-                return customPromise_1.successPromise(BindState.LINE_HAS_BOUND);
+                return customPromise_1.successPromise("Line has bound with another phone" /* LINE_HAS_BOUND */);
             }
         }
     });
@@ -214,17 +176,17 @@ function deleteBinding(event) {
                 'user.lineId': event.source.userId,
             }).exec();
             if (!dbUser) {
-                logFactory.log(DeleteBindState.LINE_HAS_NOT_BOUND);
-                return customPromise_1.successPromise(DeleteBindState.LINE_HAS_NOT_BOUND);
+                logFactory.log("Line has not bound with any phone number" /* LINE_HAS_NOT_BOUND */);
+                return customPromise_1.successPromise("Line has not bound with any phone number" /* LINE_HAS_NOT_BOUND */);
             }
             else {
-                logFactory.log(DeleteBindState.SUCCESS);
+                logFactory.log("Unbind successfully" /* SUCCESS */);
                 dbUser.user.lineId = undefined;
                 dbUser.save(err => {
                     if (err)
                         return logFactory.error(err);
                 });
-                return customPromise_1.successPromise(DeleteBindState.SUCCESS);
+                return customPromise_1.successPromise("Unbind successfully" /* SUCCESS */);
             }
         }
         catch (err) {
@@ -241,8 +203,8 @@ function getQrcode(event) {
                 'user.lineId': event.source.userId,
             }).exec();
             if (!dbUser) {
-                logFactory.log(DatabaseState.USER_NOT_FOUND);
-                return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
+                logFactory.log("Does not find user in database" /* USER_NOT_FOUND */);
+                return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
             }
             else {
                 return customPromise_1.successPromise(dbUser.user.phone);
@@ -262,8 +224,8 @@ function getContribution(event) {
                 'user.lineId': event.source.userId,
             }).exec();
             if (!dbUser) {
-                logFactory.log(DatabaseState.USER_NOT_FOUND);
-                return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
+                logFactory.log("Does not find user in database" /* USER_NOT_FOUND */);
+                return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
             }
             else {
                 var amount = yield Trade.count({
@@ -280,35 +242,6 @@ function getContribution(event) {
     });
 }
 exports.getContribution = getContribution;
-function addVerificationSignal(event, phone) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const result = yield redisClient_1.setAsync(event.source.userId, phone, 'EX', 180);
-            return customPromise_1.successPromise(AddVerificationSignalState.SUCCESS);
-        }
-        catch (err) {
-            return customPromise_1.failPromise(err);
-        }
-    });
-}
-exports.addVerificationSignal = addVerificationSignal;
-function findSignal(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const result = yield redisClient_1.getAsync(event.source.userId);
-            logFactory.log(result);
-            if (!result) {
-                return customPromise_1.successPromise(FindTemporaryInfoState.HAS_NOT_SIGNALED);
-            }
-            logFactory.log('result from findTemporaryInfo: ' + result);
-            return customPromise_1.successPromise(result);
-        }
-        catch (err) {
-            customPromise_1.failPromise(err);
-        }
-    });
-}
-exports.findSignal = findSignal;
 function deleteSignal(event) {
     redisClient_1.redisClient.del(event.source.userId);
 }
@@ -320,7 +253,7 @@ function getRecord(event, type) {
                 'user.lineId': event.source.userId,
             }).exec();
             if (!dbUser)
-                return customPromise_1.successPromise(DatabaseState.USER_NOT_FOUND);
+                return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
             var returned = [];
             var inUsed = [];
             var recordCollection = {};
@@ -354,7 +287,7 @@ function getRecord(event, type) {
             });
             recordCollection['usingAmount'] -= returnList.length;
             GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
-            if (type === exports.DataType.Record || type === exports.DataType.GetMoreRecord) {
+            if (type === DataType.Record || type === DataType.GetMoreRecord) {
                 recordCollection['data'] = [];
                 for (var i = 0; i < returned.length; i++) {
                     recordCollection['data'].push(returned[i]);

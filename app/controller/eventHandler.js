@@ -26,14 +26,6 @@ const flexMessage_1 = require("../etl/models/flexMessage");
 const qrcodeView_1 = require("../etl/view/qrcodeView");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
-function isVerificationCode(code) {
-    var reg = /[0-9]{6}/;
-    var res = reg.test(code);
-    if (res)
-        return true;
-    else
-        return false;
-}
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
@@ -42,20 +34,24 @@ function postbackAction(event) {
             return request.register(event, postbackData);
         }
         else if (postbackData === client.registerWilling.NO) {
-            let message = "期待您成為好合器會員！";
+            let message = '期待您成為好合器會員！';
             return client.textMessage(event, message);
         }
-        else if (Number(postbackData) === serviceProcess_1.DataType.GetMoreInused || Number(postbackData) === serviceProcess_1.DataType.Inused || Number(postbackData) === serviceProcess_1.DataType.Record || Number(postbackData) === serviceProcess_1.DataType.GetMoreRecord) {
+        else if (Number(postbackData) === serviceProcess_1.DataType.GetMoreInused ||
+            Number(postbackData) === serviceProcess_1.DataType.Inused ||
+            Number(postbackData) === serviceProcess_1.DataType.Record ||
+            Number(postbackData) === serviceProcess_1.DataType.GetMoreRecord) {
             return getDataEvent(event, Number(postbackData));
         }
-        else if (Number(postbackData) === serviceProcess_2.RewardType.Lottery || Number(postbackData) === serviceProcess_2.RewardType.Redeem) {
+        else if (Number(postbackData) === serviceProcess_2.RewardType.Lottery ||
+            Number(postbackData) === serviceProcess_2.RewardType.Redeem) {
             return getRewardImage(event, Number(postbackData));
         }
     });
 }
 function followEvent(event) {
     logFactory.log('Event: added or unblocked');
-    const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號\綁定完成後即可使用本帳號提供的服務！';
+    const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號綁定完成後即可使用本帳號提供的服務！';
     client.textMessage(event, message);
 }
 function unfollowOrUnBoundEvent(event) {
@@ -66,7 +62,7 @@ function unfollowOrUnBoundEvent(event) {
             logFactory.log('Event: delete bind');
         try {
             serviceProcess_1.deleteBinding(event);
-            richMenu.bindRichmenuToUser("before", event.source.userId);
+            richMenu.bindRichmenuToUser('before', event.source.userId);
             const message = '已取消綁定';
             return client.textMessage(event, message);
         }
@@ -87,7 +83,7 @@ function getContributionEvent(event) {
         //             message = '請輸入手機號碼以綁定 line id'
         //             return client.textMessage(event, message);
         //         default:
-        //             return client.textMessage(event, '您的功德數為：' + result); 
+        //             return client.textMessage(event, '您的功德數為：' + result);
         //     }
         // } catch (err) {
         //     logFactory.error(err);
@@ -110,13 +106,13 @@ function getDataEvent(event, type) {
     });
 }
 function getRewardImage(event, type) {
-    let lotteryImage = "https://i.imgur.com/MwljlRm.jpg";
-    let redeemImgae = "https://imgur.com/l2xiXxb.jpg";
+    let lotteryImage = 'https://i.imgur.com/MwljlRm.jpg';
+    let redeemImgae = 'https://imgur.com/l2xiXxb.jpg';
     let url = type === serviceProcess_2.RewardType.Lottery ? lotteryImage : redeemImgae;
     let image = {
         type: flexMessage_1.FlexMessage.ComponetType.image,
         originalContentUrl: url,
-        previewImageUrl: url
+        previewImageUrl: url,
     };
     return client.customMessage(event, image);
 }
@@ -142,8 +138,8 @@ function getQRCodeEvent(event) {
 }
 function getContactWayEvent(event) {
     logFactory.log('Event: get contact way');
-    const message = "好盒器工作室: (06)200-2341\n" +
-        "FB: https://www.facebook.com/good.to.go.tw";
+    const message = '好盒器工作室: (06)200-2341\n' +
+        'FB: https://www.facebook.com/good.to.go.tw';
     return client.textMessage(event, message);
 }
 function bindingEvent(event) {
@@ -155,20 +151,23 @@ function bindingEvent(event) {
             logFactory.log(result);
             switch (result) {
                 case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
-                    message = "您還不是會員哦！\n請問要使用 " + event.message.text + " 為帳號註冊成為會員嗎？";
+                    message =
+                        '您還不是會員哦！\n請問要使用 ' +
+                            event.message.text +
+                            ' 為帳號註冊成為會員嗎？';
                     return client.registerTemplate(event, message);
                 case serviceProcess_1.BindState.HAS_BOUND:
-                    message = "此手機已經綁定過摟！";
+                    message = '此手機已經綁定過摟！';
                     return client.textMessage(event, message);
                 case serviceProcess_1.BindState.LINE_HAS_BOUND:
-                    message = "此 line 已經綁定過摟！";
+                    message = '此 line 已經綁定過摟！';
                     return client.textMessage(event, message);
                 case serviceProcess_1.BindState.SUCCESS:
-                    message = "綁定成功！";
-                    richMenu.bindRichmenuToUser("after", event.source.userId);
+                    message = '綁定成功！';
+                    richMenu.bindRichmenuToUser('after', event.source.userId);
                     return client.textMessage(event, message);
                 case serviceProcess_1.BindState.IS_NOT_MOBILEPHONE:
-                    message = "請輸入要綁定的手機號碼！";
+                    message = '請輸入要綁定的手機號碼！';
                     return client.textMessage(event, message);
             }
         }
@@ -197,7 +196,9 @@ function verificateEvent(event) {
 }
 module.exports = {
     bot: function (event) {
-        if ((event.type !== 'message' || event.message.type !== 'text') && event.type !== 'follow' && event.type !== 'unfollow' &&
+        if ((event.type !== 'message' || event.message.type !== 'text') &&
+            event.type !== 'follow' &&
+            event.type !== 'unfollow' &&
             event.type !== 'postback') {
             logFactory.error('Event Type: Wrong Type');
             return Promise.resolve(null);
@@ -211,38 +212,32 @@ module.exports = {
         else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             unfollowOrUnBoundEvent(event);
         }
-        else if (event.message.text === "我的好杯幣") {
+        else if (event.message.text === '我的好杯幣') {
             getContributionEvent(event);
         }
-        else if (event.message.text === "使用中容器") {
+        else if (event.message.text === '使用中容器') {
             getDataEvent(event, serviceProcess_1.DataType.Inused);
         }
-        else if (event.message.text === "我的會員卡") {
+        else if (event.message.text === '我的會員卡') {
             getQRCodeEvent(event);
         }
-        else if (event.message.text === "聯絡好盒器") {
+        else if (event.message.text === '聯絡好盒器') {
             getContactWayEvent(event);
         }
-        else if (event.message.text === "綁定手機") {
+        else if (event.message.text === '綁定手機') {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
         }
-<<<<<<< HEAD
-        else if (event.message.text === "註冊") {
-            registerEvent(event);
-        }
-=======
->>>>>>> 9696156bb7067a0d7150f26aadce546778c0be33
         else if (tool_1.isMobilePhone(event.message.text)) {
             bindingEvent(event);
         }
-        else if (isVerificationCode(event.message.text)) {
+        else if (tool_1.isVerificationCode(event.message.text)) {
             verificateEvent(event);
         }
         else {
-            logFactory.log("Event: not our business");
+            logFactory.log('Event: not our business');
             // client.textMessage(event, "如果有需要任何服務請點選下列表單哦!");
         }
-    }
+    },
 };
 //# sourceMappingURL=eventHandler.js.map

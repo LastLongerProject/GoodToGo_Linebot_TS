@@ -11,11 +11,20 @@ function isMobilePhone(phone) {
 exports.isMobilePhone = isMobilePhone;
 function randomHexString(amount) {
     var text = '';
-    var charSet = "0123456789ABCDEF";
+    var charSet = '0123456789ABCDEF';
     for (var i = 0; i < amount; i++) {
         text += charSet.charAt(Math.floor(Math.random() * charSet.length));
     }
     return text;
 }
 exports.randomHexString = randomHexString;
+function isVerificationCode(code) {
+    var reg = /[0-9]{6}/;
+    var res = reg.test(code);
+    if (res)
+        return true;
+    else
+        return false;
+}
+exports.isVerificationCode = isVerificationCode;
 //# sourceMappingURL=tool.js.map
