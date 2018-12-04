@@ -83,7 +83,7 @@ class QrcodeView {
     getView() {
         return {
             type: "flex",
-            altText: "使用容器數量",
+            altText: "我的會員卡",
             contents: this.view
         };
     }

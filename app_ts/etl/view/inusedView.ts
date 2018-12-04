@@ -83,7 +83,7 @@ class InusedView implements View {
     public getView() {
         return {
             type: "flex",
-            altText: "使用容器數量",
+            altText: "使用中容器",
             contents: this.view
         };
     }

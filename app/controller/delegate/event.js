@@ -22,6 +22,7 @@ const tool_1 = require("../../api/tool");
 const request = __importStar(require("../../api/request"));
 const qrcodeView_1 = require("../../etl/view/qrcodeView");
 const contributionView_1 = require("../../etl/view/contributionView");
+const contactView_1 = require("../../etl/view/contactView");
 const logFactory = require('../../api/logFactory')('linebot:eventDelegate');
 const richMenu = require('../../api/richMenuScript');
 function followEvent(event) {
@@ -136,9 +137,8 @@ function getQRCodeEvent(event) {
 exports.getQRCodeEvent = getQRCodeEvent;
 function getContactWayEvent(event) {
     logFactory.log('Event: get contact way');
-    const message = '好盒器工作室: (06)200-2341\n' +
-        'FB: https://www.facebook.com/good.to.go.tw';
-    return client.textMessage(event, message);
+    let view = new contactView_1.ContactView();
+    return client.flexMessage(event, view.getView());
 }
 exports.getContactWayEvent = getContactWayEvent;
 function getContributionEvent(event) {

@@ -6,6 +6,7 @@ import { isMobilePhone } from "../../api/tool";
 import * as request from '../../api/request';
 import { QrcodeView } from "../../etl/view/qrcodeView";
 import { ContrubtionView } from "../../etl/view/contributionView";
+import { ContactView } from "../../etl/view/contactView";
 
 const logFactory = require('../../api/logFactory')('linebot:eventDelegate');
 const richMenu = require('../../api/richMenuScript');
@@ -113,11 +114,9 @@ async function getQRCodeEvent(event: any): Promise<any> {
 function getContactWayEvent(event: any): Promise<any> {
     logFactory.log('Event: get contact way');
 
-    const message =
-        '好盒器工作室: (06)200-2341\n' +
-        'FB: https://www.facebook.com/good.to.go.tw';
+    let view = new ContactView();
 
-    return client.textMessage(event, message);
+    return client.flexMessage(event, view.getView());
 }
 
 async function getContributionEvent(event: any): Promise<any> {

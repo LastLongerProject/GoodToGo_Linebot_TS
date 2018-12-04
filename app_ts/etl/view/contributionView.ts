@@ -92,7 +92,7 @@ class ContrubtionView implements View {
     public getView() {
         return {
             type: "flex",
-            altText: "使用容器數量",
+            altText: "我的貢獻",
             contents: this.view
         };
     }

@@ -61,9 +61,9 @@ class QrcodeView implements View {
     };
 
     private footer = {
-        type: FlexMessage.ComponetType.box, 
+        type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.vertical,
-        contents:[this.separator.getSeparator(), this.footerText]
+        contents: [this.separator.getSeparator(), this.footerText]
     };
 
     private styles = {
@@ -99,10 +99,10 @@ class QrcodeView implements View {
     public getView() {
         return {
             type: "flex",
-            altText: "使用容器數量",
+            altText: "我的會員卡",
             contents: this.view
         };
     }
 };
 
-export {QrcodeView};
+export { QrcodeView };
