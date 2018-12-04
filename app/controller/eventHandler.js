@@ -7,190 +7,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const serviceProcess_1 = require("../models/serviceProcess");
-const client = __importStar(require("./clientDelegate"));
-const request = __importStar(require("../api/request"));
-const customPromise_1 = require("../api/customPromise");
 const tool_1 = require("../api/tool");
-const contributionView_1 = require("../etl/view/contributionView");
-const flexMessage_1 = require("../etl/models/flexMessage");
-const qrcodeView_1 = require("../etl/view/qrcodeView");
+const postbackEventHandler_1 = require("./postback/postbackEventHandler");
+const event_1 = require("./delegate/event");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
-const richMenu = require('../api/richMenuScript');
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
-        if (tool_1.isMobilePhone(postbackData)) {
-            logFactory.log(postbackData);
-            return request.register(event, postbackData);
-        }
-        else if (postbackData === client.registerWilling.NO) {
-            let message = '期待您成為好合器會員！';
-            return client.textMessage(event, message);
-        }
-        else if (postbackData === "get more record from database" /* GET_MORE_RECORD */ ||
-            postbackData === "in used" /* IN_USED */ ||
-            postbackData === "record" /* RECORD */ ||
-            postbackData === "get more record from database" /* GET_MORE_RECORD */) {
-            return getDataEvent(event, postbackData);
-        }
-        else if (postbackData === "lottery" /* LOTTERY */ ||
-            postbackData === "redeem" /* REDEEM */) {
-            return getRewardImage(event, postbackData);
-        }
-    });
-}
-function followEvent(event) {
-    logFactory.log('Event: added or unblocked');
-    const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號綁定完成後即可使用本帳號提供的服務！';
-    client.textMessage(event, message);
-}
-function unfollowOrUnBoundEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (event.type === 'unfollow')
-            logFactory.log('Event: unfollowed');
-        else
-            logFactory.log('Event: delete bind');
-        try {
-            serviceProcess_1.deleteBinding(event);
-            richMenu.bindRichmenuToUser('before', event.source.userId);
-            const message = '已取消綁定';
-            return client.textMessage(event, message);
-        }
-        catch (err) {
-            logFactory.error(err);
-            return customPromise_1.failPromise(err);
-        }
-    });
-}
-function getContributionEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: get contribution');
-        // try {
-        //     let message: string;
-        //     var result = await getContribution(event);
-        //     switch (result) {
-        //         case DatabaseState.USER_NOT_FOUND:
-        //             message = '請輸入手機號碼以綁定 line id'
-        //             return client.textMessage(event, message);
-        //         default:
-        //             return client.textMessage(event, '您的功德數為：' + result);
-        //     }
-        // } catch (err) {
-        //     logFactory.error(err);
-        //     return failPromise(err);
-        // }
-        let view = new contributionView_1.ContrubtionView();
-        return client.flexMessage(event, view.getView());
-    });
-}
-function getDataEvent(event, type) {
-    return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: get data');
-        try {
-            const result = yield serviceProcess_1.getRecord(event, type);
-            client.flexMessage(event, result.getView());
-        }
-        catch (err) {
-            logFactory.error(err);
-        }
-    });
-}
-function getRewardImage(event, type) {
-    let lotteryImage = 'https://i.imgur.com/MwljlRm.jpg';
-    let redeemImgae = 'https://imgur.com/l2xiXxb.jpg';
-    let url = type === "lottery" /* LOTTERY */ ? lotteryImage : redeemImgae;
-    let image = {
-        type: flexMessage_1.FlexMessage.ComponetType.image,
-        originalContentUrl: url,
-        previewImageUrl: url,
-    };
-    return client.customMessage(event, image);
-}
-function getQRCodeEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: get QRCode');
-        try {
-            var result = yield serviceProcess_1.getQrcode(event);
-            if (result === "Does not find user in database" /* USER_NOT_FOUND */) {
-                let message = '請輸入手機號碼以綁定 line id';
-                return client.textMessage(event, message);
-            }
-            else {
-                let view = new qrcodeView_1.QrcodeView(result);
-                return client.flexMessage(event, view.getView());
-            }
-        }
-        catch (err) {
-            logFactory.error(err);
-            return customPromise_1.failPromise(err);
-        }
-    });
-}
-function getContactWayEvent(event) {
-    logFactory.log('Event: get contact way');
-    const message = '好盒器工作室: (06)200-2341\n' +
-        'FB: https://www.facebook.com/good.to.go.tw';
-    return client.textMessage(event, message);
-}
-function bindingEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: binding');
-        try {
-            let result = yield serviceProcess_1.bindLineId(event, event.message.text);
-            let message;
-            logFactory.log(result);
-            switch (result) {
-                case "Does not find user in database" /* USER_NOT_FOUND */:
-                    message =
-                        '您還不是會員哦！\n請問要使用 ' +
-                            event.message.text +
-                            ' 為帳號註冊成為會員嗎？';
-                    return client.registerTemplate(event, message);
-                case "The phone has already bound with another line account" /* PHONE_HAS_BOUND */:
-                    message = '此手機已經綁定過摟！';
-                    return client.textMessage(event, message);
-                case "Line has bound with another phone" /* LINE_HAS_BOUND */:
-                    message = '此 line 已經綁定過摟！';
-                    return client.textMessage(event, message);
-                case "Successfullt bound with line" /* SUCCESS */:
-                    message = '綁定成功！';
-                    richMenu.bindRichmenuToUser('after', event.source.userId);
-                    return client.textMessage(event, message);
-                case "The input is not phone number" /* IS_NOT_PHONE */:
-                    message = '請輸入要綁定的手機號碼！';
-                    return client.textMessage(event, message);
-            }
-        }
-        catch (err) {
-            logFactory.error(err);
-            return customPromise_1.failPromise(err);
-        }
-    });
-}
-function registerEvent(event) {
-    logFactory.log('Event: register');
-}
-function verificateEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const result = yield serviceProcess_1.findSignal(event);
-            if (tool_1.isMobilePhone(result)) {
-                request.verificate(event, result);
-            }
-        }
-        catch (err) {
-            logFactory.error(err);
-            return customPromise_1.failPromise(err);
-        }
+        postbackEventHandler_1.postbackHandler(event, postbackData);
     });
 }
 module.exports = {
@@ -206,32 +31,32 @@ module.exports = {
             postbackAction(event);
         }
         if (event.type === 'follow') {
-            followEvent(event);
+            event_1.followEvent(event);
         }
         else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
-            unfollowOrUnBoundEvent(event);
+            event_1.unfollowOrUnBoundEvent(event);
         }
         else if (event.message.text === '我的好杯幣') {
-            getContributionEvent(event);
+            event_1.getContributionEvent(event);
         }
         else if (event.message.text === '使用中容器') {
-            getDataEvent(event, "in used" /* IN_USED */);
+            event_1.getDataEvent(event, "in used" /* IN_USED */);
         }
         else if (event.message.text === '我的會員卡') {
-            getQRCodeEvent(event);
+            event_1.getQRCodeEvent(event);
         }
         else if (event.message.text === '聯絡好盒器') {
-            getContactWayEvent(event);
+            event_1.getContactWayEvent(event);
         }
         else if (event.message.text === '綁定手機') {
-            bindingEvent(event);
+            event_1.bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
         }
         else if (tool_1.isMobilePhone(event.message.text)) {
-            bindingEvent(event);
+            event_1.bindingEvent(event);
         }
         else if (tool_1.isVerificationCode(event.message.text)) {
-            verificateEvent(event);
+            event_1.verificateEvent(event);
         }
         else {
             logFactory.log('Event: not our business');

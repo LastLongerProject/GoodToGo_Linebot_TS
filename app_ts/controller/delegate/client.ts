@@ -1,15 +1,10 @@
 import {
     Client
 } from '@line/bot-sdk';
+import { RegisterState } from '../../api/enumManager';
 
-const logFactory = require('../api/logFactory')('linebot:eventHandler');
+const logFactory = require('../../api/logFactory')('linebot:eventHandler');
 const client = new Client(global.gConfig.bot);
-
-export namespace registerWilling {
-    export const
-        YES = "Wanna become member",
-        NO = "Do not wanna become member";
-}
 
 function returnTextMessage(event: any, message: string): Promise<any> {
     return client.replyMessage(event.replyToken, {
@@ -47,7 +42,7 @@ function registerTemplate(event, message) {
             {
                 type: "postback",
                 label: "否",
-                data: registerWilling.NO
+                data: RegisterState.NO
             }
             ]
         }

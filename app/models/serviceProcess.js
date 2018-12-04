@@ -244,7 +244,38 @@ function deleteSignal(event) {
     redisClient_1.redisClient.del(event.source.userId);
 }
 exports.deleteSignal = deleteSignal;
-function getRecord(event, type) {
+function addVerificationSignal(event, phone) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            //@ts-ignore
+            const result = yield redisClient_1.setAsync(event.source.userId, phone, 'EX', 180);
+            if (result)
+                return customPromise_1.successPromise("Successfully add verification signal" /* SUCCESS */);
+        }
+        catch (err) {
+            return customPromise_1.failPromise(err);
+        }
+    });
+}
+exports.addVerificationSignal = addVerificationSignal;
+function findSignal(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const result = yield redisClient_1.getAsync(event.source.userId);
+            logFactory.log(result);
+            if (!result) {
+                return customPromise_1.successPromise("The user has not been signaled in redis" /* HAS_NOT_SIGNALED */);
+            }
+            logFactory.log('result from findTemporaryInfo: ' + result);
+            return customPromise_1.successPromise(result);
+        }
+        catch (err) {
+            customPromise_1.failPromise(err);
+        }
+    });
+}
+exports.findSignal = findSignal;
+function getData(event, type) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let dbUser = yield User.findOne({
@@ -289,6 +320,7 @@ function getRecord(event, type) {
                 recordCollection['data'] = [];
                 for (var i = 0; i < returned.length; i++) {
                     recordCollection['data'].push(returned[i]);
+                    console.log(returned[i]);
                 }
             }
             else {
@@ -303,36 +335,5 @@ function getRecord(event, type) {
         }
     });
 }
-exports.getRecord = getRecord;
-function addVerificationSignal(event, phone) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            //@ts-ignore
-            const result = yield redisClient_1.setAsync(event.source.userId, phone, 'EX', 180);
-            if (result)
-                return customPromise_1.successPromise("Successfully add verification signal" /* SUCCESS */);
-        }
-        catch (err) {
-            return customPromise_1.failPromise(err);
-        }
-    });
-}
-exports.addVerificationSignal = addVerificationSignal;
-function findSignal(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const result = yield redisClient_1.getAsync(event.source.userId);
-            logFactory.log(result);
-            if (!result) {
-                return customPromise_1.successPromise("The user has not been signaled in redis" /* HAS_NOT_SIGNALED */);
-            }
-            logFactory.log('result from findTemporaryInfo: ' + result);
-            return customPromise_1.successPromise(result);
-        }
-        catch (err) {
-            customPromise_1.failPromise(err);
-        }
-    });
-}
-exports.findSignal = findSignal;
+exports.getData = getData;
 //# sourceMappingURL=serviceProcess.js.map

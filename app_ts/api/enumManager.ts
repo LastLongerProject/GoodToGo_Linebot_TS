@@ -1,4 +1,4 @@
-const enum RisgisterState {
+const enum RegisterState {
     YES = "Wanna become our member",
     NO = "Don't wanna become our member"
 }
@@ -46,7 +46,7 @@ const enum RewardType {
 }
 
 export {
-    RisgisterState, BindState, DeleteBindState, GetContributeState, QrcodeState, DatabaseState
+    RegisterState, BindState, DeleteBindState, GetContributeState, QrcodeState, DatabaseState
     , DataType, RewardType, AddVerificationSignalState
 }
 

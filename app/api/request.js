@@ -19,9 +19,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const request_1 = __importDefault(require("request"));
-const client = __importStar(require("../controller/clientDelegate"));
+const client = __importStar(require("../controller/delegate/client"));
 const serviceProcess_1 = require("../models/serviceProcess");
 const tool_1 = require("./tool");
+const richMenu = require('./richMenuScript');
 const logFactory = require('./logFactory.js')('linebot:request');
 var RegisterState;
 (function (RegisterState) {
@@ -89,6 +90,7 @@ function verificate(event, phone) {
                 serviceProcess_1.deleteSignal(event);
                 serviceProcess_1.bindLineId(event, phone);
                 const message = '恭喜您成為好合器會員囉！';
+                richMenu.bindRichmenuToUser('after', event.source.userId);
                 return client.textMessage(event, message);
             }
             logFactory.error('fail code is: ' + response.body.code);

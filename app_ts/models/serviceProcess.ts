@@ -259,7 +259,33 @@ function deleteSignal(event: any) {
     redisClient.del(event.source.userId);
 }
 
-async function getRecord(event: any, type): Promise<any> {
+async function addVerificationSignal(event: any, phone: string): Promise<any> {
+    try {
+        //@ts-ignore
+        const result = await setAsync(event.source.userId, phone, 'EX', 180);
+        if (result)
+            return successPromise(AddVerificationSignalState.SUCCESS);
+    } catch (err) {
+        return failPromise(err);
+    }
+}
+
+async function findSignal(event: any): Promise<any> {
+    try {
+        const result = await getAsync(event.source.userId);
+        logFactory.log(result);
+        if (!result) {
+            return successPromise(DatabaseState.HAS_NOT_SIGNALED);
+        }
+        logFactory.log('result from findTemporaryInfo: ' + result);
+        return successPromise(result);
+    } catch (err) {
+        failPromise(err);
+    }
+}
+
+
+async function getData(event: any, type): Promise<any> {
     try {
         let dbUser = await User.findOne({
             'user.lineId': event.source.userId,
@@ -308,6 +334,7 @@ async function getRecord(event: any, type): Promise<any> {
             recordCollection['data'] = [];
             for (var i = 0; i < returned.length; i++) {
                 recordCollection['data'].push(returned[i]);
+                console.log(returned[i])
             }
         } else {
             recordCollection['data'] = inUsed;
@@ -325,38 +352,13 @@ async function getRecord(event: any, type): Promise<any> {
     }
 }
 
-async function addVerificationSignal(event: any, phone: string): Promise<any> {
-    try {
-        //@ts-ignore
-        const result = await setAsync(event.source.userId, phone, 'EX', 180);
-        if (result)
-            return successPromise(AddVerificationSignalState.SUCCESS);
-    } catch (err) {
-        return failPromise(err);
-    }
-}
-
-async function findSignal(event: any): Promise<any> {
-    try {
-        const result = await getAsync(event.source.userId);
-        logFactory.log(result);
-        if (!result) {
-            return successPromise(DatabaseState.HAS_NOT_SIGNALED);
-        }
-        logFactory.log('result from findTemporaryInfo: ' + result);
-        return successPromise(result);
-    } catch (err) {
-        failPromise(err);
-    }
-
-}
 export {
     bindLineId,
     deleteBinding,
     getQrcode,
     getContribution,
     deleteSignal,
-    getRecord,
+    getData,
     findSignal,
     addVerificationSignal
 };

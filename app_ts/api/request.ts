@@ -1,6 +1,6 @@
 import request from 'request';
 import { successPromise, failPromise } from './customPromise';
-import * as client from '../controller/clientDelegate';
+import * as client from '../controller/delegate/client';
 import {
     addVerificationSignal,
     deleteSignal,
@@ -8,6 +8,7 @@ import {
 } from '../models/serviceProcess';
 import { randomHexString } from './tool';
 
+const richMenu = require('./richMenuScript');
 const logFactory = require('./logFactory.js')('linebot:request');
 
 export namespace RegisterState {
@@ -77,6 +78,7 @@ async function verificate(event: any, phone): Promise<any> {
             deleteSignal(event);
             bindLineId(event, phone);
             const message = '恭喜您成為好合器會員囉！';
+            richMenu.bindRichmenuToUser('after', event.source.userId);
             return client.textMessage(event, message);
         }
 

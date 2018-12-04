@@ -19,7 +19,7 @@ class RecordView implements View {
         action: {
             type: "postback",
             label: "顯示更多",
-            data: String(DataType.GET_MORE_RECORD),
+            data: DataType.GET_MORE_RECORD,
             displayText: "顯示更多"
         },
         style: "link",
@@ -31,7 +31,7 @@ class RecordView implements View {
         action: {
             type: "postback",
             label: "查看使用中容器",
-            data: String(DataType.IN_USED),
+            data: DataType.IN_USED,
             displayText: "查看使用中容器"
         },
         style: "link",

@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
 class InusedView {
     constructor() {
-        this.header = flexMessage_1.headerTemplate();
         this.separator = flexMessage_1.separatorTemplate();
         this.headerText = {
             type: flexMessage_1.FlexMessage.ComponetType.text,
@@ -12,12 +11,17 @@ class InusedView {
             weight: flexMessage_1.FlexMessage.Weight.bold,
             color: "#ffffff"
         };
+        this.header = {
+            type: "box",
+            layout: flexMessage_1.FlexMessage.Layout.vertical,
+            contents: [this.headerText]
+        };
         this.footerButton_getMore = {
             type: flexMessage_1.FlexMessage.ComponetType.button,
             action: {
                 type: "postback",
                 label: "顯示更多",
-                data: String("get more in used container from database" /* GET_MORE_INUSED */),
+                data: "get more in used container from database" /* GET_MORE_INUSED */,
                 displayText: "顯示更多"
             },
             style: "link",
@@ -28,7 +32,7 @@ class InusedView {
             action: {
                 type: "postback",
                 label: "查看歷史紀錄",
-                data: String("record" /* RECORD */),
+                data: "record" /* RECORD */,
                 displayText: "查看歷史紀錄"
             },
             style: "link",
@@ -52,12 +56,11 @@ class InusedView {
         };
         this.view = {
             type: flexMessage_1.FlexMessage.Container.bubble,
-            header: this.header.getHeader(),
+            header: this.header,
             body: this.body,
             footer: this.footer,
             styles: this.styles
         };
-        this.header.setContents([this.headerText]);
     }
     pushBodyContent(containerType, dateAndStore) {
         this.view.body.contents.push(flexMessage_1.getBodyContent(containerType, dateAndStore));

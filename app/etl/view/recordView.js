@@ -17,7 +17,7 @@ class RecordView {
             action: {
                 type: "postback",
                 label: "顯示更多",
-                data: String("get more record from database" /* GET_MORE_RECORD */),
+                data: "get more record from database" /* GET_MORE_RECORD */,
                 displayText: "顯示更多"
             },
             style: "link",
@@ -28,7 +28,7 @@ class RecordView {
             action: {
                 type: "postback",
                 label: "查看使用中容器",
-                data: String("in used" /* IN_USED */),
+                data: "in used" /* IN_USED */,
                 displayText: "查看使用中容器"
             },
             style: "link",

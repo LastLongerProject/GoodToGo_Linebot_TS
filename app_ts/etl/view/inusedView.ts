@@ -2,11 +2,9 @@ import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyCont
 import { View } from './view';
 import { DataType } from '../../api/enumManager';
 class InusedView implements View {
-    private header = headerTemplate();
+
     private separator = separatorTemplate();
-    constructor() {
-        this.header.setContents([this.headerText]);
-    }
+    constructor() { }
     private headerText = {
         type: FlexMessage.ComponetType.text,
         text: "使用中容器",
@@ -14,12 +12,18 @@ class InusedView implements View {
         weight: FlexMessage.Weight.bold,
         color: "#ffffff"
     };
+
+    private header = {
+        type: "box",
+        layout: FlexMessage.Layout.vertical,
+        contents: [this.headerText]
+    }
     private footerButton_getMore = {
         type: FlexMessage.ComponetType.button,
         action: {
             type: "postback",
             label: "顯示更多",
-            data: String(DataType.GET_MORE_INUSED),
+            data: DataType.GET_MORE_INUSED,
             displayText: "顯示更多"
         },
         style: "link",
@@ -31,7 +35,7 @@ class InusedView implements View {
         action: {
             type: "postback",
             label: "查看歷史紀錄",
-            data: String(DataType.RECORD),
+            data: DataType.RECORD,
             displayText: "查看歷史紀錄"
         },
         style: "link",
@@ -58,7 +62,7 @@ class InusedView implements View {
     };
     private view = {
         type: FlexMessage.Container.bubble,
-        header: this.header.getHeader(),
+        header: this.header,
         body: this.body,
         footer: this.footer,
         styles: this.styles
