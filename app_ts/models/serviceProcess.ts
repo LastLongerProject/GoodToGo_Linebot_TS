@@ -3,10 +3,10 @@ import { successPromise, failPromise } from '../api/customPromise';
 import { isMobilePhone } from '../api/tool';
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
-import { Double } from 'bson';
-import * as path from 'path';
+
 import { InusedView } from '../etl/view/inusedView';
 import { View } from '../etl/view/view';
+import { BindState, DatabaseState, DeleteBindState } from '../api/enumManager';
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 
@@ -19,39 +19,6 @@ const RichMenu = require('./db/richMenuDB');
 
 var containerTypeDict: Object;
 var storeDict: Object;
-
-export namespace BindState {
-    export const SUCCESS = 'Successfully bound with line',
-        HAS_BOUND = 'This phone has bound with line',
-        LINE_HAS_BOUND = 'Line has bound with another phone',
-        IS_NOT_MOBILEPHONE = 'The input is not mobile phone';
-}
-
-export namespace DeleteBindState {
-    export const LINE_HAS_NOT_BOUND = 'Line has not bound with a phone num',
-        SUCCESS = 'Unbind successfully';
-}
-
-export namespace DatabaseState {
-    export const USER_NOT_FOUND = 'Does not find user in db';
-}
-
-export namespace QrcodeState {
-    export const SUCCESS = 'Get qrcode successfully';
-}
-
-export namespace GetContributeState {
-    export const SUCCESS = 'Get contribute successfully';
-}
-
-export namespace FindTemporaryInfoState {
-    export const HAS_SIGNALED = 'ready for user to register member',
-        HAS_NOT_SIGNALED = 'does not have signal for verification';
-}
-
-export namespace AddVerificationSignalState {
-    export const SUCCESS = 'store signal successfully';
-}
 
 export var DataType = Object.freeze({
     Record: 0,
@@ -211,7 +178,7 @@ PlaceID.find(
 
 async function bindLineId(event: any, phone: string): Promise<any> {
     if (!isMobilePhone(phone))
-        return successPromise(BindState.IS_NOT_MOBILEPHONE);
+        return successPromise(BindState.IS_NOT_PHONE);
     var dbUser = await User.findOne({ 'user.phone': phone }).exec();
 
     if (!dbUser) {
@@ -220,7 +187,7 @@ async function bindLineId(event: any, phone: string): Promise<any> {
         let doc = await User.findOne({ 'user.lineId': event.source.userId }).exec();
         if (!doc) {
             if (typeof dbUser.user.lineId !== 'undefined') {
-                return successPromise(BindState.HAS_BOUND);
+                return successPromise(BindState.PHONE_HAS_BOUND);
             } else {
                 dbUser.user.lineId = event.source.userId;
                 try {
@@ -302,32 +269,6 @@ async function getContribution(event: any): Promise<any> {
     }
 }
 
-async function addVerificationSignal(event: any, phone: string): Promise<any> {
-    try {
-        const result = await setAsync(event.source.userId, phone, 'EX', 180);
-        return successPromise(AddVerificationSignalState.SUCCESS);
-    } catch (err) {
-        return failPromise(err);
-    }
-}
-
-async function findSignal(event: any): Promise<any> {
-    try {
-        const result = await getAsync(event.source.userId);
-
-        logFactory.log(result);
-
-        if (!result) {
-            return successPromise(FindTemporaryInfoState.HAS_NOT_SIGNALED);
-        }
-        logFactory.log('result from findTemporaryInfo: ' + result);
-
-        return successPromise(result);
-    } catch (err) {
-        failPromise(err);
-    }
-}
-
 function deleteSignal(event: any) {
     redisClient.del(event.source.userId);
 }
@@ -403,8 +344,6 @@ export {
     deleteBinding,
     getQrcode,
     getContribution,
-    addVerificationSignal,
-    findSignal,
     deleteSignal,
     getRecord,
 };

@@ -8,7 +8,7 @@ function isMobilePhone(phone: string): boolean {
 
 function randomHexString(amount: number): string {
     var text = '';
-    var charSet = "0123456789ABCDEF";
+    var charSet = '0123456789ABCDEF';
 
     for (var i = 0; i < amount; i++) {
         text += charSet.charAt(Math.floor(Math.random() * charSet.length));
@@ -17,5 +17,12 @@ function randomHexString(amount: number): string {
     return text;
 }
 
+function isVerificationCode(code: string): boolean {
+    var reg: RegExp = /[0-9]{6}/;
+    var res: boolean = reg.test(code);
 
-export {isMobilePhone, randomHexString};
+    if (res) return true;
+    else return false;
+}
+
+export { isMobilePhone, randomHexString, isVerificationCode };
