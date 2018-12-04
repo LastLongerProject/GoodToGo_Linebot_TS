@@ -50,17 +50,17 @@ var GetDataMethod;
             let view;
             var monthArray = Array();
             var index;
-            if (type === DataType.GetMoreRecord) {
+            if (type === "get more record from database" /* GET_MORE_RECORD */) {
                 view = new recordView_1.RecordView();
                 index = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
                 index = index === null ? 0 : Number(index);
             }
-            else if (type === DataType.Record) {
+            else if (type === "record" /* RECORD */) {
                 view = new recordView_1.RecordView();
                 index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
                 index = 0;
             }
-            else if (type === DataType.Inused) {
+            else if (type === "in used" /* IN_USED */) {
                 view = new inusedView_1.InusedView();
                 index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', 0);
                 index = 0;
@@ -106,7 +106,7 @@ var GetDataMethod;
             if (view.getView().contents.body.contents.length === 0) {
                 view.pushBodyContent(container_1.container.nothing.toString, '期待您的使用！');
             }
-            if (type === DataType.Record || type === DataType.GetMoreRecord) {
+            if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
                 redisClient_1.setAsync(event.source.userId + '_recordIndex', index + tempIndex);
             }
             else {
@@ -287,7 +287,7 @@ function getRecord(event, type) {
             });
             recordCollection['usingAmount'] -= returnList.length;
             GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
-            if (type === DataType.Record || type === DataType.GetMoreRecord) {
+            if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
                 recordCollection['data'] = [];
                 for (var i = 0; i < returned.length; i++) {
                     recordCollection['data'].push(returned[i]);
@@ -306,6 +306,23 @@ function getRecord(event, type) {
     });
 }
 exports.getRecord = getRecord;
+function findSignal(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const result = yield redisClient_1.getAsync(event.source.userId);
+            logFactory.log(result);
+            if (!result) {
+                return customPromise_1.successPromise("The user has not been signaled in redis" /* HAS_NOT_SIGNALED */);
+            }
+            logFactory.log('result from findTemporaryInfo: ' + result);
+            return customPromise_1.successPromise(result);
+        }
+        catch (err) {
+            customPromise_1.failPromise(err);
+        }
+    });
+}
+exports.findSignal = findSignal;
 function getTimeString(DateObject) {
     var tmpHour = DateObject.getHours() + 8;
     var dayFormatted = intReLength(dayFormatter(DateObject), 2);

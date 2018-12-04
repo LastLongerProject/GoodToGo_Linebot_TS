@@ -21,7 +21,6 @@ const request = __importStar(require("../api/request"));
 const customPromise_1 = require("../api/customPromise");
 const tool_1 = require("../api/tool");
 const contributionView_1 = require("../etl/view/contributionView");
-const serviceProcess_2 = require("../models/serviceProcess");
 const flexMessage_1 = require("../etl/models/flexMessage");
 const qrcodeView_1 = require("../etl/view/qrcodeView");
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
@@ -37,15 +36,15 @@ function postbackAction(event) {
             let message = '期待您成為好合器會員！';
             return client.textMessage(event, message);
         }
-        else if (Number(postbackData) === serviceProcess_1.DataType.GetMoreInused ||
-            Number(postbackData) === serviceProcess_1.DataType.Inused ||
-            Number(postbackData) === serviceProcess_1.DataType.Record ||
-            Number(postbackData) === serviceProcess_1.DataType.GetMoreRecord) {
-            return getDataEvent(event, Number(postbackData));
+        else if (postbackData === "get more record from database" /* GET_MORE_RECORD */ ||
+            postbackData === "in used" /* IN_USED */ ||
+            postbackData === "record" /* RECORD */ ||
+            postbackData === "get more record from database" /* GET_MORE_RECORD */) {
+            return getDataEvent(event, postbackData);
         }
-        else if (Number(postbackData) === serviceProcess_2.RewardType.Lottery ||
-            Number(postbackData) === serviceProcess_2.RewardType.Redeem) {
-            return getRewardImage(event, Number(postbackData));
+        else if (postbackData === "lottery" /* LOTTERY */ ||
+            postbackData === "redeem" /* REDEEM */) {
+            return getRewardImage(event, postbackData);
         }
     });
 }
@@ -108,7 +107,7 @@ function getDataEvent(event, type) {
 function getRewardImage(event, type) {
     let lotteryImage = 'https://i.imgur.com/MwljlRm.jpg';
     let redeemImgae = 'https://imgur.com/l2xiXxb.jpg';
-    let url = type === serviceProcess_2.RewardType.Lottery ? lotteryImage : redeemImgae;
+    let url = type === "lottery" /* LOTTERY */ ? lotteryImage : redeemImgae;
     let image = {
         type: flexMessage_1.FlexMessage.ComponetType.image,
         originalContentUrl: url,
@@ -121,7 +120,7 @@ function getQRCodeEvent(event) {
         logFactory.log('Event: get QRCode');
         try {
             var result = yield serviceProcess_1.getQrcode(event);
-            if (result === serviceProcess_1.DatabaseState.USER_NOT_FOUND) {
+            if (result === "Does not find user in database" /* USER_NOT_FOUND */) {
                 let message = '請輸入手機號碼以綁定 line id';
                 return client.textMessage(event, message);
             }
@@ -150,23 +149,23 @@ function bindingEvent(event) {
             let message;
             logFactory.log(result);
             switch (result) {
-                case serviceProcess_1.DatabaseState.USER_NOT_FOUND:
+                case "Does not find user in database" /* USER_NOT_FOUND */:
                     message =
                         '您還不是會員哦！\n請問要使用 ' +
                             event.message.text +
                             ' 為帳號註冊成為會員嗎？';
                     return client.registerTemplate(event, message);
-                case serviceProcess_1.BindState.HAS_BOUND:
+                case "The phone has already bound with another line account" /* PHONE_HAS_BOUND */:
                     message = '此手機已經綁定過摟！';
                     return client.textMessage(event, message);
-                case serviceProcess_1.BindState.LINE_HAS_BOUND:
+                case "Line has bound with another phone" /* LINE_HAS_BOUND */:
                     message = '此 line 已經綁定過摟！';
                     return client.textMessage(event, message);
-                case serviceProcess_1.BindState.SUCCESS:
+                case "Successfullt bound with line" /* SUCCESS */:
                     message = '綁定成功！';
                     richMenu.bindRichmenuToUser('after', event.source.userId);
                     return client.textMessage(event, message);
-                case serviceProcess_1.BindState.IS_NOT_MOBILEPHONE:
+                case "The input is not phone number" /* IS_NOT_PHONE */:
                     message = '請輸入要綁定的手機號碼！';
                     return client.textMessage(event, message);
             }
@@ -216,7 +215,7 @@ module.exports = {
             getContributionEvent(event);
         }
         else if (event.message.text === '使用中容器') {
-            getDataEvent(event, serviceProcess_1.DataType.Inused);
+            getDataEvent(event, "in used" /* IN_USED */);
         }
         else if (event.message.text === '我的會員卡') {
             getQRCodeEvent(event);

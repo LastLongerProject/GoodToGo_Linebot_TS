@@ -5,7 +5,7 @@ import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
 import { View } from '../etl/view/view';
-import { BindState, DatabaseState, DeleteBindState } from '../api/enumManager';
+import { BindState, DatabaseState, DeleteBindState, DataType } from '../api/enumManager';
 
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
@@ -59,15 +59,15 @@ namespace GetDataMethod {
         var monthArray = Array<any>();
         var index: any;
 
-        if (type === DataType.GetMoreRecord) {
+        if (type === DataType.GET_MORE_RECORD) {
             view = new RecordView();
             index = await getAsync(event.source.userId + '_recordIndex');
             index = index === null ? 0 : Number(index);
-        } else if (type === DataType.Record) {
+        } else if (type === DataType.RECORD) {
             view = new RecordView();
             index = await setAsync(event.source.userId + '_recordIndex', 0);
             index = 0;
-        } else if (type === DataType.Inused) {
+        } else if (type === DataType.IN_USED) {
             view = new InusedView();
             index = await setAsync(event.source.userId + '_inusedIndex', 0);
             index = 0;
@@ -127,7 +127,7 @@ namespace GetDataMethod {
             view.pushBodyContent(container.nothing.toString, '期待您的使用！');
         }
 
-        if (type === DataType.Record || type === DataType.GetMoreRecord) {
+        if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
             setAsync(event.source.userId + '_recordIndex', index + tempIndex);
         } else {
             setAsync(event.source.userId + '_inusedIndex', index + tempIndex);
@@ -167,7 +167,6 @@ PlaceID.find(
 async function bindLineId(event: any, phone: string): Promise<any> {
     if (!isMobilePhone(phone))
         return successPromise(BindState.IS_NOT_PHONE);
-
     var dbUser = await User.findOne({ 'user.phone': phone }).exec();
 
     if (!dbUser) {
@@ -177,7 +176,6 @@ async function bindLineId(event: any, phone: string): Promise<any> {
         if (!doc) {
             if (typeof dbUser.user.lineId !== 'undefined') {
                 return successPromise(BindState.PHONE_HAS_BOUND);
-
             } else {
                 dbUser.user.lineId = event.source.userId;
                 try {
@@ -308,7 +306,7 @@ async function getRecord(event: any, type): Promise<any> {
         });
         recordCollection['usingAmount'] -= returnList.length;
         GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
-        if (type === DataType.Record || type === DataType.GetMoreRecord) {
+        if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
             recordCollection['data'] = [];
             for (var i = 0; i < returned.length; i++) {
                 recordCollection['data'].push(returned[i]);
@@ -329,6 +327,20 @@ async function getRecord(event: any, type): Promise<any> {
     }
 }
 
+async function findSignal(event: any): Promise<any> {
+    try {
+        const result = await getAsync(event.source.userId);
+        logFactory.log(result);
+        if (!result) {
+            return successPromise(DatabaseState.HAS_NOT_SIGNALED);
+        }
+        logFactory.log('result from findTemporaryInfo: ' + result);
+        return successPromise(result);
+    } catch (err) {
+        failPromise(err);
+    }
+
+}
 export {
     bindLineId,
     deleteBinding,
@@ -336,6 +348,7 @@ export {
     getContribution,
     deleteSignal,
     getRecord,
+    findSignal
 };
 
 function getTimeString(DateObject: Date): string {

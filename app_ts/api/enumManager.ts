@@ -24,7 +24,8 @@ enum QrcodeState {
 }
 
 const enum DatabaseState {
-    USER_NOT_FOUND = 'Does not find user in database'
+    USER_NOT_FOUND = 'Does not find user in database',
+    HAS_NOT_SIGNALED = 'The user has not been signaled in redis'
 }
 
 

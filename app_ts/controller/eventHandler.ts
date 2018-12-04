@@ -6,14 +6,10 @@ import { loadavg } from 'os';
 import {
     bindLineId,
     deleteBinding,
-    BindState,
     getQrcode,
-    DeleteBindState,
-    DatabaseState,
     getContribution,
-    findSignal,
     getRecord,
-    DataType,
+    findSignal,
 } from '../models/serviceProcess';
 
 import * as client from './clientDelegate';
@@ -21,9 +17,9 @@ import * as request from '../api/request';
 import { failPromise } from '../api/customPromise';
 import { isMobilePhone, isVerificationCode } from '../api/tool';
 import { ContrubtionView } from '../etl/view/contributionView';
-import { RewardType } from '../models/serviceProcess';
 import { FlexMessage } from '../etl/models/flexMessage';
 import { QrcodeView } from '../etl/view/qrcodeView';
+import { DataType, RewardType, DatabaseState, BindState } from '../api/enumManager';
 
 const logFactory = require('../api/logFactory')('linebot:eventHandler');
 const richMenu = require('../api/richMenuScript');
@@ -38,17 +34,17 @@ async function postbackAction(event: any): Promise<any> {
         let message = '期待您成為好合器會員！';
         return client.textMessage(event, message);
     } else if (
-        Number(postbackData) === DataType.GetMoreInused ||
-        Number(postbackData) === DataType.Inused ||
-        Number(postbackData) === DataType.Record ||
-        Number(postbackData) === DataType.GetMoreRecord
+        postbackData === DataType.GET_MORE_RECORD ||
+        postbackData === DataType.IN_USED ||
+        postbackData === DataType.RECORD ||
+        postbackData === DataType.GET_MORE_RECORD
     ) {
-        return getDataEvent(event, Number(postbackData));
+        return getDataEvent(event, postbackData);
     } else if (
-        Number(postbackData) === RewardType.Lottery ||
-        Number(postbackData) === RewardType.Redeem
+        postbackData === RewardType.LOTTERY ||
+        postbackData === RewardType.REDEEM
     ) {
-        return getRewardImage(event, Number(postbackData));
+        return getRewardImage(event, postbackData);
     }
 }
 
@@ -111,7 +107,7 @@ function getRewardImage(event, type) {
     let lotteryImage = 'https://i.imgur.com/MwljlRm.jpg';
     let redeemImgae = 'https://imgur.com/l2xiXxb.jpg';
 
-    let url = type === RewardType.Lottery ? lotteryImage : redeemImgae;
+    let url = type === RewardType.LOTTERY ? lotteryImage : redeemImgae;
     let image = {
         type: FlexMessage.ComponetType.image,
         originalContentUrl: url,
@@ -164,7 +160,7 @@ async function bindingEvent(event: any): Promise<any> {
                     event.message.text +
                     ' 為帳號註冊成為會員嗎？';
                 return client.registerTemplate(event, message);
-            case BindState.HAS_BOUND:
+            case BindState.PHONE_HAS_BOUND:
                 message = '此手機已經綁定過摟！';
                 return client.textMessage(event, message);
             case BindState.LINE_HAS_BOUND:
@@ -174,7 +170,7 @@ async function bindingEvent(event: any): Promise<any> {
                 message = '綁定成功！';
                 richMenu.bindRichmenuToUser('after', event.source.userId);
                 return client.textMessage(event, message);
-            case BindState.IS_NOT_MOBILEPHONE:
+            case BindState.IS_NOT_PHONE:
                 message = '請輸入要綁定的手機號碼！';
                 return client.textMessage(event, message);
         }
@@ -223,7 +219,7 @@ module.exports = {
         } else if (event.message.text === '我的好杯幣') {
             getContributionEvent(event);
         } else if (event.message.text === '使用中容器') {
-            getDataEvent(event, DataType.Inused);
+            getDataEvent(event, DataType.IN_USED);
         } else if (event.message.text === '我的會員卡') {
             getQRCodeEvent(event);
         } else if (event.message.text === '聯絡好盒器') {
