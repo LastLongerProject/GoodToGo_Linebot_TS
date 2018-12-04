@@ -9,7 +9,7 @@ class RecordView implements View {
     }
     private headerText = {
         type: FlexMessage.ComponetType.text,
-        text: "歷史紀錄",
+        text: "已歸還容器",
         size: FlexMessage.Size.xl,
         weight: FlexMessage.Weight.bold,
         color: "#ffffff"
@@ -80,7 +80,7 @@ class RecordView implements View {
     public getView() {
         return {
             type: "flex",
-            altText: "使用容器數量",
+            altText: "已歸還容器",
             contents: this.view
         };
     }

@@ -34,9 +34,9 @@ class InusedView implements View {
         type: FlexMessage.ComponetType.button,
         action: {
             type: "postback",
-            label: "查看歷史紀錄",
+            label: "查看已歸還容器",
             data: DataType.RECORD,
-            displayText: "查看歷史紀錄"
+            displayText: "查看已歸還容器"
         },
         style: "link",
         color: "#8FD5E8"

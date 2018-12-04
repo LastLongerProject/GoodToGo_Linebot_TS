@@ -7,7 +7,7 @@ class RecordView {
         this.separator = flexMessage_1.separatorTemplate();
         this.headerText = {
             type: flexMessage_1.FlexMessage.ComponetType.text,
-            text: "歷史紀錄",
+            text: "已歸還容器",
             size: flexMessage_1.FlexMessage.Size.xl,
             weight: flexMessage_1.FlexMessage.Weight.bold,
             color: "#ffffff"
@@ -71,7 +71,7 @@ class RecordView {
     getView() {
         return {
             type: "flex",
-            altText: "使用容器數量",
+            altText: "已歸還容器",
             contents: this.view
         };
     }

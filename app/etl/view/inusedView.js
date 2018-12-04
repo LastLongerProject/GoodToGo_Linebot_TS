@@ -31,9 +31,9 @@ class InusedView {
             type: flexMessage_1.FlexMessage.ComponetType.button,
             action: {
                 type: "postback",
-                label: "查看歷史紀錄",
+                label: "查看已歸還容器",
                 data: "record" /* RECORD */,
-                displayText: "查看歷史紀錄"
+                displayText: "查看已歸還容器"
             },
             style: "link",
             color: "#8FD5E8"
