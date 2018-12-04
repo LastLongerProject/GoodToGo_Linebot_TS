@@ -1,11 +1,11 @@
 import { redisClient, getAsync, setAsync } from './db/redisClient';
 import { successPromise, failPromise } from '../api/customPromise';
-import { isMobilePhone } from '../api/tool';
+import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString } from '../api/tool';
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
 import { View } from '../etl/view/view';
-import { BindState, DatabaseState, DeleteBindState, DataType } from '../api/enumManager';
+import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../api/enumManager';
 
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
@@ -14,8 +14,6 @@ const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
 const ContainerType = require('./db/containerTypeDB');
-const TemporaryInfo = require('./db/temporaryInfoDB');
-const RichMenu = require('./db/richMenuDB');
 
 var containerTypeDict: Object;
 var storeDict: Object;
@@ -65,11 +63,11 @@ namespace GetDataMethod {
             index = index === null ? 0 : Number(index);
         } else if (type === DataType.RECORD) {
             view = new RecordView();
-            index = await setAsync(event.source.userId + '_recordIndex', 0);
+            index = await setAsync(event.source.userId + '_recordIndex', "0");
             index = 0;
         } else if (type === DataType.IN_USED) {
             view = new InusedView();
-            index = await setAsync(event.source.userId + '_inusedIndex', 0);
+            index = await setAsync(event.source.userId + '_inusedIndex', "0");
             index = 0;
         } else {
             view = new InusedView();
@@ -327,6 +325,17 @@ async function getRecord(event: any, type): Promise<any> {
     }
 }
 
+async function addVerificationSignal(event: any, phone: string): Promise<any> {
+    try {
+        //@ts-ignore
+        const result = await setAsync(event.source.userId, phone, 'EX', 180);
+        if (result)
+            return successPromise(AddVerificationSignalState.SUCCESS);
+    } catch (err) {
+        return failPromise(err);
+    }
+}
+
 async function findSignal(event: any): Promise<any> {
     try {
         const result = await getAsync(event.source.userId);
@@ -348,61 +357,7 @@ export {
     getContribution,
     deleteSignal,
     getRecord,
-    findSignal
+    findSignal,
+    addVerificationSignal
 };
 
-function getTimeString(DateObject: Date): string {
-    var tmpHour = DateObject.getHours() + 8;
-    var dayFormatted = intReLength(dayFormatter(DateObject), 2);
-    var monthFormatted = intReLength(DateObject.getMonth() + 1, 2);
-    var hoursFormatted = intReLength(tmpHour >= 24 ? tmpHour - 24 : tmpHour, 2);
-    var minutesFormatted = intReLength(DateObject.getMinutes(), 2);
-    return (
-        DateObject.getFullYear() +
-        '/' +
-        monthFormatted +
-        '/' +
-        dayFormatted +
-        ' ' +
-        hoursFormatted +
-        ':' +
-        minutesFormatted
-    );
-}
-
-function dayFormatter(dateToFormat: Date): number {
-    if (dateToFormat.getHours() >= 16)
-        dateToFormat.setDate(dateToFormat.getDate() + 1);
-    return dateToFormat.getDate();
-}
-
-function intReLength(data, length: number): string {
-    var str = data.toString();
-    if (length - str.length) {
-        for (let j = 0; j <= length - str.length; j++) {
-            str = '0' + str;
-        }
-    }
-    return str;
-}
-
-function getYearAndMonthString(DateObject: Date): string {
-    return (
-        DateObject.getFullYear().toString() +
-        '年' +
-        (DateObject.getMonth() + 1).toString() +
-        '月'
-    );
-}
-
-function isToday(d: Date): boolean {
-    let today = new Date();
-    if (
-        d.getFullYear() === today.getFullYear() &&
-        d.getMonth() === today.getMonth() &&
-        d.getDay() === today.getDay()
-    ) {
-        return true;
-    }
-    return false;
-}

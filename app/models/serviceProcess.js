@@ -19,8 +19,6 @@ const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
 const ContainerType = require('./db/containerTypeDB');
-const TemporaryInfo = require('./db/temporaryInfoDB');
-const RichMenu = require('./db/richMenuDB');
 var containerTypeDict;
 var storeDict;
 var GetDataMethod;
@@ -57,12 +55,12 @@ var GetDataMethod;
             }
             else if (type === "record" /* RECORD */) {
                 view = new recordView_1.RecordView();
-                index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', 0);
+                index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', "0");
                 index = 0;
             }
             else if (type === "in used" /* IN_USED */) {
                 view = new inusedView_1.InusedView();
-                index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', 0);
+                index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', "0");
                 index = 0;
             }
             else {
@@ -75,9 +73,9 @@ var GetDataMethod;
                 (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT
                     ? index + MAX_DISPLAY_AMOUNT
                     : recordCollection.data.length); i++) {
-                if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
-                    monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
-                    if (isToday(recordCollection.data[i].time)) {
+                if (monthArray.indexOf(tool_1.getYearAndMonthString(recordCollection.data[i].time)) === -1) {
+                    monthArray.push(tool_1.getYearAndMonthString(recordCollection.data[i].time));
+                    if (tool_1.isToday(recordCollection.data[i].time)) {
                         if (i !== index)
                             view.pushSeparator();
                         view.pushTimeBar('今天');
@@ -85,7 +83,7 @@ var GetDataMethod;
                     else {
                         if (i !== index)
                             view.pushSeparator();
-                        view.pushTimeBar(getYearAndMonthString(recordCollection.data[i].time));
+                        view.pushTimeBar(tool_1.getYearAndMonthString(recordCollection.data[i].time));
                     }
                 }
                 tempIndex += 1;
@@ -99,7 +97,7 @@ var GetDataMethod;
                             : type === 4
                                 ? container_1.container.icecream.toString
                                 : container_1.container.glass_16oz.toString;
-                view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) +
+                view.pushBodyContent(containerType, tool_1.getTimeString(recordCollection.data[i].time) +
                     '\n' +
                     recordCollection.data[i].store);
             }
@@ -266,7 +264,7 @@ function getRecord(event, type) {
             });
             for (let i = 0; i < rentList.length; i++) {
                 let record = {
-                    container: '#' + intReLength(rentList[i].container.id, 3),
+                    container: '#' + tool_1.intReLength(rentList[i].container.id, 3),
                     containerCode: rentList[i].container.id,
                     time: rentList[i].tradeTime,
                     type: rentList[i].container.typeCode,
@@ -306,6 +304,20 @@ function getRecord(event, type) {
     });
 }
 exports.getRecord = getRecord;
+function addVerificationSignal(event, phone) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            //@ts-ignore
+            const result = yield redisClient_1.setAsync(event.source.userId, phone, 'EX', 180);
+            if (result)
+                return customPromise_1.successPromise("Successfully add verification signal" /* SUCCESS */);
+        }
+        catch (err) {
+            return customPromise_1.failPromise(err);
+        }
+    });
+}
+exports.addVerificationSignal = addVerificationSignal;
 function findSignal(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -323,49 +335,4 @@ function findSignal(event) {
     });
 }
 exports.findSignal = findSignal;
-function getTimeString(DateObject) {
-    var tmpHour = DateObject.getHours() + 8;
-    var dayFormatted = intReLength(dayFormatter(DateObject), 2);
-    var monthFormatted = intReLength(DateObject.getMonth() + 1, 2);
-    var hoursFormatted = intReLength(tmpHour >= 24 ? tmpHour - 24 : tmpHour, 2);
-    var minutesFormatted = intReLength(DateObject.getMinutes(), 2);
-    return (DateObject.getFullYear() +
-        '/' +
-        monthFormatted +
-        '/' +
-        dayFormatted +
-        ' ' +
-        hoursFormatted +
-        ':' +
-        minutesFormatted);
-}
-function dayFormatter(dateToFormat) {
-    if (dateToFormat.getHours() >= 16)
-        dateToFormat.setDate(dateToFormat.getDate() + 1);
-    return dateToFormat.getDate();
-}
-function intReLength(data, length) {
-    var str = data.toString();
-    if (length - str.length) {
-        for (let j = 0; j <= length - str.length; j++) {
-            str = '0' + str;
-        }
-    }
-    return str;
-}
-function getYearAndMonthString(DateObject) {
-    return (DateObject.getFullYear().toString() +
-        '年' +
-        (DateObject.getMonth() + 1).toString() +
-        '月');
-}
-function isToday(d) {
-    let today = new Date();
-    if (d.getFullYear() === today.getFullYear() &&
-        d.getMonth() === today.getMonth() &&
-        d.getDay() === today.getDay()) {
-        return true;
-    }
-    return false;
-}
 //# sourceMappingURL=serviceProcess.js.map

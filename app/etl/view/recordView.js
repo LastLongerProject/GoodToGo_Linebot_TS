@@ -1,7 +1,6 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
-const serviceProcess_1 = require("../../models/serviceProcess");
 class RecordView {
     constructor() {
         this.header = flexMessage_1.headerTemplate();
@@ -18,7 +17,7 @@ class RecordView {
             action: {
                 type: "postback",
                 label: "顯示更多",
-                data: String(serviceProcess_1.DataType.GetMoreRecord),
+                data: String("get more record from database" /* GET_MORE_RECORD */),
                 displayText: "顯示更多"
             },
             style: "link",
@@ -29,7 +28,7 @@ class RecordView {
             action: {
                 type: "postback",
                 label: "查看使用中容器",
-                data: String(serviceProcess_1.DataType.Inused),
+                data: String("in used" /* IN_USED */),
                 displayText: "查看使用中容器"
             },
             style: "link",

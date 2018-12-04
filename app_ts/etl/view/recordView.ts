@@ -1,6 +1,6 @@
 import { View } from "./view"
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent } from "../models/flexMessage"
-import { DataType } from '../../models/serviceProcess';
+import { DataType } from '../../api/enumManager';
 class RecordView implements View {
     private header = headerTemplate();
     private separator = separatorTemplate();
@@ -19,7 +19,7 @@ class RecordView implements View {
         action: {
             type: "postback",
             label: "顯示更多",
-            data: String(DataType.GetMoreRecord),
+            data: String(DataType.GET_MORE_RECORD),
             displayText: "顯示更多"
         },
         style: "link",
@@ -31,7 +31,7 @@ class RecordView implements View {
         action: {
             type: "postback",
             label: "查看使用中容器",
-            data: String(DataType.Inused),
+            data: String(DataType.IN_USED),
             displayText: "查看使用中容器"
         },
         style: "link",
@@ -39,9 +39,9 @@ class RecordView implements View {
     }
 
     private footer = {
-        type: FlexMessage.ComponetType.box, 
+        type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.vertical,
-        contents:[this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getInused]
+        contents: [this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getInused]
     };
 
     private styles = {
@@ -85,4 +85,4 @@ class RecordView implements View {
     }
 };
 
-export {RecordView};
+export { RecordView };

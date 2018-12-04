@@ -1,6 +1,6 @@
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent } from "../models/flexMessage"
 import { View } from './view';
-import { DataType } from '../../models/serviceProcess';
+import { DataType } from '../../api/enumManager';
 class InusedView implements View {
     private header = headerTemplate();
     private separator = separatorTemplate();
@@ -19,7 +19,7 @@ class InusedView implements View {
         action: {
             type: "postback",
             label: "顯示更多",
-            data: String(DataType.GetMoreInused),
+            data: String(DataType.GET_MORE_INUSED),
             displayText: "顯示更多"
         },
         style: "link",
@@ -31,7 +31,7 @@ class InusedView implements View {
         action: {
             type: "postback",
             label: "查看歷史紀錄",
-            data: String(DataType.Record),
+            data: String(DataType.RECORD),
             displayText: "查看歷史紀錄"
         },
         style: "link",
@@ -39,9 +39,9 @@ class InusedView implements View {
     }
 
     private footer = {
-        type: FlexMessage.ComponetType.box, 
+        type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.vertical,
-        contents:[this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getRecord]
+        contents: [this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getRecord]
     };
 
     private styles = {
@@ -85,5 +85,5 @@ class InusedView implements View {
     }
 };
 
-export {InusedView};
+export { InusedView };
 

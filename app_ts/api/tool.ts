@@ -25,4 +25,61 @@ function isVerificationCode(code: string): boolean {
     else return false;
 }
 
-export { isMobilePhone, randomHexString, isVerificationCode };
+function getTimeString(DateObject: Date): string {
+    var tmpHour = DateObject.getHours() + 8;
+    var dayFormatted = intReLength(dayFormatter(DateObject), 2);
+    var monthFormatted = intReLength(DateObject.getMonth() + 1, 2);
+    var hoursFormatted = intReLength(tmpHour >= 24 ? tmpHour - 24 : tmpHour, 2);
+    var minutesFormatted = intReLength(DateObject.getMinutes(), 2);
+    return (
+        DateObject.getFullYear() +
+        '/' +
+        monthFormatted +
+        '/' +
+        dayFormatted +
+        ' ' +
+        hoursFormatted +
+        ':' +
+        minutesFormatted
+    );
+}
+
+function dayFormatter(dateToFormat: Date): number {
+    if (dateToFormat.getHours() >= 16)
+        dateToFormat.setDate(dateToFormat.getDate() + 1);
+    return dateToFormat.getDate();
+}
+
+function intReLength(data, length: number): string {
+    var str = data.toString();
+    if (length - str.length) {
+        for (let j = 0; j <= length - str.length; j++) {
+            str = '0' + str;
+        }
+    }
+    return str;
+}
+
+function getYearAndMonthString(DateObject: Date): string {
+    return (
+        DateObject.getFullYear().toString() +
+        '年' +
+        (DateObject.getMonth() + 1).toString() +
+        '月'
+    );
+}
+
+function isToday(d: Date): boolean {
+    let today = new Date();
+    if (
+        d.getFullYear() === today.getFullYear() &&
+        d.getMonth() === today.getMonth() &&
+        d.getDay() === today.getDay()
+    ) {
+        return true;
+    }
+    return false;
+}
+
+
+export { isMobilePhone, randomHexString, isVerificationCode, getTimeString, dayFormatter, intReLength, getYearAndMonthString, isToday };

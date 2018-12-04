@@ -1,7 +1,6 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
-const serviceProcess_1 = require("../../models/serviceProcess");
 class InusedView {
     constructor() {
         this.header = flexMessage_1.headerTemplate();
@@ -18,7 +17,7 @@ class InusedView {
             action: {
                 type: "postback",
                 label: "顯示更多",
-                data: String(serviceProcess_1.DataType.GetMoreInused),
+                data: String("get more in used container from database" /* GET_MORE_INUSED */),
                 displayText: "顯示更多"
             },
             style: "link",
@@ -29,7 +28,7 @@ class InusedView {
             action: {
                 type: "postback",
                 label: "查看歷史紀錄",
-                data: String(serviceProcess_1.DataType.Record),
+                data: String("record" /* RECORD */),
                 displayText: "查看歷史紀錄"
             },
             style: "link",

@@ -1,7 +1,6 @@
-import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent, spacerTemplate } from '../models/flexMessage';
+import { separatorTemplate, FlexMessage, spacerTemplate } from '../models/flexMessage';
 import { View } from './view';
-import * as bodyParser from 'body-parser';
-import { RewardType } from "../../models/serviceProcess";
+import { RewardType } from "../../api/enumManager";
 class ContrubtionView implements View {
     private separator = separatorTemplate();
     private spacer = spacerTemplate();
@@ -10,7 +9,7 @@ class ContrubtionView implements View {
         action: {
             type: "postback",
             label: "用 5 點好杯幣參加抽獎",
-            data: String(RewardType.Lottery),
+            data: String(RewardType.LOTTERY),
             displayText: "用 5 點好杯幣參加抽獎"
         },
         style: "link",
@@ -22,7 +21,7 @@ class ContrubtionView implements View {
         action: {
             type: "postback",
             label: "用 50 點好杯幣兌換飲料",
-            data: String(RewardType.Redeem),
+            data: String(RewardType.REDEEM),
             displayText: "用 50 點好杯幣兌換飲料"
         },
         style: "link",
@@ -30,9 +29,9 @@ class ContrubtionView implements View {
     }
 
     private footer = {
-        type: FlexMessage.ComponetType.box, 
+        type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.vertical,
-        contents:[this.footerButton_lottery, this.separator.getSeparator(), this.footerButton_redeem]
+        contents: [this.footerButton_lottery, this.separator.getSeparator(), this.footerButton_redeem]
     };
 
     private bodyImage = {
@@ -99,4 +98,4 @@ class ContrubtionView implements View {
     }
 };
 
-export {ContrubtionView};
+export { ContrubtionView };

@@ -19,7 +19,11 @@ const enum GetContributeState {
     SUCCESS = "Get contribution successfully"
 }
 
-enum QrcodeState {
+const enum AddVerificationSignalState {
+    SUCCESS = "Successfully add verification signal"
+}
+
+const enum QrcodeState {
     SUCCESS = 'Get contribution successfully'
 }
 
@@ -43,6 +47,6 @@ const enum RewardType {
 
 export {
     RisgisterState, BindState, DeleteBindState, GetContributeState, QrcodeState, DatabaseState
-    , DataType, RewardType
+    , DataType, RewardType, AddVerificationSignalState
 }
 

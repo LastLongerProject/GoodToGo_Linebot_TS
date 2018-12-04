@@ -1,7 +1,6 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
-const serviceProcess_1 = require("../../models/serviceProcess");
 class ContrubtionView {
     constructor() {
         this.separator = flexMessage_1.separatorTemplate();
@@ -11,7 +10,7 @@ class ContrubtionView {
             action: {
                 type: "postback",
                 label: "用 5 點好杯幣參加抽獎",
-                data: String(serviceProcess_1.RewardType.Lottery),
+                data: String("lottery" /* LOTTERY */),
                 displayText: "用 5 點好杯幣參加抽獎"
             },
             style: "link",
@@ -22,7 +21,7 @@ class ContrubtionView {
             action: {
                 type: "postback",
                 label: "用 50 點好杯幣兌換飲料",
-                data: String(serviceProcess_1.RewardType.Redeem),
+                data: String("redeem" /* REDEEM */),
                 displayText: "用 50 點好杯幣兌換飲料"
             },
             style: "link",
