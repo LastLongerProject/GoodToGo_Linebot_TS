@@ -22,7 +22,7 @@ exports.headerTemplate = header;
 function separator() {
     let separator = {
         type: "separator",
-        margin: FlexMessage.Margin.sm
+        margin: FlexMessage.Margin.xxl
     };
     function setMargin(margin) {
         separator.margin = margin;
@@ -73,11 +73,13 @@ function getBodyContent(containerType, dateAndStore) {
                 size: FlexMessage.Size.xs,
                 gravity: FlexMessage.Gravity.center,
                 flex: 1
-            }, {
+            },
+            {
                 type: FlexMessage.ComponetType.text,
                 text: container_1.container[containerType].name,
                 size: FlexMessage.Size.md,
                 color: "#565656",
+                margin: FlexMessage.Margin.md,
                 gravity: FlexMessage.Gravity.center,
                 align: FlexMessage.Align.start,
                 weight: FlexMessage.Weight.bold,

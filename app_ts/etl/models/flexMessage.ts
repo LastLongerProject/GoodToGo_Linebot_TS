@@ -24,7 +24,7 @@ function header(): any {
 function separator(): any {
     let separator = {
         type: "separator",
-        margin: FlexMessage.Margin.sm
+        margin: FlexMessage.Margin.xxl
     }
 
     function setMargin(margin: string) {
@@ -71,7 +71,7 @@ function addTimeBar(date: String) {
     }
 }
 
-function getBodyContent(containerType, dateAndStore: String): any{
+function getBodyContent(containerType, dateAndStore: String): any {
     return {
         type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.horizontal,
@@ -81,11 +81,13 @@ function getBodyContent(containerType, dateAndStore: String): any{
             size: FlexMessage.Size.xs,
             gravity: FlexMessage.Gravity.center,
             flex: 1
-        }, {
+        },
+        {
             type: FlexMessage.ComponetType.text,
             text: container[containerType].name,
             size: FlexMessage.Size.md,
             color: "#565656",
+            margin: FlexMessage.Margin.md,
             gravity: FlexMessage.Gravity.center,
             align: FlexMessage.Align.start,
             weight: FlexMessage.Weight.bold,
@@ -114,78 +116,78 @@ function buttonStyle(): any {
 namespace FlexMessage {
     export namespace Margin {
         export const none = "none",
-        xs = "xs",
-        sm = "sm",
-        md = "md",
-        lg = "lg",
-        xl = "xl",
-        xxl = "xxl"
+            xs = "xs",
+            sm = "sm",
+            md = "md",
+            lg = "lg",
+            xl = "xl",
+            xxl = "xxl"
     }
-    
+
     export namespace Size {
         export const xxs = "xxs",
-        xs = "xs",
-        sm = "sm",
-        md = "md",
-        lg = "lg",
-        xl = "xl",
-        xxl = "xxl",
-        _3xl = "3xl",
-        _4xl = "4xl",
-        _5xl = "5xl"
+            xs = "xs",
+            sm = "sm",
+            md = "md",
+            lg = "lg",
+            xl = "xl",
+            xxl = "xxl",
+            _3xl = "3xl",
+            _4xl = "4xl",
+            _5xl = "5xl"
     }
-    
+
     export namespace Height {
         export const sm = "sm",
-        md = "md"
+            md = "md"
     }
-    
+
     export namespace Weight {
         export const regular = "regular",
-        bold = "bold"
+            bold = "bold"
     }
-    
+
     export namespace Layout {
         export const horizontal = "horizontal",
-        vertical = "vertical"
+            vertical = "vertical"
     }
-    
+
     export namespace Gravity {
         export const top = "top",
-        bottom = "bottom",
-        center = "center"
+            bottom = "bottom",
+            center = "center"
     }
-    
+
     export namespace ComponetType {
         export const box = "box",
-        button = "button",
-        filler = "filler",
-        icon = "icon",
-        image = "image",
-        separator = "separator",
-        spacer = "spacer",
-        text = "text"
+            button = "button",
+            filler = "filler",
+            icon = "icon",
+            image = "image",
+            separator = "separator",
+            spacer = "spacer",
+            text = "text"
     }
-    
+
     export namespace Align {
         export const start = "start",
-        end = "end",
-        center = "center"
+            end = "end",
+            center = "center"
     }
 
     export namespace Spacing {
         export const none = "none",
-        xs = "xs",
-        sm = "sm",
-        md = "md",
-        lg = "lg",
-        xl = "xl",
-        xxl = "xxl"
+            xs = "xs",
+            sm = "sm",
+            md = "md",
+            lg = "lg",
+            xl = "xl",
+            xxl = "xxl"
     }
 
     export namespace Container {
         export const bubble = "bubble",
-        carousel = "carousel"
+            carousel = "carousel"
     }
 }
 

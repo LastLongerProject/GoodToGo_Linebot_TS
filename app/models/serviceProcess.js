@@ -26,11 +26,8 @@ var GetDataMethod;
     function spliceArrAndPush(returnList, inUsed, returned) {
         for (var i = 0; i < returnList.length; i++) {
             for (var j = inUsed.length - 1; j >= 0; j--) {
-                var returnCycle = typeof returnList[i].container.cycleCtr === 'undefined'
-                    ? 0
-                    : returnList[i].container.cycleCtr;
-                if (inUsed[j].containerCode === returnList[i].container.id &&
-                    inUsed[j].cycle === returnCycle) {
+                var returnCycle = typeof returnList[i].container.cycleCtr === 'undefined' ? 0 : returnList[i].container.cycleCtr;
+                if (inUsed[j].containerCode === returnList[i].container.id && inUsed[j].cycle === returnCycle) {
                     inUsed[j].returned = true;
                     inUsed[j].returnTime = returnList[i].tradeTime;
                     inUsed[j].cycle = undefined;
@@ -40,6 +37,9 @@ var GetDataMethod;
                 }
             }
         }
+        returned.sort(function (a, b) {
+            return b.time - a.time;
+        });
     }
     GetDataMethod.spliceArrAndPush = spliceArrAndPush;
     function exportClientFlexMessage(recordCollection, event, type) {
@@ -69,10 +69,7 @@ var GetDataMethod;
                 index = index === null ? 0 : Number(index);
             }
             let tempIndex = 0;
-            for (let i = index; i <
-                (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT
-                    ? index + MAX_DISPLAY_AMOUNT
-                    : recordCollection.data.length); i++) {
+            for (let i = index; i < (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT ? index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
                 if (monthArray.indexOf(tool_1.getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                     monthArray.push(tool_1.getYearAndMonthString(recordCollection.data[i].time));
                     if (tool_1.isToday(recordCollection.data[i].time)) {
@@ -88,18 +85,10 @@ var GetDataMethod;
                 }
                 tempIndex += 1;
                 let type = recordCollection.data[i].type;
-                let containerType = type === 0
-                    ? container_1.container.glass_12oz.toString
-                    : type === 7
-                        ? container_1.container.bowl.toString
-                        : type === 2
-                            ? container_1.container.plate.toString
-                            : type === 4
-                                ? container_1.container.icecream.toString
-                                : container_1.container.glass_16oz.toString;
+                let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2
+                    ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
                 view.pushBodyContent(containerType, tool_1.getTimeString(recordCollection.data[i].time) +
-                    '\n' +
-                    recordCollection.data[i].store);
+                    '\n' + recordCollection.data[i].store);
             }
             if (view.getView().contents.body.contents.length === 0) {
                 view.pushBodyContent(container_1.container.nothing.toString, '期待您的使用！');
@@ -320,7 +309,6 @@ function getData(event, type) {
                 recordCollection['data'] = [];
                 for (var i = 0; i < returned.length; i++) {
                     recordCollection['data'].push(returned[i]);
-                    console.log(returned[i]);
                 }
             }
             else {

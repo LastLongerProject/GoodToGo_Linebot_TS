@@ -26,14 +26,9 @@ namespace GetDataMethod {
     ): void {
         for (var i = 0; i < returnList.length; i++) {
             for (var j = inUsed.length - 1; j >= 0; j--) {
-                var returnCycle =
-                    typeof returnList[i].container.cycleCtr === 'undefined'
-                        ? 0
-                        : returnList[i].container.cycleCtr;
-                if (
-                    inUsed[j].containerCode === returnList[i].container.id &&
-                    inUsed[j].cycle === returnCycle
-                ) {
+                var returnCycle = typeof returnList[i].container.cycleCtr === 'undefined' ? 0 : returnList[i].container.cycleCtr;
+
+                if (inUsed[j].containerCode === returnList[i].container.id && inUsed[j].cycle === returnCycle) {
                     inUsed[j].returned = true;
                     inUsed[j].returnTime = returnList[i].tradeTime;
                     inUsed[j].cycle = undefined;
@@ -43,6 +38,10 @@ namespace GetDataMethod {
                 }
             }
         }
+
+        returned.sort(function (a, b) {
+            return b.time - a.time;
+        });
     }
 
     export async function exportClientFlexMessage(
@@ -77,19 +76,9 @@ namespace GetDataMethod {
 
         let tempIndex = 0;
 
-        for (
-            let i = index;
-            i <
-            (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT
-                ? index + MAX_DISPLAY_AMOUNT
-                : recordCollection.data.length);
-            i++
-        ) {
+        for (let i = index; i < (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT ? index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
             if (
-                monthArray.indexOf(
-                    getYearAndMonthString(recordCollection.data[i].time)
-                ) === -1
-            ) {
+                monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                 monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                 if (isToday(recordCollection.data[i].time)) {
                     if (i !== index) view.pushSeparator();
@@ -104,22 +93,10 @@ namespace GetDataMethod {
 
             tempIndex += 1;
             let type = recordCollection.data[i].type;
-            let containerType =
-                type === 0
-                    ? container.glass_12oz.toString
-                    : type === 7
-                        ? container.bowl.toString
-                        : type === 2
-                            ? container.plate.toString
-                            : type === 4
-                                ? container.icecream.toString
-                                : container.glass_16oz.toString;
-            view.pushBodyContent(
-                containerType,
-                getTimeString(recordCollection.data[i].time) +
-                '\n' +
-                recordCollection.data[i].store
-            );
+            let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2
+                ? container.plate.toString : type === 4 ? container.icecream.toString : container.glass_16oz.toString;
+            view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) +
+                '\n' + recordCollection.data[i].store);
         }
         if (view.getView().contents.body.contents.length === 0) {
             view.pushBodyContent(container.nothing.toString, '期待您的使用！');
@@ -334,7 +311,6 @@ async function getData(event: any, type): Promise<any> {
             recordCollection['data'] = [];
             for (var i = 0; i < returned.length; i++) {
                 recordCollection['data'].push(returned[i]);
-                console.log(returned[i])
             }
         } else {
             recordCollection['data'] = inUsed;

@@ -53,9 +53,10 @@ class RecordView implements View {
     private body = {
         type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.vertical,
-        spacing: FlexMessage.Spacing.lg,
+        spacing: FlexMessage.Spacing.xxl,
         contents: Array<any>()
     };
+
     private view = {
         type: FlexMessage.Container.bubble,
         header: this.header.getHeader(),

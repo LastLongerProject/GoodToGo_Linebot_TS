@@ -47,7 +47,7 @@ class RecordView {
         this.body = {
             type: flexMessage_1.FlexMessage.ComponetType.box,
             layout: flexMessage_1.FlexMessage.Layout.vertical,
-            spacing: flexMessage_1.FlexMessage.Spacing.lg,
+            spacing: flexMessage_1.FlexMessage.Spacing.xxl,
             contents: Array()
         };
         this.view = {
