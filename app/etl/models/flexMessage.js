@@ -22,7 +22,7 @@ exports.headerTemplate = header;
 function separator() {
     let separator = {
         type: "separator",
-        margin: FlexMessage.Margin.xxl
+        margin: FlexMessage.Margin.none
     };
     function setMargin(margin) {
         separator.margin = margin;

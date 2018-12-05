@@ -14,6 +14,7 @@ const tool_1 = require("../lib/tool");
 const container_1 = require("../etl/models/container");
 const recordView_1 = require("../etl/view/recordView");
 const inusedView_1 = require("../etl/view/inusedView");
+const flexMessage_1 = require("../etl/models/flexMessage");
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
@@ -59,12 +60,12 @@ var GetDataMethod;
                 index = 0;
             }
             else if (type === "in used" /* IN_USED */) {
-                view = new inusedView_1.InusedView();
+                view = new inusedView_1.InusedView(recordCollection['data'].length.toString());
                 index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', "0");
                 index = 0;
             }
             else {
-                view = new inusedView_1.InusedView();
+                view = new inusedView_1.InusedView(recordCollection['data'].length.toString());
                 index = yield redisClient_1.getAsync(event.source.userId + '_inusedIndex');
                 index = index === null ? 0 : Number(index);
             }
@@ -74,12 +75,12 @@ var GetDataMethod;
                     monthArray.push(tool_1.getYearAndMonthString(recordCollection.data[i].time));
                     if (tool_1.isToday(recordCollection.data[i].time)) {
                         if (i !== index)
-                            view.pushSeparator();
+                            view.pushSeparator(flexMessage_1.FlexMessage.Margin.xs);
                         view.pushTimeBar('今天');
                     }
                     else {
                         if (i !== index)
-                            view.pushSeparator();
+                            view.pushSeparator(flexMessage_1.FlexMessage.Margin.xs);
                         view.pushTimeBar(tool_1.getYearAndMonthString(recordCollection.data[i].time));
                     }
                 }
@@ -87,11 +88,16 @@ var GetDataMethod;
                 let type = recordCollection.data[i].type;
                 let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2
                     ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
-                view.pushBodyContent(containerType, tool_1.getTimeString(recordCollection.data[i].time) +
-                    '\n' + recordCollection.data[i].store);
+                view.pushSeparator(i === index ? flexMessage_1.FlexMessage.Margin.md : flexMessage_1.FlexMessage.Margin.lg);
+                view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getTimeString(recordCollection.data[i].time), recordCollection.data[i].store + "｜" + "使用");
             }
             if (view.getView().contents.body.contents.length === 0) {
-                view.pushBodyContent(container_1.container.nothing.toString, '期待您的使用！');
+                view.pushBodyContent(container_1.container.nothing.toString, container_1.container.nothing.toString, '期待您的使用！', "");
+                view.deleteGetmoreButton();
+            }
+            else {
+                let indexLabel = "(第" + String(index + 1) + "-" + String(index + tempIndex) + "筆)";
+                view.addIndexToFooterButtonLabel(indexLabel);
             }
             if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
                 redisClient_1.setAsync(event.source.userId + '_recordIndex', index + tempIndex);

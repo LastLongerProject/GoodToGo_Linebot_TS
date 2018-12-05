@@ -6,6 +6,7 @@ import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
 import { View } from '../etl/view/view';
 import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../lib/enumManager';
+import { FlexMessage } from '../etl/models/flexMessage';
 
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
@@ -65,11 +66,11 @@ namespace GetDataMethod {
             index = await setAsync(event.source.userId + '_recordIndex', "0");
             index = 0;
         } else if (type === DataType.IN_USED) {
-            view = new InusedView();
+            view = new InusedView(recordCollection['data'].length.toString());
             index = await setAsync(event.source.userId + '_inusedIndex', "0");
             index = 0;
         } else {
-            view = new InusedView();
+            view = new InusedView(recordCollection['data'].length.toString());
             index = await getAsync(event.source.userId + '_inusedIndex');
             index = index === null ? 0 : Number(index);
         }
@@ -81,25 +82,30 @@ namespace GetDataMethod {
                 monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
                 monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
                 if (isToday(recordCollection.data[i].time)) {
-                    if (i !== index) view.pushSeparator();
+                    if (i !== index) view.pushSeparator(FlexMessage.Margin.xs);
                     view.pushTimeBar('今天');
                 } else {
-                    if (i !== index) view.pushSeparator();
+                    if (i !== index) view.pushSeparator(FlexMessage.Margin.xs);
                     view.pushTimeBar(
                         getYearAndMonthString(recordCollection.data[i].time)
                     );
                 }
             }
-
             tempIndex += 1;
             let type = recordCollection.data[i].type;
             let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2
                 ? container.plate.toString : type === 4 ? container.icecream.toString : container.glass_16oz.toString;
-            view.pushBodyContent(containerType, getTimeString(recordCollection.data[i].time) +
-                '\n' + recordCollection.data[i].store);
+            view.pushSeparator(i === index ? FlexMessage.Margin.md : FlexMessage.Margin.lg);
+            view.pushBodyContent(containerType, recordCollection.data[i].container, getTimeString(recordCollection.data[i].time),
+                recordCollection.data[i].store + "｜" + "使用");
         }
+
         if (view.getView().contents.body.contents.length === 0) {
-            view.pushBodyContent(container.nothing.toString, '期待您的使用！');
+            view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "");
+            view.deleteGetmoreButton();
+        } else {
+            let indexLabel = "(第" + String(index + 1) + "-" + String(index + tempIndex) + "筆)"
+            view.addIndexToFooterButtonLabel(indexLabel);
         }
 
         if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {

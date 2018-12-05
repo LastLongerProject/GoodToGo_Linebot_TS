@@ -1,72 +1,27 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
-class RecordView {
+const inusedView_1 = require("./inusedView");
+class RecordView extends inusedView_1.InusedView {
     constructor() {
-        this.header = flexMessage_1.headerTemplate();
-        this.separator = flexMessage_1.separatorTemplate();
-        this.headerText = {
-            type: flexMessage_1.FlexMessage.ComponetType.text,
-            text: "已歸還容器",
-            size: flexMessage_1.FlexMessage.Size.xl,
-            weight: flexMessage_1.FlexMessage.Weight.bold,
-            color: "#ffffff"
-        };
-        this.footerButton_getMore = {
-            type: flexMessage_1.FlexMessage.ComponetType.button,
-            action: {
-                type: "postback",
-                label: "顯示更多",
-                data: "get more record from database" /* GET_MORE_RECORD */,
-                displayText: "顯示更多"
-            },
-            style: "link",
-            color: "#8FD5E8"
-        };
-        this.footerButton_getInused = {
-            type: flexMessage_1.FlexMessage.ComponetType.button,
-            action: {
-                type: "postback",
-                label: "查看使用中容器",
-                data: "in used" /* IN_USED */,
-                displayText: "查看使用中容器"
-            },
-            style: "link",
-            color: "#8FD5E8"
-        };
-        this.footer = {
-            type: flexMessage_1.FlexMessage.ComponetType.box,
-            layout: flexMessage_1.FlexMessage.Layout.vertical,
-            contents: [this.separator.getSeparator(), this.footerButton_getMore, this.footerButton_getInused]
-        };
-        this.styles = {
-            header: {
-                backgroundColor: "#00bbdc"
-            }
-        };
-        this.body = {
-            type: flexMessage_1.FlexMessage.ComponetType.box,
-            layout: flexMessage_1.FlexMessage.Layout.vertical,
-            spacing: flexMessage_1.FlexMessage.Spacing.xxl,
-            contents: Array()
-        };
-        this.view = {
-            type: flexMessage_1.FlexMessage.Container.bubble,
-            header: this.header.getHeader(),
-            body: this.body,
-            footer: this.footer,
-            styles: this.styles
-        };
-        this.header.setContents([this.headerText]);
+        super(...arguments);
+        this.name = "已歸還容器";
+        this.post_getMore = "get more record from database" /* GET_MORE_RECORD */;
+        this.post_getAnother = "get more in used container from database" /* GET_MORE_INUSED */;
     }
-    pushBodyContent(containerType, dateAndStore) {
+    pushBodyContent(containerType, containerId, dateAndStore) {
         this.view.body.contents.push(flexMessage_1.getBodyContent(containerType, dateAndStore));
     }
     pushTimeBar(label) {
         this.view.body.contents.push(flexMessage_1.addTimeBar(label));
     }
-    pushSeparator() {
+    pushSeparator(margin) {
+        this.separator.setMargin(margin);
         this.view.body.contents.push(this.separator.getSeparator());
+    }
+    addIndexToFooterButtonLabel(index) { }
+    deleteGetmoreButton() {
+        this.footer.contents.slice(1, 1);
     }
     getView() {
         return {

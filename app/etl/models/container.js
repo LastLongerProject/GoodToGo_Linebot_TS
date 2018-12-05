@@ -35,6 +35,16 @@ let container = {
         toString: "nothing",
         name: "無",
         imageUrl: "https://i.imgur.com/LGMaxh4.png"
+    },
+    pp_500: {
+        toString: "pp_500",
+        name: "500 PP杯",
+        imageUrl: "https://i.imgur.com/IRKPyIG.png"
+    },
+    pp_660: {
+        toString: "pp_660",
+        name: "660 PP杯",
+        imageUrl: "https://imgur.com/Z3fkZhA.png"
     }
 };
 exports.container = container;

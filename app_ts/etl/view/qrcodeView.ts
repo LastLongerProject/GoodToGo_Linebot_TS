@@ -1,6 +1,6 @@
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent, spacerTemplate } from "../models/flexMessage"
 import { View } from './view';
-class QrcodeView implements View {
+class QrcodeView {
     private header = headerTemplate();
     private separator = separatorTemplate();
     private spacer = spacerTemplate()

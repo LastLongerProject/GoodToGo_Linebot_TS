@@ -37,11 +37,7 @@ function getTimeString(DateObject) {
         '/' +
         monthFormatted +
         '/' +
-        dayFormatted +
-        ' ' +
-        hoursFormatted +
-        ':' +
-        minutesFormatted);
+        dayFormatted);
 }
 exports.getTimeString = getTimeString;
 function dayFormatter(dateToFormat) {

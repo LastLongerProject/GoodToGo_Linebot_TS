@@ -36,11 +36,7 @@ function getTimeString(DateObject: Date): string {
         '/' +
         monthFormatted +
         '/' +
-        dayFormatted +
-        ' ' +
-        hoursFormatted +
-        ':' +
-        minutesFormatted
+        dayFormatted
     );
 }
 

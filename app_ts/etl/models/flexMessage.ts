@@ -24,7 +24,7 @@ function header(): any {
 function separator(): any {
     let separator = {
         type: "separator",
-        margin: FlexMessage.Margin.xxl
+        margin: FlexMessage.Margin.none
     }
 
     function setMargin(margin: string) {

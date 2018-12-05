@@ -2,7 +2,7 @@ import { separatorTemplate, FlexMessage, spacerTemplate } from '../models/flexMe
 import { View } from './view';
 import { RewardType } from "../../lib/enumManager";
 import { container } from '../models/container';
-class ContrubtionView implements View {
+class ContrubtionView {
     private separator = separatorTemplate();
     private spacer = spacerTemplate();
 
