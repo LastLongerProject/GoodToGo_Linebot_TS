@@ -1,6 +1,6 @@
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent } from "../models/flexMessage"
 import { View } from './view';
-import { DataType } from '../../api/enumManager';
+import { DataType } from '../../lib/enumManager';
 class InusedView implements View {
 
     private separator = separatorTemplate();

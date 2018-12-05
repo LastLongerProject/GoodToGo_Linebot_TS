@@ -8,10 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const tool_1 = require("../api/tool");
+const tool_1 = require("../lib/tool");
 const postbackEventHandler_1 = require("./postback/postbackEventHandler");
 const event_1 = require("./delegate/event");
-const logFactory = require('../api/logFactory')('linebot:eventHandler');
+const logFactory = require('../lib/logFactory')('linebot:eventHandler');
 function postbackAction(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let postbackData = event.postback.data;
@@ -36,7 +36,7 @@ module.exports = {
         else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             event_1.unfollowOrUnBoundEvent(event);
         }
-        else if (event.message.text === '我的好杯幣') {
+        else if (event.message.text === '我的環境影響力') {
             event_1.getContributionEvent(event);
         }
         else if (event.message.text === '使用中容器') {

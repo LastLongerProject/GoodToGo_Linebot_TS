@@ -1,15 +1,15 @@
 import { deleteBinding, bindLineId, findSignal, getData, getQrcode } from "../../models/serviceProcess";
 import * as client from './client';
-import { failPromise } from "../../api/customPromise";
-import { DatabaseState, BindState } from "../../api/enumManager";
-import { isMobilePhone } from "../../api/tool";
-import * as request from '../../api/request';
+import { failPromise } from "../../lib/customPromise";
+import { DatabaseState, BindState } from "../../lib/enumManager";
+import { isMobilePhone } from "../../lib/tool";
+import * as request from '../../lib/request';
 import { QrcodeView } from "../../etl/view/qrcodeView";
 import { ContrubtionView } from "../../etl/view/contributionView";
 import { ContactView } from "../../etl/view/contactView";
 
-const logFactory = require('../../api/logFactory')('linebot:eventDelegate');
-const richMenu = require('../../api/richMenuScript');
+const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
+const richMenu = require('../../lib/richMenuScript');
 
 function followEvent(event: any): void {
     logFactory.log('Event: added or unblocked');

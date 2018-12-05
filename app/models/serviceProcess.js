@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const redisClient_1 = require("./db/redisClient");
-const customPromise_1 = require("../api/customPromise");
-const tool_1 = require("../api/tool");
+const customPromise_1 = require("../lib/customPromise");
+const tool_1 = require("../lib/tool");
 const container_1 = require("../etl/models/container");
 const recordView_1 = require("../etl/view/recordView");
 const inusedView_1 = require("../etl/view/inusedView");

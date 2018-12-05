@@ -1,5 +1,4 @@
 import request from 'request';
-import { successPromise, failPromise } from './customPromise';
 import * as client from '../controller/delegate/client';
 import {
     addVerificationSignal,

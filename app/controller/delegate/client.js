@@ -1,7 +1,7 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const bot_sdk_1 = require("@line/bot-sdk");
-const logFactory = require('../../api/logFactory')('linebot:eventHandler');
+const logFactory = require('../../lib/logFactory')('linebot:eventHandler');
 const client = new bot_sdk_1.Client(global.gConfig.bot);
 function returnTextMessage(event, message) {
     return client.replyMessage(event.replyToken, {

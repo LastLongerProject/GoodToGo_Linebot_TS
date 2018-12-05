@@ -1,10 +1,10 @@
-import { isMobilePhone, isVerificationCode } from '../api/tool';
+import { isMobilePhone, isVerificationCode } from '../lib/tool';
 
-import { DataType } from '../api/enumManager';
+import { DataType } from '../lib/enumManager';
 import { postbackHandler } from './postback/postbackEventHandler';
 import { followEvent, unfollowOrUnBoundEvent, getContributionEvent, getDataEvent, getQRCodeEvent, getContactWayEvent, bindingEvent, verificateEvent } from './delegate/event';
 
-const logFactory = require('../api/logFactory')('linebot:eventHandler');
+const logFactory = require('../lib/logFactory')('linebot:eventHandler');
 
 
 async function postbackAction(event: any): Promise<any> {
@@ -31,7 +31,7 @@ module.exports = {
             followEvent(event);
         } else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             unfollowOrUnBoundEvent(event);
-        } else if (event.message.text === '我的好杯幣') {
+        } else if (event.message.text === '我的環境影響力') {
             getContributionEvent(event);
         } else if (event.message.text === '使用中容器') {
             getDataEvent(event, DataType.IN_USED);

@@ -1,11 +1,11 @@
 import { redisClient, getAsync, setAsync } from './db/redisClient';
-import { successPromise, failPromise } from '../api/customPromise';
-import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString } from '../api/tool';
+import { successPromise, failPromise } from '../lib/customPromise';
+import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString } from '../lib/tool';
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
 import { View } from '../etl/view/view';
-import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../api/enumManager';
+import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../lib/enumManager';
 
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');

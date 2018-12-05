@@ -1,6 +1,6 @@
 import { View } from "./view"
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent } from "../models/flexMessage"
-import { DataType } from '../../api/enumManager';
+import { DataType } from '../../lib/enumManager';
 class RecordView implements View {
     private header = headerTemplate();
     private separator = separatorTemplate();

@@ -17,14 +17,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const serviceProcess_1 = require("../../models/serviceProcess");
 const client = __importStar(require("./client"));
-const customPromise_1 = require("../../api/customPromise");
-const tool_1 = require("../../api/tool");
-const request = __importStar(require("../../api/request"));
+const customPromise_1 = require("../../lib/customPromise");
+const tool_1 = require("../../lib/tool");
+const request = __importStar(require("../../lib/request"));
 const qrcodeView_1 = require("../../etl/view/qrcodeView");
 const contributionView_1 = require("../../etl/view/contributionView");
 const contactView_1 = require("../../etl/view/contactView");
-const logFactory = require('../../api/logFactory')('linebot:eventDelegate');
-const richMenu = require('../../api/richMenuScript');
+const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
+const richMenu = require('../../lib/richMenuScript');
 function followEvent(event) {
     logFactory.log('Event: added or unblocked');
     const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號綁定完成後即可使用本帳號提供的服務！';

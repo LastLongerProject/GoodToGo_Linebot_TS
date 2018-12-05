@@ -7,8 +7,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const tool_1 = require("../../api/tool");
-const request = __importStar(require("../../api/request"));
+const tool_1 = require("../../lib/tool");
+const request = __importStar(require("../../lib/request"));
 const client = __importStar(require("../delegate/client"));
 const flexMessage_1 = require("../../etl/models/flexMessage");
 const event_1 = require("../delegate/event");

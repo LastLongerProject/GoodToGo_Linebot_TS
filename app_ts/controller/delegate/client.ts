@@ -1,9 +1,9 @@
 import {
     Client
 } from '@line/bot-sdk';
-import { RegisterState } from '../../api/enumManager';
+import { RegisterState } from '../../lib/enumManager';
 
-const logFactory = require('../../api/logFactory')('linebot:eventHandler');
+const logFactory = require('../../lib/logFactory')('linebot:eventHandler');
 const client = new Client(global.gConfig.bot);
 
 function returnTextMessage(event: any, message: string): Promise<any> {

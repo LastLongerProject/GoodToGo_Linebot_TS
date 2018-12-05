@@ -1,5 +1,5 @@
 import { View } from './view';
-import { DataType } from '../../api/enumManager';
+import { DataType } from '../../lib/enumManager';
 import { separatorTemplate, FlexMessage, getBodyContent, addTimeBar } from '../models/flexMessage';
 class ContactView implements View {
 

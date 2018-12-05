@@ -1,6 +1,6 @@
-import { isMobilePhone } from "../../api/tool";
-import * as request from '../../api/request';
-import { DataType, RewardType, DatabaseState, BindState, RegisterState } from '../../api/enumManager';
+import { isMobilePhone } from "../../lib/tool";
+import * as request from '../../lib/request';
+import { DataType, RewardType, DatabaseState, BindState, RegisterState } from '../../lib/enumManager';
 import * as client from '../delegate/client';
 import { getData } from "../../models/serviceProcess";
 import { FlexMessage } from "../../etl/models/flexMessage";
