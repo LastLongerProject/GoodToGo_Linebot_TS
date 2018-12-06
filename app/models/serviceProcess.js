@@ -32,6 +32,7 @@ var GetDataMethod;
                     inUsed[j].returned = true;
                     inUsed[j].returnTime = returnList[i].tradeTime;
                     inUsed[j].cycle = undefined;
+                    inUsed[j].returnStore = storeDict[returnList[i].newUser.storeID].name;
                     returned.push(inUsed[j]);
                     inUsed.splice(j, 1);
                     break;
@@ -47,25 +48,26 @@ var GetDataMethod;
         return __awaiter(this, void 0, void 0, function* () {
             let MAX_DISPLAY_AMOUNT = 5;
             let view;
-            var monthArray = Array();
-            var index;
+            let monthArray = Array();
+            let index;
+            let totalAmount = recordCollection['data'].length.toString();
             if (type === "get more record from database" /* GET_MORE_RECORD */) {
-                view = new recordView_1.RecordView();
+                view = new recordView_1.RecordView(totalAmount);
                 index = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
                 index = index === null ? 0 : Number(index);
             }
             else if (type === "record" /* RECORD */) {
-                view = new recordView_1.RecordView();
+                view = new recordView_1.RecordView(totalAmount);
                 index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', "0");
                 index = 0;
             }
             else if (type === "in used" /* IN_USED */) {
-                view = new inusedView_1.InusedView(recordCollection['data'].length.toString());
+                view = new inusedView_1.InusedView(totalAmount);
                 index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', "0");
                 index = 0;
             }
             else {
-                view = new inusedView_1.InusedView(recordCollection['data'].length.toString());
+                view = new inusedView_1.InusedView(totalAmount);
                 index = yield redisClient_1.getAsync(event.source.userId + '_inusedIndex');
                 index = index === null ? 0 : Number(index);
             }
@@ -79,8 +81,6 @@ var GetDataMethod;
                         view.pushTimeBar('今天');
                     }
                     else {
-                        if (i !== index)
-                            view.pushSeparator(flexMessage_1.FlexMessage.Margin.xs);
                         view.pushTimeBar(tool_1.getYearAndMonthString(recordCollection.data[i].time));
                     }
                 }
@@ -89,14 +89,18 @@ var GetDataMethod;
                 let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2
                     ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
                 view.pushSeparator(i === index ? flexMessage_1.FlexMessage.Margin.md : flexMessage_1.FlexMessage.Margin.lg);
-                view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getTimeString(recordCollection.data[i].time), recordCollection.data[i].store + "｜" + "使用");
+                view instanceof inusedView_1.InusedView ?
+                    view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getTimeString(recordCollection.data[i].time), recordCollection.data[i].store) :
+                    view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getBorrowTimeInterval(recordCollection.data[i].time, recordCollection.data[i].returnTime), recordCollection.data[i].store + '｜使用\n' + recordCollection.data[i].returnStore + "｜歸還");
             }
+            let nextStartIndex = String(index + 6);
+            let nextEndIndex = String(index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5);
             if (view.getView().contents.body.contents.length === 0) {
-                view.pushBodyContent(container_1.container.nothing.toString, container_1.container.nothing.toString, '期待您的使用！', "");
+                view.pushBodyContent(container_1.container.nothing.toString, container_1.container.nothing.toString, '期待您的使用！', "好盒器基地");
                 view.deleteGetmoreButton();
             }
             else {
-                let indexLabel = "(第" + String(index + 1) + "-" + String(index + tempIndex) + "筆)";
+                let indexLabel = "(第" + nextStartIndex + "-" + nextEndIndex + "筆)";
                 view.addIndexToFooterButtonLabel(indexLabel);
             }
             if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {

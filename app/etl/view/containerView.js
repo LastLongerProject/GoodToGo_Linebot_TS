@@ -8,6 +8,10 @@ class ContainerStateView {
             type: "separator",
             margin: flexMessage_1.FlexMessage.Margin.none
         };
+        this.spacer = {
+            type: "spacer",
+            size: flexMessage_1.FlexMessage.Size.sm
+        };
         this.inusedAmount = {
             type: flexMessage_1.FlexMessage.ComponetType.text,
             text: "",
@@ -55,11 +59,14 @@ class ContainerStateView {
         this.footer = {
             type: flexMessage_1.FlexMessage.ComponetType.box,
             layout: flexMessage_1.FlexMessage.Layout.vertical,
-            contents: [this.separator, this.footerButton_getMore, this.separator, this.footerButton_getAnother]
+            contents: [this.footerButton_getMore, this.separator, this.footerButton_getAnother]
         };
         this.styles = {
             header: {
                 backgroundColor: "#00bbdc"
+            },
+            footer: {
+                separator: true
             }
         };
         this.body = {
@@ -80,7 +87,7 @@ class ContainerStateView {
         this.viewInit();
     }
     bodyContent(containerType, containerId, info_1, info_2) {
-        return {
+        let bodyContent = {
             type: flexMessage_1.FlexMessage.ComponetType.box,
             layout: flexMessage_1.FlexMessage.Layout.horizontal,
             contents: [{
@@ -88,19 +95,20 @@ class ContainerStateView {
                     url: container_1.container[containerType].imageUrl,
                     size: flexMessage_1.FlexMessage.Size.xl,
                     gravity: flexMessage_1.FlexMessage.Gravity.center,
-                    flex: 2
+                    flex: 1
                 },
                 {
                     type: flexMessage_1.FlexMessage.ComponetType.box,
                     layout: flexMessage_1.FlexMessage.Layout.vertical,
-                    margin: flexMessage_1.FlexMessage.Margin.lg,
-                    flex: 8,
-                    contents: [{
+                    margin: flexMessage_1.FlexMessage.Margin.xxl,
+                    flex: 4,
+                    contents: [
+                        this.spacer,
+                        {
                             type: flexMessage_1.FlexMessage.ComponetType.text,
                             text: container_1.container[containerType].name,
                             size: flexMessage_1.FlexMessage.Size.md,
                             color: "#565656",
-                            gravity: flexMessage_1.FlexMessage.Gravity.center,
                             align: flexMessage_1.FlexMessage.Align.start,
                             weight: flexMessage_1.FlexMessage.Weight.bold
                         }, {
@@ -109,31 +117,32 @@ class ContainerStateView {
                             size: flexMessage_1.FlexMessage.Size.xxs,
                             color: "#484848",
                             margin: flexMessage_1.FlexMessage.Margin.xs,
-                            gravity: flexMessage_1.FlexMessage.Gravity.center,
                             align: flexMessage_1.FlexMessage.Align.start
-                        }]
+                        }
+                    ]
                 }, {
                     type: flexMessage_1.FlexMessage.ComponetType.box,
                     layout: flexMessage_1.FlexMessage.Layout.vertical,
                     margin: flexMessage_1.FlexMessage.Margin.none,
-                    flex: 10,
+                    flex: 5,
                     contents: [{
                             type: flexMessage_1.FlexMessage.ComponetType.text,
                             text: info_1,
                             size: flexMessage_1.FlexMessage.Size.xxs,
                             color: "#C0C0C8",
-                            align: flexMessage_1.FlexMessage.Align.end,
+                            gravity: flexMessage_1.FlexMessage.Gravity.bottom,
+                            align: flexMessage_1.FlexMessage.Align.end
                         }, {
                             type: flexMessage_1.FlexMessage.ComponetType.text,
                             text: info_2,
                             size: flexMessage_1.FlexMessage.Size.xxs,
                             color: "#C0C0C8",
-                            gravity: flexMessage_1.FlexMessage.Gravity.bottom,
-                            margin: flexMessage_1.FlexMessage.Margin.md,
                             align: flexMessage_1.FlexMessage.Align.end,
+                            wrap: true
                         }]
                 }]
         };
+        return bodyContent;
     }
     viewInit() {
         this.headerText.text = this.name;
@@ -141,7 +150,7 @@ class ContainerStateView {
         this.header.contents.push(this.inusedAmount);
     }
     setFootButton(getMore, getAnother) {
-        let label_getAnother = "in used" /* IN_USED */ ? "使用中容器" : "已歸還容器";
+        let label_getAnother = getAnother === "in used" /* IN_USED */ ? "使用中容器" : "已歸還容器";
         this.footerButton_getAnother.action.label += label_getAnother;
         this.footerButton_getAnother.action.displayText += label_getAnother;
         this.footerButton_getAnother.action.data = getAnother;
@@ -175,4 +184,4 @@ class ContainerStateView {
     }
 }
 exports.ContainerStateView = ContainerStateView;
-//# sourceMappingURL=view.js.map
+//# sourceMappingURL=containerView.js.map

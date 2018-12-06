@@ -1,5 +1,4 @@
 import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent, spacerTemplate } from "../models/flexMessage"
-import { View } from './view';
 class QrcodeView {
     private header = headerTemplate();
     private separator = separatorTemplate();

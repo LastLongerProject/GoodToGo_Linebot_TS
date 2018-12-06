@@ -1,12 +1,12 @@
 import { redisClient, getAsync, setAsync } from './db/redisClient';
 import { successPromise, failPromise } from '../lib/customPromise';
-import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString } from '../lib/tool';
+import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString, getBorrowTimeInterval } from '../lib/tool';
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
-import { View } from '../etl/view/view';
 import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../lib/enumManager';
 import { FlexMessage } from '../etl/models/flexMessage';
+import { ContainerStateView } from '../etl/view/containerView';
 
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
@@ -33,6 +33,7 @@ namespace GetDataMethod {
                     inUsed[j].returned = true;
                     inUsed[j].returnTime = returnList[i].tradeTime;
                     inUsed[j].cycle = undefined;
+                    inUsed[j].returnStore = storeDict[returnList[i].newUser.storeID].name
                     returned.push(inUsed[j]);
                     inUsed.splice(j, 1);
                     break;
@@ -52,25 +53,26 @@ namespace GetDataMethod {
     ): Promise<any> {
         let MAX_DISPLAY_AMOUNT = 5;
 
-        let view: View;
+        let view: ContainerStateView;
 
-        var monthArray = Array<any>();
-        var index: any;
+        let monthArray = Array<any>();
+        let index: any;
+        let totalAmount = recordCollection['data'].length.toString();
 
         if (type === DataType.GET_MORE_RECORD) {
-            view = new RecordView();
+            view = new RecordView(totalAmount);
             index = await getAsync(event.source.userId + '_recordIndex');
             index = index === null ? 0 : Number(index);
         } else if (type === DataType.RECORD) {
-            view = new RecordView();
+            view = new RecordView(totalAmount);
             index = await setAsync(event.source.userId + '_recordIndex', "0");
             index = 0;
         } else if (type === DataType.IN_USED) {
-            view = new InusedView(recordCollection['data'].length.toString());
+            view = new InusedView(totalAmount);
             index = await setAsync(event.source.userId + '_inusedIndex', "0");
             index = 0;
         } else {
-            view = new InusedView(recordCollection['data'].length.toString());
+            view = new InusedView(totalAmount);
             index = await getAsync(event.source.userId + '_inusedIndex');
             index = index === null ? 0 : Number(index);
         }
@@ -85,7 +87,6 @@ namespace GetDataMethod {
                     if (i !== index) view.pushSeparator(FlexMessage.Margin.xs);
                     view.pushTimeBar('今天');
                 } else {
-                    if (i !== index) view.pushSeparator(FlexMessage.Margin.xs);
                     view.pushTimeBar(
                         getYearAndMonthString(recordCollection.data[i].time)
                     );
@@ -96,15 +97,21 @@ namespace GetDataMethod {
             let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2
                 ? container.plate.toString : type === 4 ? container.icecream.toString : container.glass_16oz.toString;
             view.pushSeparator(i === index ? FlexMessage.Margin.md : FlexMessage.Margin.lg);
-            view.pushBodyContent(containerType, recordCollection.data[i].container, getTimeString(recordCollection.data[i].time),
-                recordCollection.data[i].store + "｜" + "使用");
+            view instanceof InusedView ?
+                view.pushBodyContent(containerType, recordCollection.data[i].container, getTimeString(recordCollection.data[i].time),
+                    recordCollection.data[i].store) :
+                view.pushBodyContent(containerType, recordCollection.data[i].container, getBorrowTimeInterval(recordCollection.data[i].time, recordCollection.data[i].returnTime),
+                    recordCollection.data[i].store + '｜使用\n' + recordCollection.data[i].returnStore + "｜歸還");
         }
 
+        let nextStartIndex = String(index + 6);
+        let nextEndIndex = String(index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5);
+
         if (view.getView().contents.body.contents.length === 0) {
-            view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "");
+            view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "好盒器基地");
             view.deleteGetmoreButton();
         } else {
-            let indexLabel = "(第" + String(index + 1) + "-" + String(index + tempIndex) + "筆)"
+            let indexLabel = "(第" + nextStartIndex + "-" + nextEndIndex + "筆)";
             view.addIndexToFooterButtonLabel(indexLabel);
         }
 

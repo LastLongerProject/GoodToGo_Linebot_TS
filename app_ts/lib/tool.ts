@@ -29,8 +29,6 @@ function getTimeString(DateObject: Date): string {
     var tmpHour = DateObject.getHours() + 8;
     var dayFormatted = intReLength(dayFormatter(DateObject), 2);
     var monthFormatted = intReLength(DateObject.getMonth() + 1, 2);
-    var hoursFormatted = intReLength(tmpHour >= 24 ? tmpHour - 24 : tmpHour, 2);
-    var minutesFormatted = intReLength(DateObject.getMinutes(), 2);
     return (
         DateObject.getFullYear() +
         '/' +
@@ -39,6 +37,16 @@ function getTimeString(DateObject: Date): string {
         dayFormatted
     );
 }
+
+function getBorrowTimeInterval(startDate: Date, returnDate: Date) {
+    var dayFormatted_start = intReLength(dayFormatter(startDate), 2);
+    var monthFormatted_start = intReLength(startDate.getMonth() + 1, 2);
+    var dayFormatted_return = intReLength(dayFormatter(returnDate), 2);
+    var monthFormatted_return = intReLength(returnDate.getMonth() + 1, 2);
+
+    return (monthFormatted_start + '/' + dayFormatted_start + ' - ' + monthFormatted_return + '/' + dayFormatted_return);
+}
+
 
 function dayFormatter(dateToFormat: Date): number {
     if (dateToFormat.getHours() >= 16)
@@ -78,4 +86,4 @@ function isToday(d: Date): boolean {
 }
 
 
-export { isMobilePhone, randomHexString, isVerificationCode, getTimeString, dayFormatter, intReLength, getYearAndMonthString, isToday };
+export { isMobilePhone, randomHexString, isVerificationCode, getTimeString, dayFormatter, intReLength, getYearAndMonthString, isToday, getBorrowTimeInterval };
