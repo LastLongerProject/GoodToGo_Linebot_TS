@@ -93,14 +93,17 @@ var GetDataMethod;
                     view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getTimeString(recordCollection.data[i].time), recordCollection.data[i].store) :
                     view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getBorrowTimeInterval(recordCollection.data[i].time, recordCollection.data[i].returnTime), recordCollection.data[i].store + '｜使用\n' + recordCollection.data[i].returnStore + "｜歸還");
             }
-            let nextStartIndex = String(index + 6);
-            let nextEndIndex = String(index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5);
+            let nextStartIndex = index + 6;
+            let nextEndIndex = index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5;
             if (view.getView().contents.body.contents.length === 0) {
                 view.pushBodyContent(container_1.container.nothing.toString, container_1.container.nothing.toString, '期待您的使用！', "好盒器基地");
                 view.deleteGetmoreButton();
             }
+            else if (nextStartIndex >= totalAmount) {
+                view.deleteGetmoreButton();
+            }
             else {
-                let indexLabel = "(第" + nextStartIndex + "-" + nextEndIndex + "筆)";
+                let indexLabel = "(第" + String(nextStartIndex) + "-" + String(nextEndIndex) + "筆)";
                 view.addIndexToFooterButtonLabel(indexLabel);
             }
             if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {

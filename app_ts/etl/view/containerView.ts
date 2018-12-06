@@ -192,7 +192,7 @@ export class ContainerStateView {
     }
 
     public deleteGetmoreButton() {
-        this.footer.contents.splice(1, 1);
+        this.footer.contents.splice(0, 2);
     }
 
     public getView() {

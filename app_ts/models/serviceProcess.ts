@@ -104,14 +104,17 @@ namespace GetDataMethod {
                     recordCollection.data[i].store + '｜使用\n' + recordCollection.data[i].returnStore + "｜歸還");
         }
 
-        let nextStartIndex = String(index + 6);
-        let nextEndIndex = String(index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5);
+        let nextStartIndex = index + 6;
+        let nextEndIndex = index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5;
 
         if (view.getView().contents.body.contents.length === 0) {
             view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "好盒器基地");
             view.deleteGetmoreButton();
-        } else {
-            let indexLabel = "(第" + nextStartIndex + "-" + nextEndIndex + "筆)";
+        } else if (nextStartIndex >= totalAmount) {
+            view.deleteGetmoreButton();
+        }
+        else {
+            let indexLabel = "(第" + String(nextStartIndex) + "-" + String(nextEndIndex) + "筆)";
             view.addIndexToFooterButtonLabel(indexLabel);
         }
 

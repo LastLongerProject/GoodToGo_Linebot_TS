@@ -173,7 +173,7 @@ class ContainerStateView {
         this.footerButton_getMore.action.label += index;
     }
     deleteGetmoreButton() {
-        this.footer.contents.splice(1, 1);
+        this.footer.contents.splice(0, 2);
     }
     getView() {
         return {
