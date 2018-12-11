@@ -7,9 +7,9 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
       "width": 2500,
       "height": 1686
     },
-    "selected": false,
-    "name": "test menu",
-    "chatBarText": "Tap here",
+    "selected": true,
+    "name": "own more than five container",
+    "chatBarText": "好盒器選單",
     "areas": [
       {
         "bounds": {
@@ -21,7 +21,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
         "action": {
           "type": "postback",
           "text": "使用中容器",
-                    "data": "使用中容器"
+          "data": "使用中容器"
 
         }
       },
@@ -34,8 +34,8 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
         },
         "action": {
           "type": "postback",
-          "text": "我的好杯幣",
-          "data": "我的好杯幣"
+          "text": "我的環境影響力",
+          "data": "我的環境影響力"
         }
       },
  {
@@ -48,7 +48,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
         "action": {
           "type": "postback",
           "text": "我的會員卡",
-                    "data": "我的會員卡"
+          "data": "我的會員卡"
 
         }
       },
@@ -62,7 +62,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
         "action": {
           "type": "postback",
           "text": "解除綁定",
-                              "data": "解除綁定"
+          "data": "解除綁定"
 
         }
       },
@@ -76,7 +76,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
         "action": {
           "type": "postback",
           "text": "哪裡有好盒器",
-                                        "data": "哪裡有好盒器"
+          "data": "哪裡有好盒器"
 
         }
       },
@@ -90,7 +90,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
         "action": {
           "type": "postback",
           "text": "聯絡好盒器",
-                                                  "data": "聯絡好盒器"
+          "data": "聯絡好盒器"
 
         }}]}'
 formal:richmenu-3fadedf3308f9fa5173bdf5a9f93adda
@@ -153,10 +153,10 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
 formal: richmenu-2c93cc00b1c56640a2caa06580dac8f4
 test: richmenu-045d8521e7145722379d9de15f6be215
 
-curl -v -X POST https://api.line.me/v2/bot/richmenu/richmenu-3fadedf3308f9fa5173bdf5a9f93adda/content \
+curl -v -X POST https://api.line.me/v2/bot/richmenu/"richmenu-e1d186a8d05fc19cd080f7e641a73a4a"/content \
 -H "Authorization: Bearer {gxS3/xEi58GEq7dF+m1Fw47WRw+Jmwm+lXfd9Z/dBJVET3mmfJu5mdF6mPYpH4D6frASHurqDUEsWkg6SXaJSuvf3BmoBIV0yMVfyZior38v7zlyV4Gnqqp0lIaoB545Q0l2Bx28bX1M0CaXNNZDfwdB04t89/1O/w1cDnyilFU=}" \
 -H "Content-Type: image/jpeg" \
--T image.jpg
+-T LineBotRichMenu_more.png
 
 curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{richmenu-70099967387ac62058de8608e18dd06e} \
 -H "Authorization: Bearer {JC9QgwQrHMW8IIbzeK06QxpYmnHCmNfGnzzimgcpI/ASLYEKx0REduc60G1VFIvu/z/JjaDGU8xGollYFtpm+c9yfTwA29AwVzLs7Rf8V4dkjPKyIvHXdpU9ILEn/MabXzJ/9EtBtYu78tBhsBxqPgdB04t89/1O/w1cDnyilFU=}"

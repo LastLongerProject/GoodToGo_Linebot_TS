@@ -2,7 +2,7 @@ import { isMobilePhone, isVerificationCode } from '../lib/tool';
 
 import { DataType } from '../lib/enumManager';
 import { postbackHandler } from './postback/postbackEventHandler';
-import { followEvent, unfollowOrUnBoundEvent, getContributionEvent, getDataEvent, getQRCodeEvent, getContactWayEvent, bindingEvent, verificateEvent } from './delegate/event';
+import { followEvent, unfollowOrUnBoundEvent, getContributionEvent, getDataEvent, getQRCodeEvent, getContactWayEvent, bindingEvent, verificateEvent, getGoodtogo } from './delegate/event';
 
 const logFactory = require('../lib/logFactory')('linebot:eventHandler');
 
@@ -42,6 +42,8 @@ module.exports = {
         } else if (event.message.text === '綁定手機') {
             bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
+        } else if (event.message.text === '哪裡有好盒器') {
+            getGoodtogo(event);
         } else if (isMobilePhone(event.message.text)) {
             bindingEvent(event);
         } else if (isVerificationCode(event.message.text)) {

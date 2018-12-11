@@ -52,6 +52,9 @@ module.exports = {
             event_1.bindingEvent(event);
             // client.textMessage(event, "請輸入手機號碼");
         }
+        else if (event.message.text === '哪裡有好盒器') {
+            event_1.getGoodtogo(event);
+        }
         else if (tool_1.isMobilePhone(event.message.text)) {
             event_1.bindingEvent(event);
         }

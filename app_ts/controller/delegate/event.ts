@@ -119,28 +119,41 @@ function getContactWayEvent(event: any): Promise<any> {
     return client.flexMessage(event, view.getView());
 }
 
+function getGoodtogo(event: any) {
+    logFactory.log('Event: get GoodToGo');
+    let message = {
+        type: "imagemap",
+        baseUrl: "https://imgur.com/FUvdzIa.png",
+        altText: "合作店家",
+        baseSize: {
+            width: 520,
+            height: 520
+        },
+        actions: [
+            {
+                type: "uri",
+                linkUri: "https://goodtogo.tw/#3",
+                area: {
+                    x: 0,
+                    y: 0,
+                    width: 520,
+                    height: 520
+                }
+            }
+        ]
+    }
+
+    return client.customMessage(event, message);
+}
+
 async function getContributionEvent(event: any): Promise<any> {
     logFactory.log('Event: get contribution');
-    // try {
-    //     let message: string;
-    //     var result = await getContribution(event);
-    //     switch (result) {
-    //         case DatabaseState.USER_NOT_FOUND:
-    //             message = '請輸入手機號碼以綁定 line id'
-    //             return client.textMessage(event, message);
-    //         default:
-    //             return client.textMessage(event, '您的功德數為：' + result);
 
-    //     }
-    // } catch (err) {
-    //     logFactory.error(err);
-    //     return failPromise(err);
-    // }
     let view = new ContrubtionView();
     return client.flexMessage(event, view.getView());
 }
 
 export {
     unfollowOrUnBoundEvent, bindingEvent, verificateEvent, getDataEvent, getQRCodeEvent
-    , getContactWayEvent, followEvent, getContributionEvent
+    , getContactWayEvent, followEvent, getContributionEvent, getGoodtogo
 }
