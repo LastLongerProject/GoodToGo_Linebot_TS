@@ -77,7 +77,6 @@ var richmenu = {
                 "type": "uri",
                 "label": "好盒器合作店家",
                 "uri": "https://goodtogo.tw/#3"
-
             }
         },
         {

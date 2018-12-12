@@ -1,7 +1,7 @@
 import { deleteBinding, bindLineId, findSignal, getData, getQrcode } from "../../models/serviceProcess";
 import * as client from './client';
 import { failPromise } from "../../lib/customPromise";
-import { DatabaseState, BindState } from "../../lib/enumManager";
+import { DatabaseState, BindState, RichmenuType } from "../../lib/enumManager";
 import { isMobilePhone } from "../../lib/tool";
 import * as request from '../../lib/request';
 import { QrcodeView } from "../../etl/view/qrcodeView";
@@ -25,7 +25,7 @@ async function unfollowOrUnBoundEvent(event: any): Promise<any> {
     else logFactory.log('Event: delete bind');
     try {
         deleteBinding(event);
-        richMenu.bindRichmenuToUser('before', event.source.userId);
+        richMenu.bindRichmenuToUser(RichmenuType.BEFORE, event.source.userId);
         const message = '已取消綁定';
 
         return client.textMessage(event, message);
@@ -57,7 +57,6 @@ async function bindingEvent(event: any): Promise<any> {
                 return client.textMessage(event, message);
             case BindState.SUCCESS:
                 message = '綁定成功！';
-                richMenu.bindRichmenuToUser('after', event.source.userId);
                 return client.textMessage(event, message);
             case BindState.IS_NOT_PHONE:
                 message = '請輸入要綁定的手機號碼！';

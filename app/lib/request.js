@@ -89,7 +89,7 @@ function verificate(event, phone) {
             if (response.body.code === undefined) {
                 serviceProcess_1.deleteSignal(event);
                 serviceProcess_1.bindLineId(event, phone);
-                const message = '恭喜您成為好合器會員囉！';
+                const message = '恭喜您成為好盒器會員囉！';
                 richMenu.bindRichmenuToUser('after', event.source.userId);
                 return client.textMessage(event, message);
             }

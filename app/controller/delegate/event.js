@@ -39,7 +39,7 @@ function unfollowOrUnBoundEvent(event) {
             logFactory.log('Event: delete bind');
         try {
             serviceProcess_1.deleteBinding(event);
-            richMenu.bindRichmenuToUser('before', event.source.userId);
+            richMenu.bindRichmenuToUser("before binding" /* BEFORE */, event.source.userId);
             const message = '已取消綁定';
             return client.textMessage(event, message);
         }
@@ -72,7 +72,6 @@ function bindingEvent(event) {
                     return client.textMessage(event, message);
                 case "Successfullt bound with line" /* SUCCESS */:
                     message = '綁定成功！';
-                    richMenu.bindRichmenuToUser('after', event.source.userId);
                     return client.textMessage(event, message);
                 case "The input is not phone number" /* IS_NOT_PHONE */:
                     message = '請輸入要綁定的手機號碼！';

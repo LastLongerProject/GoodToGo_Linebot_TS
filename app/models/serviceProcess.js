@@ -16,6 +16,7 @@ const recordView_1 = require("../etl/view/recordView");
 const inusedView_1 = require("../etl/view/inusedView");
 const flexMessage_1 = require("../etl/models/flexMessage");
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
+const richMenu = require('../lib/richMenuScript');
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
@@ -151,14 +152,10 @@ function bindLineId(event, phone) {
                 }
                 else {
                     dbUser.user.lineId = event.source.userId;
-                    try {
-                        var saveRes = yield dbUser.save();
-                        if (saveRes)
-                            return customPromise_1.successPromise("Successfullt bound with line" /* SUCCESS */);
-                    }
-                    catch (err) {
-                        logFactory.error(err);
-                        return customPromise_1.failPromise(err);
+                    var saveRes = yield dbUser.save();
+                    if (saveRes) {
+                        richMenu.bindRichmenuToUser('after', event.source.userId);
+                        return customPromise_1.successPromise("Successfullt bound with line" /* SUCCESS */);
                     }
                 }
             }
@@ -337,4 +334,49 @@ function getData(event, type) {
     });
 }
 exports.getData = getData;
+function getDataList(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let dbUser = yield User.findOne({
+            'user.lineId': event.source.userId,
+        }).exec();
+        if (!dbUser)
+            return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
+        var returned = [];
+        var inUsed = [];
+        const rentList = yield Trade.find({
+            'tradeType.action': 'Rent',
+            'newUser.phone': dbUser.user.phone,
+        }).exec();
+        rentList.sort(function (a, b) {
+            return b.tradeTime - a.tradeTime;
+        });
+        for (let i = 0; i < rentList.length; i++) {
+            let record = {
+                container: '#' + tool_1.intReLength(rentList[i].container.id, 3),
+                containerCode: rentList[i].container.id,
+                time: rentList[i].tradeTime,
+                type: rentList[i].container.typeCode,
+                store: storeDict[rentList[i].oriUser.storeID].name,
+                cycle: rentList[i].container.cycleCtr === undefined
+                    ? 0
+                    : rentList[i].container.cycleCtr,
+                return: false,
+            };
+            inUsed.push(record);
+        }
+        const returnList = yield Trade.find({
+            'tradeType.action': 'Return',
+            'oriUser.phone': dbUser.user.phone,
+        }).exec();
+        returnList.sort(function (a, b) {
+            return b.tradeTime - a.tradeTime;
+        });
+        GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
+        customPromise_1.successPromise({
+            returnList,
+            inUsed,
+            returned
+        });
+    });
+}
 //# sourceMappingURL=serviceProcess.js.map

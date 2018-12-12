@@ -12,13 +12,14 @@ const request = __importStar(require("../../lib/request"));
 const client = __importStar(require("../delegate/client"));
 const flexMessage_1 = require("../../etl/models/flexMessage");
 const event_1 = require("../delegate/event");
+const logFactory = require('../../lib/logFactory')('linebot:eventHandler');
 function postbackHandler(event, postbackData) {
     if (tool_1.isMobilePhone(postbackData)) {
         logFactory.log(postbackData);
         return request.register(event, postbackData);
     }
     else if (postbackData === "Don't wanna become our member" /* NO */) {
-        let message = '期待您成為好合器會員！';
+        let message = '期待您成為好盒器會員！';
         return client.textMessage(event, message);
     }
     else if (postbackData === "get more record from database" /* GET_MORE_RECORD */.toString() ||

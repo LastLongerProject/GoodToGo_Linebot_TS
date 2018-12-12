@@ -5,6 +5,7 @@ import * as client from '../delegate/client';
 import { getData } from "../../models/serviceProcess";
 import { FlexMessage } from "../../etl/models/flexMessage";
 import { getDataEvent } from "../delegate/event";
+const logFactory = require('../../lib/logFactory')('linebot:eventHandler');
 
 
 function postbackHandler(event, postbackData) {
@@ -12,7 +13,7 @@ function postbackHandler(event, postbackData) {
         logFactory.log(postbackData);
         return request.register(event, postbackData);
     } else if (postbackData === RegisterState.NO) {
-        let message = '期待您成為好合器會員！';
+        let message = '期待您成為好盒器會員！';
         return client.textMessage(event, message);
     } else if (
         postbackData === DataType.GET_MORE_RECORD.toString() ||

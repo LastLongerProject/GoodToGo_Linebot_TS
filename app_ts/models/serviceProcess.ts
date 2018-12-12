@@ -4,12 +4,13 @@ import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeStri
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
-import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../lib/enumManager';
+import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState, RichmenuType } from '../lib/enumManager';
 import { FlexMessage } from '../etl/models/flexMessage';
 import { ContainerStateView } from '../etl/view/containerView';
 
 
 const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
+const richMenu = require('../lib/richMenuScript');
 
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
@@ -169,13 +170,13 @@ async function bindLineId(event: any, phone: string): Promise<any> {
                 return successPromise(BindState.PHONE_HAS_BOUND);
             } else {
                 dbUser.user.lineId = event.source.userId;
-                try {
-                    var saveRes = await dbUser.save();
-                    if (saveRes) return successPromise(BindState.SUCCESS);
-                } catch (err) {
-                    logFactory.error(err);
-                    return failPromise(err);
+                var saveRes = await dbUser.save();
+                if (saveRes) {
+
+                    richMenu.bindRichmenuToUser('after', event.source.userId);
+                    return successPromise(BindState.SUCCESS);
                 }
+
             }
         } else {
             return successPromise(BindState.LINE_HAS_BOUND);
@@ -342,6 +343,56 @@ async function getData(event: any, type): Promise<any> {
         logFactory.error(err);
         return failPromise(err);
     }
+}
+
+async function getDataList(event): Promise<any> {
+    let dbUser = await User.findOne({
+        'user.lineId': event.source.userId,
+    }).exec();
+    if (!dbUser) return successPromise(DatabaseState.USER_NOT_FOUND);
+
+    var returned = [];
+    var inUsed: Array<any> = [];
+
+    const rentList = await Trade.find({
+        'tradeType.action': 'Rent',
+        'newUser.phone': dbUser.user.phone,
+    }).exec();
+    rentList.sort(function (a, b) {
+        return b.tradeTime - a.tradeTime;
+    });
+
+    for (let i = 0; i < rentList.length; i++) {
+        let record = {
+            container: '#' + intReLength(rentList[i].container.id, 3),
+            containerCode: rentList[i].container.id,
+            time: rentList[i].tradeTime,
+            type: rentList[i].container.typeCode,
+            store: storeDict[rentList[i].oriUser.storeID].name,
+            cycle:
+                rentList[i].container.cycleCtr === undefined
+                    ? 0
+                    : rentList[i].container.cycleCtr,
+            return: false,
+        };
+
+        inUsed.push(record);
+    }
+    const returnList = await Trade.find({
+        'tradeType.action': 'Return',
+        'oriUser.phone': dbUser.user.phone,
+    }).exec();
+
+    returnList.sort(function (a, b) {
+        return b.tradeTime - a.tradeTime;
+    });
+    GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
+
+    successPromise({
+        returnList,
+        inUsed,
+        returned
+    });
 }
 
 export {

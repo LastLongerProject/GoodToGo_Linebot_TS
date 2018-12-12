@@ -45,8 +45,20 @@ const enum RewardType {
     REDEEM = "redeem"
 }
 
+const enum RichmenuType {
+    BEFORE = "before binding",
+    _0 = "using amount 0",
+    _1 = "using amount 1",
+    _2 = "using amount 2",
+    _3 = "using amount 3",
+    _4 = "using amount 4",
+    _5 = "using amount 5",
+    MORE = "using lots of"
+
+}
+
 export {
     RegisterState, BindState, DeleteBindState, GetContributeState, QrcodeState, DatabaseState
-    , DataType, RewardType, AddVerificationSignalState
+    , DataType, RewardType, AddVerificationSignalState, RichmenuType
 }
 
