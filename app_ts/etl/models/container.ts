@@ -43,6 +43,11 @@ let container = {
         toString: "pp_660",
         name: "660 PP杯",
         imageUrl: "https://imgur.com/Z3fkZhA.png"
+    },
+    pp_250: {
+        toString: "pp_250",
+        name: "250 PP杯",
+        imageUrl: "https://i.imgur.com/LGMaxh4.png"
     }
 }
 

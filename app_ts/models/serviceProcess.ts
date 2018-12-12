@@ -95,7 +95,7 @@ namespace GetDataMethod {
             tempIndex += 1;
             let type = recordCollection.data[i].type;
             let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2
-                ? container.plate.toString : type === 4 ? container.icecream.toString : container.glass_16oz.toString;
+                ? container.plate.toString : type === 4 ? container.icecream.toString : type === 9 ? container.pp_660.toString : type === 8 ? container.pp_500.toString : type === 10 ? container.pp_250.toString : container.glass_16oz.toString;
             view.pushSeparator(i === index ? FlexMessage.Margin.md : FlexMessage.Margin.lg);
             view instanceof InusedView ?
                 view.pushBodyContent(containerType, recordCollection.data[i].container, getTimeString(recordCollection.data[i].time),

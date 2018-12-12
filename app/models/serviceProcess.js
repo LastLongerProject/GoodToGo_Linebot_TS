@@ -87,7 +87,7 @@ var GetDataMethod;
                 tempIndex += 1;
                 let type = recordCollection.data[i].type;
                 let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2
-                    ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : container_1.container.glass_16oz.toString;
+                    ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : type === 9 ? container_1.container.pp_660.toString : type === 8 ? container_1.container.pp_500.toString : type === 10 ? container_1.container.pp_250.toString : container_1.container.glass_16oz.toString;
                 view.pushSeparator(i === index ? flexMessage_1.FlexMessage.Margin.md : flexMessage_1.FlexMessage.Margin.lg);
                 view instanceof inusedView_1.InusedView ?
                     view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getTimeString(recordCollection.data[i].time), recordCollection.data[i].store) :

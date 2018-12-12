@@ -64,3 +64,5 @@ typings/
 
 .DS_Store
 .vscode/
+richmenu.txt
+richmenuScript/richmenu.json
