@@ -9,7 +9,7 @@ import { FlexMessage } from '../etl/models/flexMessage';
 import { ContainerStateView } from '../etl/view/containerView';
 
 
-const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
+const logFactory = require('../lib/logFactory.js')('linebot:serviceProcess');
 const richMenu = require('../lib/richMenuScript');
 
 const User = require('./db/userDB');
@@ -21,110 +21,113 @@ var containerTypeDict: Object;
 var storeDict: Object;
 
 namespace GetDataMethod {
-    export function spliceArrAndPush(
-        returnList: Array<any>,
-        inUsed: Array<any>,
-        returned: Array<any>
-    ): void {
-        for (var i = 0; i < returnList.length; i++) {
+    export function filterInusedToReturned(returnList: Array<any>, inUsed: Array<any>, returned: Array<any>): void {
+        returnList.forEach((element, index) => {
             for (var j = inUsed.length - 1; j >= 0; j--) {
-                var returnCycle = typeof returnList[i].container.cycleCtr === 'undefined' ? 0 : returnList[i].container.cycleCtr;
+                var returnCycle = typeof returnList[index].container.cycleCtr === 'undefined' ? 0 : returnList[index].container.cycleCtr;
 
-                if (inUsed[j].containerCode === returnList[i].container.id && inUsed[j].cycle === returnCycle) {
+                if (inUsed[j].containerCode === returnList[index].container.id && inUsed[j].cycle === returnCycle) {
                     inUsed[j].returned = true;
-                    inUsed[j].returnTime = returnList[i].tradeTime;
+                    inUsed[j].returnTime = returnList[index].tradeTime;
                     inUsed[j].cycle = undefined;
-                    inUsed[j].returnStore = storeDict[returnList[i].newUser.storeID].name
+                    inUsed[j].returnStore = storeDict[returnList[index].newUser.storeID].name
                     returned.push(inUsed[j]);
                     inUsed.splice(j, 1);
                     break;
                 }
             }
-        }
+        })
 
         returned.sort(function (a, b) {
             return b.time - a.time;
         });
     }
 
-    export async function exportClientFlexMessage(
-        recordCollection,
-        event,
-        type
-    ): Promise<any> {
-        let MAX_DISPLAY_AMOUNT = 5;
-
-        let view: ContainerStateView;
-
-        let monthArray = Array<any>();
+    async function flexInit(type: DataType, totalAmount: string, userId: string): Promise<any> {
         let index: any;
-        let totalAmount = recordCollection['data'].length.toString();
+        let view: ContainerStateView;
 
         if (type === DataType.GET_MORE_RECORD) {
             view = new RecordView(totalAmount);
-            index = await getAsync(event.source.userId + '_recordIndex');
+            index = await getAsync(userId + '_recordIndex');
             index = index === null ? 0 : Number(index);
         } else if (type === DataType.RECORD) {
             view = new RecordView(totalAmount);
-            index = await setAsync(event.source.userId + '_recordIndex', "0");
+            index = await setAsync(userId + '_recordIndex', "0");
             index = 0;
         } else if (type === DataType.IN_USED) {
             view = new InusedView(totalAmount);
-            index = await setAsync(event.source.userId + '_inusedIndex', "0");
+            index = await setAsync(userId + '_inusedIndex', "0");
             index = 0;
         } else {
             view = new InusedView(totalAmount);
-            index = await getAsync(event.source.userId + '_inusedIndex');
+            index = await getAsync(userId + '_inusedIndex');
             index = index === null ? 0 : Number(index);
         }
 
-        let tempIndex = 0;
+        return successPromise({ view, index })
+    }
 
-        for (let i = index; i < (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT ? index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
-            if (
-                monthArray.indexOf(getYearAndMonthString(recordCollection.data[i].time)) === -1) {
-                monthArray.push(getYearAndMonthString(recordCollection.data[i].time));
-                if (isToday(recordCollection.data[i].time)) {
-                    if (i !== index) view.pushSeparator(FlexMessage.Margin.xs);
-                    view.pushTimeBar('今天');
-                } else {
-                    view.pushTimeBar(
-                        getYearAndMonthString(recordCollection.data[i].time)
-                    );
-                }
+    function setupView(result: any, recordCollection: any, index: number, monthArray: Array<any>): void {
+        if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[index].time)) === -1) {
+            monthArray.push(getYearAndMonthString(recordCollection.data[index].time));
+            if (isToday(recordCollection.data[index].time)) {
+                if (index !== result.index) result.view.pushSeparator(FlexMessage.Margin.xs);
+                result.view.pushTimeBar('今天');
+            } else {
+                result.view.pushTimeBar(
+                    getYearAndMonthString(recordCollection.data[index].time)
+                );
             }
-            tempIndex += 1;
-            let type = recordCollection.data[i].type;
-            let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2
-                ? container.plate.toString : type === 4 ? container.icecream.toString : type === 9 ? container.pp_660.toString : type === 8 ? container.pp_500.toString : type === 10 ? container.pp_250.toString : container.glass_16oz.toString;
-            view.pushSeparator(i === index ? FlexMessage.Margin.md : FlexMessage.Margin.lg);
-            view instanceof InusedView ?
-                view.pushBodyContent(containerType, recordCollection.data[i].container, getTimeString(recordCollection.data[i].time),
-                    recordCollection.data[i].store) :
-                view.pushBodyContent(containerType, recordCollection.data[i].container, getBorrowTimeInterval(recordCollection.data[i].time, recordCollection.data[i].returnTime),
-                    recordCollection.data[i].store + '｜使用\n' + recordCollection.data[i].returnStore + "｜歸還");
         }
 
-        let nextStartIndex = index + 6;
-        let nextEndIndex = index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5;
+        let type = recordCollection.data[index].type;
+        let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2 ?
+            container.plate.toString : type === 4 ? container.icecream.toString : type === 9 ? container.pp_660.toString : type === 8 ?
+                container.pp_500.toString : type === 10 ? container.pp_250.toString : container.glass_16oz.toString;
 
-        if (view.getView().contents.body.contents.length === 0) {
-            view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "好盒器基地");
-            view.deleteGetmoreButton();
+        result.view.pushSeparator(index === result.index ? FlexMessage.Margin.md : FlexMessage.Margin.lg);
+        result.view instanceof InusedView ?
+            result.view.pushBodyContent(containerType, recordCollection.data[index].container, getTimeString(recordCollection.data[index].time),
+                recordCollection.data[index].store) :
+            result.view.pushBodyContent(containerType, recordCollection.data[index].container, getBorrowTimeInterval(recordCollection.data[index].time,
+                recordCollection.data[index].returnTime), recordCollection.data[index].store + '｜使用\n' + recordCollection.data[index].returnStore + "｜歸還");
+    }
+
+    export async function exportClientFlexMessage(recordCollection, event, type): Promise<any> {
+        let MAX_DISPLAY_AMOUNT = 5;
+
+        let monthArray = Array<any>();
+        let totalAmount = recordCollection['data'].length.toString();
+        let result = await flexInit(type, totalAmount, event.source.userId);
+
+        let tempIndex = 0;
+
+        for (let i = result.index; i < (recordCollection.data.length > result.index + MAX_DISPLAY_AMOUNT ? result.index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
+            tempIndex += 1;
+            setupView(result, recordCollection, i, monthArray);
+        }
+
+        let nextStartIndex = result.index + 6;
+        let nextEndIndex = result.index + tempIndex + 5 > totalAmount ? totalAmount : result.index + tempIndex + 5;
+
+        if (result.view.getView().contents.body.contents.length === 0) {
+            result.view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "好盒器基地");
+            result.view.deleteGetmoreButton();
         } else if (nextStartIndex >= totalAmount) {
-            view.deleteGetmoreButton();
+            result.view.deleteGetmoreButton();
         }
         else {
             let indexLabel = "(第" + String(nextStartIndex) + "-" + String(nextEndIndex) + "筆)";
-            view.addIndexToFooterButtonLabel(indexLabel);
+            result.view.addIndexToFooterButtonLabel(indexLabel);
         }
 
         if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
-            setAsync(event.source.userId + '_recordIndex', index + tempIndex);
+            setAsync(event.source.userId + '_recordIndex', result.index + tempIndex);
         } else {
-            setAsync(event.source.userId + '_inusedIndex', index + tempIndex);
+            setAsync(event.source.userId + '_inusedIndex', result.index + tempIndex);
         }
-        return successPromise(view);
+        return successPromise(result.view);
     }
 }
 
@@ -281,63 +284,20 @@ async function findSignal(event: any): Promise<any> {
 
 async function getData(event: any, type): Promise<any> {
     try {
-        let dbUser = await User.findOne({
-            'user.lineId': event.source.userId,
-        }).exec();
-        if (!dbUser) return successPromise(DatabaseState.USER_NOT_FOUND);
-
-        var returned = [];
-        var inUsed: Array<any> = [];
-        var recordCollection = {};
-
-        const rentList = await Trade.find({
-            'tradeType.action': 'Rent',
-            'newUser.phone': dbUser.user.phone,
-        }).exec();
-        rentList.sort(function (a, b) {
-            return b.tradeTime - a.tradeTime;
-        });
-
-        for (let i = 0; i < rentList.length; i++) {
-            let record = {
-                container: '#' + intReLength(rentList[i].container.id, 3),
-                containerCode: rentList[i].container.id,
-                time: rentList[i].tradeTime,
-                type: rentList[i].container.typeCode,
-                store: storeDict[rentList[i].oriUser.storeID].name,
-                cycle:
-                    rentList[i].container.cycleCtr === undefined
-                        ? 0
-                        : rentList[i].container.cycleCtr,
-                return: false,
-            };
-
-            inUsed.push(record);
-        }
-        const returnList = await Trade.find({
-            'tradeType.action': 'Return',
-            'oriUser.phone': dbUser.user.phone,
-        }).exec();
-
-        returnList.sort(function (a, b) {
-            return b.tradeTime - a.tradeTime;
-        });
-        recordCollection['usingAmount'] -= returnList.length;
-        GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
+        let recordCollection = {};
+        let result = await getDataList(event);
+        recordCollection['usingAmount'] -= result.returnList.length;
+        GetDataMethod.filterInusedToReturned(result.returnList, result.inUsed, result.returned);
         if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
             recordCollection['data'] = [];
-            for (var i = 0; i < returned.length; i++) {
-                recordCollection['data'].push(returned[i]);
-            }
+            result.returned.forEach(element => {
+                recordCollection['data'].push(element);
+            });
         } else {
-            recordCollection['data'] = inUsed;
+            recordCollection['data'] = result.inUsed;
         }
 
-        let view = await GetDataMethod.exportClientFlexMessage(
-            recordCollection,
-            event,
-            type
-        );
+        let view = await GetDataMethod.exportClientFlexMessage(recordCollection, event, type);
         return successPromise(view);
     } catch (err) {
         logFactory.error(err);
@@ -386,9 +346,9 @@ async function getDataList(event): Promise<any> {
     returnList.sort(function (a, b) {
         return b.tradeTime - a.tradeTime;
     });
-    GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
+    GetDataMethod.filterInusedToReturned(returnList, inUsed, returned);
 
-    successPromise({
+    return successPromise({
         returnList,
         inUsed,
         returned

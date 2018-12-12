@@ -5,7 +5,7 @@
  */
 
 var app = require('../app.js');
-var logFactory = require('../api/logFactory.js')('linebot:server');
+var logFactory = require('../lib/logFactory.js')('linebot:server');
 var http = require('http');
 
 /**

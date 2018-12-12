@@ -31,7 +31,7 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const eventHandler = require('./controller/eventHandler');
-const logFactory = require('./api/logFactory')('linebot:app');
+const logFactory = require('./lib/logFactory')('linebot:app');
 const app = express();
 const logDirectory = path.join(__dirname, 'log');
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
@@ -60,7 +60,7 @@ mongoose.set('useCreateIndex', true);
 /*
  *  router
  */
-app.post('/webhook', bot_sdk_1.middleware(global.gConfig.bot), (req, res) => {
+app.post('/webhook/linebot', bot_sdk_1.middleware(global.gConfig.bot), (req, res) => {
     Promise
         .all(req.body.events.map(eventHandler.bot))
         .then(result => res.json(result))

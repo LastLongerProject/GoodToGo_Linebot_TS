@@ -15,7 +15,7 @@ const container_1 = require("../etl/models/container");
 const recordView_1 = require("../etl/view/recordView");
 const inusedView_1 = require("../etl/view/inusedView");
 const flexMessage_1 = require("../etl/models/flexMessage");
-const logFactory = require('../api/logFactory.js')('linebot:serviceProcess');
+const logFactory = require('../lib/logFactory.js')('linebot:serviceProcess');
 const richMenu = require('../lib/richMenuScript');
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
@@ -25,95 +25,105 @@ var containerTypeDict;
 var storeDict;
 var GetDataMethod;
 (function (GetDataMethod) {
-    function spliceArrAndPush(returnList, inUsed, returned) {
-        for (var i = 0; i < returnList.length; i++) {
+    function filterInusedToReturned(returnList, inUsed, returned) {
+        returnList.forEach((element, index) => {
             for (var j = inUsed.length - 1; j >= 0; j--) {
-                var returnCycle = typeof returnList[i].container.cycleCtr === 'undefined' ? 0 : returnList[i].container.cycleCtr;
-                if (inUsed[j].containerCode === returnList[i].container.id && inUsed[j].cycle === returnCycle) {
+                var returnCycle = typeof returnList[index].container.cycleCtr === 'undefined' ? 0 : returnList[index].container.cycleCtr;
+                if (inUsed[j].containerCode === returnList[index].container.id && inUsed[j].cycle === returnCycle) {
                     inUsed[j].returned = true;
-                    inUsed[j].returnTime = returnList[i].tradeTime;
+                    inUsed[j].returnTime = returnList[index].tradeTime;
                     inUsed[j].cycle = undefined;
-                    inUsed[j].returnStore = storeDict[returnList[i].newUser.storeID].name;
+                    inUsed[j].returnStore = storeDict[returnList[index].newUser.storeID].name;
                     returned.push(inUsed[j]);
                     inUsed.splice(j, 1);
                     break;
                 }
             }
-        }
+        });
         returned.sort(function (a, b) {
             return b.time - a.time;
         });
     }
-    GetDataMethod.spliceArrAndPush = spliceArrAndPush;
-    function exportClientFlexMessage(recordCollection, event, type) {
+    GetDataMethod.filterInusedToReturned = filterInusedToReturned;
+    function flexInit(type, totalAmount, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            let MAX_DISPLAY_AMOUNT = 5;
-            let view;
-            let monthArray = Array();
             let index;
-            let totalAmount = recordCollection['data'].length.toString();
+            let view;
             if (type === "get more record from database" /* GET_MORE_RECORD */) {
                 view = new recordView_1.RecordView(totalAmount);
-                index = yield redisClient_1.getAsync(event.source.userId + '_recordIndex');
+                index = yield redisClient_1.getAsync(userId + '_recordIndex');
                 index = index === null ? 0 : Number(index);
             }
             else if (type === "record" /* RECORD */) {
                 view = new recordView_1.RecordView(totalAmount);
-                index = yield redisClient_1.setAsync(event.source.userId + '_recordIndex', "0");
+                index = yield redisClient_1.setAsync(userId + '_recordIndex', "0");
                 index = 0;
             }
             else if (type === "in used" /* IN_USED */) {
                 view = new inusedView_1.InusedView(totalAmount);
-                index = yield redisClient_1.setAsync(event.source.userId + '_inusedIndex', "0");
+                index = yield redisClient_1.setAsync(userId + '_inusedIndex', "0");
                 index = 0;
             }
             else {
                 view = new inusedView_1.InusedView(totalAmount);
-                index = yield redisClient_1.getAsync(event.source.userId + '_inusedIndex');
+                index = yield redisClient_1.getAsync(userId + '_inusedIndex');
                 index = index === null ? 0 : Number(index);
             }
-            let tempIndex = 0;
-            for (let i = index; i < (recordCollection.data.length > index + MAX_DISPLAY_AMOUNT ? index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
-                if (monthArray.indexOf(tool_1.getYearAndMonthString(recordCollection.data[i].time)) === -1) {
-                    monthArray.push(tool_1.getYearAndMonthString(recordCollection.data[i].time));
-                    if (tool_1.isToday(recordCollection.data[i].time)) {
-                        if (i !== index)
-                            view.pushSeparator(flexMessage_1.FlexMessage.Margin.xs);
-                        view.pushTimeBar('今天');
-                    }
-                    else {
-                        view.pushTimeBar(tool_1.getYearAndMonthString(recordCollection.data[i].time));
-                    }
-                }
-                tempIndex += 1;
-                let type = recordCollection.data[i].type;
-                let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2
-                    ? container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : type === 9 ? container_1.container.pp_660.toString : type === 8 ? container_1.container.pp_500.toString : type === 10 ? container_1.container.pp_250.toString : container_1.container.glass_16oz.toString;
-                view.pushSeparator(i === index ? flexMessage_1.FlexMessage.Margin.md : flexMessage_1.FlexMessage.Margin.lg);
-                view instanceof inusedView_1.InusedView ?
-                    view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getTimeString(recordCollection.data[i].time), recordCollection.data[i].store) :
-                    view.pushBodyContent(containerType, recordCollection.data[i].container, tool_1.getBorrowTimeInterval(recordCollection.data[i].time, recordCollection.data[i].returnTime), recordCollection.data[i].store + '｜使用\n' + recordCollection.data[i].returnStore + "｜歸還");
+            return customPromise_1.successPromise({ view, index });
+        });
+    }
+    function setupView(result, recordCollection, index, monthArray) {
+        if (monthArray.indexOf(tool_1.getYearAndMonthString(recordCollection.data[index].time)) === -1) {
+            monthArray.push(tool_1.getYearAndMonthString(recordCollection.data[index].time));
+            if (tool_1.isToday(recordCollection.data[index].time)) {
+                if (index !== result.index)
+                    result.view.pushSeparator(flexMessage_1.FlexMessage.Margin.xs);
+                result.view.pushTimeBar('今天');
             }
-            let nextStartIndex = index + 6;
-            let nextEndIndex = index + tempIndex + 5 > totalAmount ? totalAmount : index + tempIndex + 5;
-            if (view.getView().contents.body.contents.length === 0) {
-                view.pushBodyContent(container_1.container.nothing.toString, container_1.container.nothing.toString, '期待您的使用！', "好盒器基地");
-                view.deleteGetmoreButton();
+            else {
+                result.view.pushTimeBar(tool_1.getYearAndMonthString(recordCollection.data[index].time));
+            }
+        }
+        let type = recordCollection.data[index].type;
+        let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2 ?
+            container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : type === 9 ? container_1.container.pp_660.toString : type === 8 ?
+            container_1.container.pp_500.toString : type === 10 ? container_1.container.pp_250.toString : container_1.container.glass_16oz.toString;
+        result.view.pushSeparator(index === result.index ? flexMessage_1.FlexMessage.Margin.md : flexMessage_1.FlexMessage.Margin.lg);
+        result.view instanceof inusedView_1.InusedView ?
+            result.view.pushBodyContent(containerType, recordCollection.data[index].container, tool_1.getTimeString(recordCollection.data[index].time), recordCollection.data[index].store) :
+            result.view.pushBodyContent(containerType, recordCollection.data[index].container, tool_1.getBorrowTimeInterval(recordCollection.data[index].time, recordCollection.data[index].returnTime), recordCollection.data[index].store + '｜使用\n' + recordCollection.data[index].returnStore + "｜歸還");
+    }
+    function exportClientFlexMessage(recordCollection, event, type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let MAX_DISPLAY_AMOUNT = 5;
+            let monthArray = Array();
+            let totalAmount = recordCollection['data'].length.toString();
+            let result = yield flexInit(type, totalAmount, event.source.userId);
+            let tempIndex = 0;
+            for (let i = result.index; i < (recordCollection.data.length > result.index + MAX_DISPLAY_AMOUNT ? result.index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
+                tempIndex += 1;
+                setupView(result, recordCollection, i, monthArray);
+            }
+            let nextStartIndex = result.index + 6;
+            let nextEndIndex = result.index + tempIndex + 5 > totalAmount ? totalAmount : result.index + tempIndex + 5;
+            if (result.view.getView().contents.body.contents.length === 0) {
+                result.view.pushBodyContent(container_1.container.nothing.toString, container_1.container.nothing.toString, '期待您的使用！', "好盒器基地");
+                result.view.deleteGetmoreButton();
             }
             else if (nextStartIndex >= totalAmount) {
-                view.deleteGetmoreButton();
+                result.view.deleteGetmoreButton();
             }
             else {
                 let indexLabel = "(第" + String(nextStartIndex) + "-" + String(nextEndIndex) + "筆)";
-                view.addIndexToFooterButtonLabel(indexLabel);
+                result.view.addIndexToFooterButtonLabel(indexLabel);
             }
             if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
-                redisClient_1.setAsync(event.source.userId + '_recordIndex', index + tempIndex);
+                redisClient_1.setAsync(event.source.userId + '_recordIndex', result.index + tempIndex);
             }
             else {
-                redisClient_1.setAsync(event.source.userId + '_inusedIndex', index + tempIndex);
+                redisClient_1.setAsync(event.source.userId + '_inusedIndex', result.index + tempIndex);
             }
-            return customPromise_1.successPromise(view);
+            return customPromise_1.successPromise(result.view);
         });
     }
     GetDataMethod.exportClientFlexMessage = exportClientFlexMessage;
@@ -277,52 +287,18 @@ exports.findSignal = findSignal;
 function getData(event, type) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let dbUser = yield User.findOne({
-                'user.lineId': event.source.userId,
-            }).exec();
-            if (!dbUser)
-                return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
-            var returned = [];
-            var inUsed = [];
-            var recordCollection = {};
-            const rentList = yield Trade.find({
-                'tradeType.action': 'Rent',
-                'newUser.phone': dbUser.user.phone,
-            }).exec();
-            rentList.sort(function (a, b) {
-                return b.tradeTime - a.tradeTime;
-            });
-            for (let i = 0; i < rentList.length; i++) {
-                let record = {
-                    container: '#' + tool_1.intReLength(rentList[i].container.id, 3),
-                    containerCode: rentList[i].container.id,
-                    time: rentList[i].tradeTime,
-                    type: rentList[i].container.typeCode,
-                    store: storeDict[rentList[i].oriUser.storeID].name,
-                    cycle: rentList[i].container.cycleCtr === undefined
-                        ? 0
-                        : rentList[i].container.cycleCtr,
-                    return: false,
-                };
-                inUsed.push(record);
-            }
-            const returnList = yield Trade.find({
-                'tradeType.action': 'Return',
-                'oriUser.phone': dbUser.user.phone,
-            }).exec();
-            returnList.sort(function (a, b) {
-                return b.tradeTime - a.tradeTime;
-            });
-            recordCollection['usingAmount'] -= returnList.length;
-            GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
+            let recordCollection = {};
+            let result = yield getDataList(event);
+            recordCollection['usingAmount'] -= result.returnList.length;
+            GetDataMethod.filterInusedToReturned(result.returnList, result.inUsed, result.returned);
             if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
                 recordCollection['data'] = [];
-                for (var i = 0; i < returned.length; i++) {
-                    recordCollection['data'].push(returned[i]);
-                }
+                result.returned.forEach(element => {
+                    recordCollection['data'].push(element);
+                });
             }
             else {
-                recordCollection['data'] = inUsed;
+                recordCollection['data'] = result.inUsed;
             }
             let view = yield GetDataMethod.exportClientFlexMessage(recordCollection, event, type);
             return customPromise_1.successPromise(view);
@@ -371,8 +347,8 @@ function getDataList(event) {
         returnList.sort(function (a, b) {
             return b.tradeTime - a.tradeTime;
         });
-        GetDataMethod.spliceArrAndPush(returnList, inUsed, returned);
-        customPromise_1.successPromise({
+        GetDataMethod.filterInusedToReturned(returnList, inUsed, returned);
+        return customPromise_1.successPromise({
             returnList,
             inUsed,
             returned

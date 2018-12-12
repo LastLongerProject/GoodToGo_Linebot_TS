@@ -23,14 +23,14 @@ const environment = process.env.NODE_ENV || 'development';
 const environmentConfig = config[environment];
 const finalConfig = _.merge(defaultConfig, environmentConfig);
 global.gConfig = finalConfig;
-import {redisClient} from './models/db/redisClient';
+import { redisClient } from './models/db/redisClient';
 
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const eventHandler = require('./controller/eventHandler');
-const logFactory = require('./api/logFactory')('linebot:app');
+const logFactory = require('./lib/logFactory')('linebot:app');
 
 
 const app: express.Application = express();
@@ -45,14 +45,14 @@ const accessLogStream = rfs('access.log', {
 
 /*
  *  init database
- */ 
+ */
 
 redisClient.select(5, (err, res) => {
     if (err) return logFactory.error(err);
     logFactory.log(res);
 });
 
-redisClient.on('connect', function() {
+redisClient.on('connect', function () {
     logFactory.log('Redis client connected');
 });
 
@@ -71,7 +71,7 @@ mongoose.set('useCreateIndex', true);
  *  router
  */
 
-app.post('/webhook', middleware(global.gConfig.bot), (req,res) => {
+app.post('/webhook/linebot', middleware(global.gConfig.bot), (req, res) => {
     Promise
         .all(req.body.events.map(eventHandler.bot))
         .then(result => res.json(result))
@@ -94,7 +94,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 /**
  *  error handler
  */
-app.use(function(err, req, res, next)  {
+app.use(function (err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
@@ -103,7 +103,7 @@ app.use(function(err, req, res, next)  {
 });
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     var err = new Error('Not Found');
     Object.defineProperty(err, 'status', {
         value: 404
