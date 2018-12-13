@@ -43,7 +43,7 @@ namespace GetDataMethod {
         });
     }
 
-    async function flexInit(type: DataType, totalAmount: string, userId: string): Promise<any> {
+    async function flexViewInit(type: DataType, totalAmount: string, userId: string): Promise<any> {
         let index: any;
         let view: ContainerStateView;
 
@@ -68,7 +68,16 @@ namespace GetDataMethod {
         return successPromise({ view, index })
     }
 
-    function setupView(result: any, recordCollection: any, index: number, monthArray: Array<any>): void {
+    function typeMatching(type: string): string {
+        for (var prop in container) {
+            if (type === container[prop]['type']) {
+                return container[prop].toString;
+            }
+        }
+        return container.nothing.toString;
+    }
+
+    function setupTimecellView(result: any, recordCollection: any, index: number, monthArray: Array<any>): void {
         if (monthArray.indexOf(getYearAndMonthString(recordCollection.data[index].time)) === -1) {
             monthArray.push(getYearAndMonthString(recordCollection.data[index].time));
             if (isToday(recordCollection.data[index].time)) {
@@ -80,11 +89,13 @@ namespace GetDataMethod {
                 );
             }
         }
+    }
+
+    function setupView(result: any, recordCollection: any, index: number, monthArray: Array<any>): void {
+        setupTimecellView(result, recordCollection, index, monthArray);
 
         let type = recordCollection.data[index].type;
-        let containerType = type === 0 ? container.glass_12oz.toString : type === 7 ? container.bowl.toString : type === 2 ?
-            container.plate.toString : type === 4 ? container.icecream.toString : type === 9 ? container.pp_660.toString : type === 8 ?
-                container.pp_500.toString : type === 10 ? container.pp_250.toString : container.glass_16oz.toString;
+        let containerType = typeMatching(type);
 
         result.view.pushSeparator(index === result.index ? FlexMessage.Margin.md : FlexMessage.Margin.lg);
         result.view instanceof InusedView ?
@@ -94,12 +105,20 @@ namespace GetDataMethod {
                 recordCollection.data[index].returnTime), recordCollection.data[index].store + '｜使用\n' + recordCollection.data[index].returnStore + "｜歸還");
     }
 
+    function setRedisInfo(type: DataType, userId: string, index: number, tempIndex: number) {
+        if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
+            setAsync(userId + '_recordIndex', String(index + tempIndex));
+        } else {
+            setAsync(userId + '_inusedIndex', String(index + tempIndex));
+        }
+    }
+
     export async function exportClientFlexMessage(recordCollection, event, type): Promise<any> {
         let MAX_DISPLAY_AMOUNT = 5;
 
         let monthArray = Array<any>();
         let totalAmount = recordCollection['data'].length.toString();
-        let result = await flexInit(type, totalAmount, event.source.userId);
+        let result = await flexViewInit(type, totalAmount, event.source.userId);
 
         let tempIndex = 0;
 
@@ -122,38 +141,27 @@ namespace GetDataMethod {
             result.view.addIndexToFooterButtonLabel(indexLabel);
         }
 
-        if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
-            setAsync(event.source.userId + '_recordIndex', result.index + tempIndex);
-        } else {
-            setAsync(event.source.userId + '_inusedIndex', result.index + tempIndex);
-        }
+        setRedisInfo(type, event.source.userId, result.index, tempIndex);
+
         return successPromise(result.view);
     }
 }
 
-ContainerType.find(
-    {},
-    {},
-    {
-        sort: {
-            typeCode: 1,
-        },
-    }
-)
+ContainerType.find({}, {}, {
+    sort: {
+        typeCode: 1,
+    },
+})
     .then(docs => {
         containerTypeDict = docs;
     })
     .catch(err => logFactory.error(err));
 
-PlaceID.find(
-    {},
-    {},
-    {
-        sort: {
-            ID: 1,
-        },
-    }
-)
+PlaceID.find({}, {}, {
+    sort: {
+        ID: 1,
+    },
+})
     .then(docs => {
         storeDict = docs;
     })
@@ -329,10 +337,7 @@ async function getDataList(event): Promise<any> {
             time: rentList[i].tradeTime,
             type: rentList[i].container.typeCode,
             store: storeDict[rentList[i].oriUser.storeID].name,
-            cycle:
-                rentList[i].container.cycleCtr === undefined
-                    ? 0
-                    : rentList[i].container.cycleCtr,
+            cycle: rentList[i].container.cycleCtr === undefined ? 0 : rentList[i].container.cycleCtr,
             return: false,
         };
 

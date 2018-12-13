@@ -32,6 +32,7 @@ function postbackHandler(event, postbackData) {
         postbackData === "redeem" /* REDEEM */) {
         return getRewardImage(event, postbackData);
     }
+    return Promise.resolve(null);
 }
 exports.postbackHandler = postbackHandler;
 function getRewardImage(event, type) {

@@ -27,7 +27,7 @@ module.exports = {
         if (event.type === 'postback') {
             postbackAction(event);
         }
-        if (event.type === 'follow') {
+        else if (event.type === 'follow') {
             followEvent(event);
         } else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             unfollowOrUnBoundEvent(event);

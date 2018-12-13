@@ -28,6 +28,8 @@ function postbackHandler(event, postbackData) {
     ) {
         return getRewardImage(event, postbackData);
     }
+
+    return Promise.resolve(null);
 }
 
 function getRewardImage(event, type) {

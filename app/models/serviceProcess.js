@@ -45,7 +45,7 @@ var GetDataMethod;
         });
     }
     GetDataMethod.filterInusedToReturned = filterInusedToReturned;
-    function flexInit(type, totalAmount, userId) {
+    function flexViewInit(type, totalAmount, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             let index;
             let view;
@@ -72,7 +72,15 @@ var GetDataMethod;
             return customPromise_1.successPromise({ view, index });
         });
     }
-    function setupView(result, recordCollection, index, monthArray) {
+    function typeMatching(type) {
+        for (var prop in container_1.container) {
+            if (type === container_1.container[prop]['type']) {
+                return container_1.container[prop].toString;
+            }
+        }
+        return container_1.container.nothing.toString;
+    }
+    function setupTimecellView(result, recordCollection, index, monthArray) {
         if (monthArray.indexOf(tool_1.getYearAndMonthString(recordCollection.data[index].time)) === -1) {
             monthArray.push(tool_1.getYearAndMonthString(recordCollection.data[index].time));
             if (tool_1.isToday(recordCollection.data[index].time)) {
@@ -84,21 +92,30 @@ var GetDataMethod;
                 result.view.pushTimeBar(tool_1.getYearAndMonthString(recordCollection.data[index].time));
             }
         }
+    }
+    function setupView(result, recordCollection, index, monthArray) {
+        setupTimecellView(result, recordCollection, index, monthArray);
         let type = recordCollection.data[index].type;
-        let containerType = type === 0 ? container_1.container.glass_12oz.toString : type === 7 ? container_1.container.bowl.toString : type === 2 ?
-            container_1.container.plate.toString : type === 4 ? container_1.container.icecream.toString : type === 9 ? container_1.container.pp_660.toString : type === 8 ?
-            container_1.container.pp_500.toString : type === 10 ? container_1.container.pp_250.toString : container_1.container.glass_16oz.toString;
+        let containerType = typeMatching(type);
         result.view.pushSeparator(index === result.index ? flexMessage_1.FlexMessage.Margin.md : flexMessage_1.FlexMessage.Margin.lg);
         result.view instanceof inusedView_1.InusedView ?
             result.view.pushBodyContent(containerType, recordCollection.data[index].container, tool_1.getTimeString(recordCollection.data[index].time), recordCollection.data[index].store) :
             result.view.pushBodyContent(containerType, recordCollection.data[index].container, tool_1.getBorrowTimeInterval(recordCollection.data[index].time, recordCollection.data[index].returnTime), recordCollection.data[index].store + '｜使用\n' + recordCollection.data[index].returnStore + "｜歸還");
+    }
+    function setRedisInfo(type, userId, index, tempIndex) {
+        if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
+            redisClient_1.setAsync(userId + '_recordIndex', String(index + tempIndex));
+        }
+        else {
+            redisClient_1.setAsync(userId + '_inusedIndex', String(index + tempIndex));
+        }
     }
     function exportClientFlexMessage(recordCollection, event, type) {
         return __awaiter(this, void 0, void 0, function* () {
             let MAX_DISPLAY_AMOUNT = 5;
             let monthArray = Array();
             let totalAmount = recordCollection['data'].length.toString();
-            let result = yield flexInit(type, totalAmount, event.source.userId);
+            let result = yield flexViewInit(type, totalAmount, event.source.userId);
             let tempIndex = 0;
             for (let i = result.index; i < (recordCollection.data.length > result.index + MAX_DISPLAY_AMOUNT ? result.index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
                 tempIndex += 1;
@@ -117,12 +134,7 @@ var GetDataMethod;
                 let indexLabel = "(第" + String(nextStartIndex) + "-" + String(nextEndIndex) + "筆)";
                 result.view.addIndexToFooterButtonLabel(indexLabel);
             }
-            if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
-                redisClient_1.setAsync(event.source.userId + '_recordIndex', result.index + tempIndex);
-            }
-            else {
-                redisClient_1.setAsync(event.source.userId + '_inusedIndex', result.index + tempIndex);
-            }
+            setRedisInfo(type, event.source.userId, result.index, tempIndex);
             return customPromise_1.successPromise(result.view);
         });
     }
@@ -333,9 +345,7 @@ function getDataList(event) {
                 time: rentList[i].tradeTime,
                 type: rentList[i].container.typeCode,
                 store: storeDict[rentList[i].oriUser.storeID].name,
-                cycle: rentList[i].container.cycleCtr === undefined
-                    ? 0
-                    : rentList[i].container.cycleCtr,
+                cycle: rentList[i].container.cycleCtr === undefined ? 0 : rentList[i].container.cycleCtr,
                 return: false,
             };
             inUsed.push(record);
