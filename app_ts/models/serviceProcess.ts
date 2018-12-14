@@ -1,27 +1,24 @@
-import { redisClient, getAsync, setAsync } from './db/redisClient';
-import { successPromise, failPromise } from '../lib/customPromise';
-import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString, getBorrowTimeInterval } from '../lib/tool';
 import { container } from '../etl/models/container';
 import { RecordView } from '../etl/view/recordView';
 import { InusedView } from '../etl/view/inusedView';
-import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState, RichmenuType } from '../lib/enumManager';
 import { FlexMessage } from '../etl/models/flexMessage';
 import { ContainerStateView } from '../etl/view/containerView';
-
-
-const logFactory = require('../lib/logFactory.js')('linebot:serviceProcess');
-const richMenu = require('../lib/richMenuScript');
-
+import { successPromise, failPromise } from '../lib/customPromise';
+import { redisClient, getAsync, setAsync } from './db/redisClient';
+import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../lib/enumManager';
+import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString, getBorrowTimeInterval } from '../lib/tool';
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
 const ContainerType = require('./db/containerTypeDB');
+const richMenu = require('../lib/richMenuScript');
+const logFactory = require('../lib/logFactory.js')('linebot:serviceProcess');
 
 var containerTypeDict: Object;
 var storeDict: Object;
 
 namespace GetDataMethod {
-    export function filterInusedToReturned(returnList: Array<any>, inUsed: Array<any>, returned: Array<any>): void {
+    export function filterReturnedFromInused(returnList: Array<any>, inUsed: Array<any>, returned: Array<any>): void {
         returnList.forEach((element, index) => {
             for (var j = inUsed.length - 1; j >= 0; j--) {
                 var returnCycle = typeof returnList[index].container.cycleCtr === 'undefined' ? 0 : returnList[index].container.cycleCtr;
@@ -115,11 +112,9 @@ namespace GetDataMethod {
 
     export async function exportClientFlexMessage(recordCollection, event, type): Promise<any> {
         let MAX_DISPLAY_AMOUNT = 5;
-
         let monthArray = Array<any>();
         let totalAmount = recordCollection['data'].length.toString();
         let result = await flexViewInit(type, totalAmount, event.source.userId);
-
         let tempIndex = 0;
 
         for (let i = result.index; i < (recordCollection.data.length > result.index + MAX_DISPLAY_AMOUNT ? result.index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {
@@ -142,7 +137,6 @@ namespace GetDataMethod {
         }
 
         setRedisInfo(type, event.source.userId, result.index, tempIndex);
-
         return successPromise(result.view);
     }
 }
@@ -150,7 +144,7 @@ namespace GetDataMethod {
 ContainerType.find({}, {}, {
     sort: {
         typeCode: 1,
-    },
+    }
 })
     .then(docs => {
         containerTypeDict = docs;
@@ -160,7 +154,7 @@ ContainerType.find({}, {}, {
 PlaceID.find({}, {}, {
     sort: {
         ID: 1,
-    },
+    }
 })
     .then(docs => {
         storeDict = docs;
@@ -183,11 +177,9 @@ async function bindLineId(event: any, phone: string): Promise<any> {
                 dbUser.user.lineId = event.source.userId;
                 var saveRes = await dbUser.save();
                 if (saveRes) {
-
                     richMenu.bindRichmenuToUser('after', event.source.userId);
                     return successPromise(BindState.SUCCESS);
                 }
-
             }
         } else {
             return successPromise(BindState.LINE_HAS_BOUND);
@@ -197,9 +189,7 @@ async function bindLineId(event: any, phone: string): Promise<any> {
 
 async function deleteBinding(event: any): Promise<any> {
     try {
-        const dbUser = await User.findOne({
-            'user.lineId': event.source.userId,
-        }).exec();
+        const dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
 
         if (!dbUser) {
             logFactory.log(DeleteBindState.LINE_HAS_NOT_BOUND);
@@ -221,9 +211,7 @@ async function deleteBinding(event: any): Promise<any> {
 
 async function getQrcode(event: any): Promise<any> {
     try {
-        var dbUser = await User.findOne({
-            'user.lineId': event.source.userId,
-        }).exec();
+        var dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
 
         if (!dbUser) {
             logFactory.log(DatabaseState.USER_NOT_FOUND);
@@ -239,9 +227,7 @@ async function getQrcode(event: any): Promise<any> {
 
 async function getContribution(event: any): Promise<any> {
     try {
-        var dbUser = await User.findOne({
-            'user.lineId': event.source.userId,
-        }).exec();
+        var dbUser = await User.findOne({ 'user.lineId': event.source.userId, }).exec();
 
         if (!dbUser) {
             logFactory.log(DatabaseState.USER_NOT_FOUND);
@@ -268,8 +254,7 @@ async function addVerificationSignal(event: any, phone: string): Promise<any> {
     try {
         //@ts-ignore
         const result = await setAsync(event.source.userId, phone, 'EX', 180);
-        if (result)
-            return successPromise(AddVerificationSignalState.SUCCESS);
+        if (result) return successPromise(AddVerificationSignalState.SUCCESS);
     } catch (err) {
         return failPromise(err);
     }
@@ -278,11 +263,7 @@ async function addVerificationSignal(event: any, phone: string): Promise<any> {
 async function findSignal(event: any): Promise<any> {
     try {
         const result = await getAsync(event.source.userId);
-        logFactory.log(result);
-        if (!result) {
-            return successPromise(DatabaseState.HAS_NOT_SIGNALED);
-        }
-        logFactory.log('result from findTemporaryInfo: ' + result);
+        if (!result) return successPromise(DatabaseState.HAS_NOT_SIGNALED);
         return successPromise(result);
     } catch (err) {
         failPromise(err);
@@ -295,7 +276,7 @@ async function getData(event: any, type): Promise<any> {
         let recordCollection = {};
         let result = await getDataList(event);
         recordCollection['usingAmount'] -= result.returnList.length;
-        GetDataMethod.filterInusedToReturned(result.returnList, result.inUsed, result.returned);
+        GetDataMethod.filterReturnedFromInused(result.returnList, result.inUsed, result.returned);
         if (type === DataType.RECORD || type === DataType.GET_MORE_RECORD) {
             recordCollection['data'] = [];
             result.returned.forEach(element => {
@@ -321,37 +302,37 @@ async function getDataList(event): Promise<any> {
 
     var returned = [];
     var inUsed: Array<any> = [];
-
     const rentList = await Trade.find({
         'tradeType.action': 'Rent',
-        'newUser.phone': dbUser.user.phone,
+        'newUser.phone': dbUser.user.phone
     }).exec();
-    rentList.sort(function (a, b) {
-        return b.tradeTime - a.tradeTime;
-    });
-
-    for (let i = 0; i < rentList.length; i++) {
-        let record = {
-            container: '#' + intReLength(rentList[i].container.id, 3),
-            containerCode: rentList[i].container.id,
-            time: rentList[i].tradeTime,
-            type: rentList[i].container.typeCode,
-            store: storeDict[rentList[i].oriUser.storeID].name,
-            cycle: rentList[i].container.cycleCtr === undefined ? 0 : rentList[i].container.cycleCtr,
-            return: false,
-        };
-
-        inUsed.push(record);
-    }
     const returnList = await Trade.find({
         'tradeType.action': 'Return',
         'oriUser.phone': dbUser.user.phone,
     }).exec();
 
+    rentList.sort(function (a, b) {
+        return b.tradeTime - a.tradeTime;
+    });
     returnList.sort(function (a, b) {
         return b.tradeTime - a.tradeTime;
     });
-    GetDataMethod.filterInusedToReturned(returnList, inUsed, returned);
+
+    rentList.forEach(element => {
+        let record = {
+            container: '#' + intReLength(element.container.id, 3),
+            containerCode: element.container.id,
+            time: element.tradeTime,
+            type: element.container.typeCode,
+            store: storeDict[element.oriUser.storeID].name,
+            cycle: element.container.cycleCtr === undefined ? 0 : element.container.cycleCtr,
+            return: false,
+        };
+
+        inUsed.push(record);
+    });
+
+    GetDataMethod.filterReturnedFromInused(returnList, inUsed, returned);
 
     return successPromise({
         returnList,

@@ -7,9 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -17,9 +14,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const request_1 = __importDefault(require("request"));
 const client = __importStar(require("../controller/delegate/client"));
+const request_1 = __importDefault(require("request"));
 const serviceProcess_1 = require("../models/serviceProcess");
 const tool_1 = require("./tool");
 const richMenu = require('./richMenuScript');
@@ -100,7 +100,4 @@ function verificate(event, phone) {
     });
 }
 exports.verificate = verificate;
-function request_module(resquestObject, callback) {
-    request_1.default(resquestObject, callback);
-}
 //# sourceMappingURL=request.js.map

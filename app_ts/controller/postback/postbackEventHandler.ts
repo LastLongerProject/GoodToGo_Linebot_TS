@@ -1,8 +1,7 @@
-import { isMobilePhone } from "../../lib/tool";
 import * as request from '../../lib/request';
-import { DataType, RewardType, DatabaseState, BindState, RegisterState } from '../../lib/enumManager';
 import * as client from '../delegate/client';
-import { getData } from "../../models/serviceProcess";
+import { isMobilePhone } from "../../lib/tool";
+import { DataType, RewardType, RegisterState } from '../../lib/enumManager';
 import { FlexMessage } from "../../etl/models/flexMessage";
 import { getDataEvent } from "../delegate/event";
 const logFactory = require('../../lib/logFactory')('linebot:eventHandler');
@@ -35,7 +34,6 @@ function postbackHandler(event, postbackData) {
 function getRewardImage(event, type) {
     let lotteryImage = 'https://i.imgur.com/MwljlRm.jpg';
     let redeemImgae = 'https://imgur.com/l2xiXxb.jpg';
-
     let url = type === RewardType.LOTTERY ? lotteryImage : redeemImgae;
     let image = {
         type: FlexMessage.ComponetType.image,

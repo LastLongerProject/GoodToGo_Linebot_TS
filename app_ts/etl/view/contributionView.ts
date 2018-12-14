@@ -1,7 +1,6 @@
-import { separatorTemplate, FlexMessage, spacerTemplate } from '../models/flexMessage';
+import { separatorTemplate, FlexMessage } from '../models/flexMessage';
 class ContrubtionView {
     private separator = separatorTemplate();
-    private spacer = spacerTemplate();
 
     private image = {
         water: "https://imgur.com/c5Fs3UE.png",
@@ -129,22 +128,6 @@ class ContrubtionView {
     }
     constructor() {
         this.separator.setMargin(FlexMessage.Margin.lg);
-        // this.view.body.contents.push(this.bodyImage);
-    }
-    public pushBodyContent(data) {
-        // this.view.body.contents.push(data);
-    }
-
-    public pushTimeBar(label: String) {
-        // this.view.body.contents.push(addTimeBar(label));
-    }
-
-    public pushSeparator() {
-        // this.view.body.contents.push(this.separator.getSeparator());
-    }
-
-    public pushSpacer() {
-        // this.view.body.contents.push(this.spacer.getSpacer());
     }
 
     public getView() {

@@ -8,24 +8,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const redisClient_1 = require("./db/redisClient");
-const customPromise_1 = require("../lib/customPromise");
-const tool_1 = require("../lib/tool");
 const container_1 = require("../etl/models/container");
 const recordView_1 = require("../etl/view/recordView");
 const inusedView_1 = require("../etl/view/inusedView");
 const flexMessage_1 = require("../etl/models/flexMessage");
-const logFactory = require('../lib/logFactory.js')('linebot:serviceProcess');
-const richMenu = require('../lib/richMenuScript');
+const customPromise_1 = require("../lib/customPromise");
+const redisClient_1 = require("./db/redisClient");
+const tool_1 = require("../lib/tool");
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
 const ContainerType = require('./db/containerTypeDB');
+const richMenu = require('../lib/richMenuScript');
+const logFactory = require('../lib/logFactory.js')('linebot:serviceProcess');
 var containerTypeDict;
 var storeDict;
 var GetDataMethod;
 (function (GetDataMethod) {
-    function filterInusedToReturned(returnList, inUsed, returned) {
+    function filterReturnedFromInused(returnList, inUsed, returned) {
         returnList.forEach((element, index) => {
             for (var j = inUsed.length - 1; j >= 0; j--) {
                 var returnCycle = typeof returnList[index].container.cycleCtr === 'undefined' ? 0 : returnList[index].container.cycleCtr;
@@ -44,7 +44,7 @@ var GetDataMethod;
             return b.time - a.time;
         });
     }
-    GetDataMethod.filterInusedToReturned = filterInusedToReturned;
+    GetDataMethod.filterReturnedFromInused = filterReturnedFromInused;
     function flexViewInit(type, totalAmount, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             let index;
@@ -143,7 +143,7 @@ var GetDataMethod;
 ContainerType.find({}, {}, {
     sort: {
         typeCode: 1,
-    },
+    }
 })
     .then(docs => {
     containerTypeDict = docs;
@@ -152,7 +152,7 @@ ContainerType.find({}, {}, {
 PlaceID.find({}, {}, {
     sort: {
         ID: 1,
-    },
+    }
 })
     .then(docs => {
     storeDict = docs;
@@ -191,9 +191,7 @@ exports.bindLineId = bindLineId;
 function deleteBinding(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const dbUser = yield User.findOne({
-                'user.lineId': event.source.userId,
-            }).exec();
+            const dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
             if (!dbUser) {
                 logFactory.log("Line has not bound with any phone number" /* LINE_HAS_NOT_BOUND */);
                 return customPromise_1.successPromise("Line has not bound with any phone number" /* LINE_HAS_NOT_BOUND */);
@@ -218,9 +216,7 @@ exports.deleteBinding = deleteBinding;
 function getQrcode(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            var dbUser = yield User.findOne({
-                'user.lineId': event.source.userId,
-            }).exec();
+            var dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
             if (!dbUser) {
                 logFactory.log("Does not find user in database" /* USER_NOT_FOUND */);
                 return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
@@ -239,9 +235,7 @@ exports.getQrcode = getQrcode;
 function getContribution(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            var dbUser = yield User.findOne({
-                'user.lineId': event.source.userId,
-            }).exec();
+            var dbUser = yield User.findOne({ 'user.lineId': event.source.userId, }).exec();
             if (!dbUser) {
                 logFactory.log("Does not find user in database" /* USER_NOT_FOUND */);
                 return customPromise_1.successPromise("Does not find user in database" /* USER_NOT_FOUND */);
@@ -283,11 +277,8 @@ function findSignal(event) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const result = yield redisClient_1.getAsync(event.source.userId);
-            logFactory.log(result);
-            if (!result) {
+            if (!result)
                 return customPromise_1.successPromise("The user has not been signaled in redis" /* HAS_NOT_SIGNALED */);
-            }
-            logFactory.log('result from findTemporaryInfo: ' + result);
             return customPromise_1.successPromise(result);
         }
         catch (err) {
@@ -302,7 +293,7 @@ function getData(event, type) {
             let recordCollection = {};
             let result = yield getDataList(event);
             recordCollection['usingAmount'] -= result.returnList.length;
-            GetDataMethod.filterInusedToReturned(result.returnList, result.inUsed, result.returned);
+            GetDataMethod.filterReturnedFromInused(result.returnList, result.inUsed, result.returned);
             if (type === "record" /* RECORD */ || type === "get more record from database" /* GET_MORE_RECORD */) {
                 recordCollection['data'] = [];
                 result.returned.forEach(element => {
@@ -333,31 +324,31 @@ function getDataList(event) {
         var inUsed = [];
         const rentList = yield Trade.find({
             'tradeType.action': 'Rent',
-            'newUser.phone': dbUser.user.phone,
+            'newUser.phone': dbUser.user.phone
         }).exec();
-        rentList.sort(function (a, b) {
-            return b.tradeTime - a.tradeTime;
-        });
-        for (let i = 0; i < rentList.length; i++) {
-            let record = {
-                container: '#' + tool_1.intReLength(rentList[i].container.id, 3),
-                containerCode: rentList[i].container.id,
-                time: rentList[i].tradeTime,
-                type: rentList[i].container.typeCode,
-                store: storeDict[rentList[i].oriUser.storeID].name,
-                cycle: rentList[i].container.cycleCtr === undefined ? 0 : rentList[i].container.cycleCtr,
-                return: false,
-            };
-            inUsed.push(record);
-        }
         const returnList = yield Trade.find({
             'tradeType.action': 'Return',
             'oriUser.phone': dbUser.user.phone,
         }).exec();
+        rentList.sort(function (a, b) {
+            return b.tradeTime - a.tradeTime;
+        });
         returnList.sort(function (a, b) {
             return b.tradeTime - a.tradeTime;
         });
-        GetDataMethod.filterInusedToReturned(returnList, inUsed, returned);
+        rentList.forEach(element => {
+            let record = {
+                container: '#' + tool_1.intReLength(element.container.id, 3),
+                containerCode: element.container.id,
+                time: element.tradeTime,
+                type: element.container.typeCode,
+                store: storeDict[element.oriUser.storeID].name,
+                cycle: element.container.cycleCtr === undefined ? 0 : element.container.cycleCtr,
+                return: false,
+            };
+            inUsed.push(record);
+        });
+        GetDataMethod.filterReturnedFromInused(returnList, inUsed, returned);
         return customPromise_1.successPromise({
             returnList,
             inUsed,

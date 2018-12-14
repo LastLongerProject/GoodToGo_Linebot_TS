@@ -15,11 +15,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const serviceProcess_1 = require("../../models/serviceProcess");
 const client = __importStar(require("./client"));
+const request = __importStar(require("../../lib/request"));
+const serviceProcess_1 = require("../../models/serviceProcess");
 const customPromise_1 = require("../../lib/customPromise");
 const tool_1 = require("../../lib/tool");
-const request = __importStar(require("../../lib/request"));
 const qrcodeView_1 = require("../../etl/view/qrcodeView");
 const contributionView_1 = require("../../etl/view/contributionView");
 const contactView_1 = require("../../etl/view/contactView");
@@ -28,7 +28,7 @@ const richMenu = require('../../lib/richMenuScript');
 function followEvent(event) {
     logFactory.log('Event: added or unblocked');
     const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號綁定完成後即可使用本帳號提供的服務！';
-    client.textMessage(event, message);
+    return client.textMessage(event, message);
 }
 exports.followEvent = followEvent;
 function unfollowOrUnBoundEvent(event) {
@@ -56,13 +56,10 @@ function bindingEvent(event) {
         try {
             let result = yield serviceProcess_1.bindLineId(event, event.message.text);
             let message;
-            logFactory.log(result);
             switch (result) {
                 case "Does not find user in database" /* USER_NOT_FOUND */:
-                    message =
-                        '您還不是會員哦！\n請問要使用 ' +
-                            event.message.text +
-                            ' 為帳號註冊成為會員嗎？';
+                    message = '您還不是會員哦！\n請問要使用 ' +
+                        event.message.text + ' 為帳號註冊成為會員嗎？';
                     return client.registerTemplate(event, message);
                 case "The phone has already bound with another line account" /* PHONE_HAS_BOUND */:
                     message = '此手機已經綁定過摟！';
@@ -76,6 +73,9 @@ function bindingEvent(event) {
                 case "The input is not phone number" /* IS_NOT_PHONE */:
                     message = '請輸入要綁定的手機號碼！';
                     return client.textMessage(event, message);
+                default:
+                    message = '伺服器出現錯誤！請稍後再試';
+                    return client.textMessage(event, message);
             }
         }
         catch (err) {
@@ -87,11 +87,11 @@ function bindingEvent(event) {
 exports.bindingEvent = bindingEvent;
 function verificateEvent(event) {
     return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: verificate');
         try {
             const result = yield serviceProcess_1.findSignal(event);
-            if (tool_1.isMobilePhone(result)) {
+            if (tool_1.isMobilePhone(result))
                 request.verificate(event, result);
-            }
         }
         catch (err) {
             logFactory.error(err);
@@ -167,11 +167,15 @@ function getGoodtogo(event) {
 }
 exports.getGoodtogo = getGoodtogo;
 function getContributionEvent(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        logFactory.log('Event: get contribution');
-        let view = new contributionView_1.ContrubtionView();
-        return client.flexMessage(event, view.getView());
-    });
+    logFactory.log('Event: get contribution');
+    let view = new contributionView_1.ContrubtionView();
+    return client.flexMessage(event, view.getView());
 }
 exports.getContributionEvent = getContributionEvent;
+function notOurEvent(event) {
+    logFactory.log('Event: not our business');
+    let message = "如有需要任何服務請點下列選單！";
+    return client.textMessage(event, message);
+}
+exports.notOurEvent = notOurEvent;
 //# sourceMappingURL=event.js.map

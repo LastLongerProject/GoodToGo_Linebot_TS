@@ -4,7 +4,6 @@ const flexMessage_1 = require("../models/flexMessage");
 class ContrubtionView {
     constructor() {
         this.separator = flexMessage_1.separatorTemplate();
-        this.spacer = flexMessage_1.spacerTemplate();
         this.image = {
             water: "https://imgur.com/c5Fs3UE.png",
             tree: "https://imgur.com/WoW1JPY.png",
@@ -77,7 +76,6 @@ class ContrubtionView {
             styles: this.styles
         };
         this.separator.setMargin(flexMessage_1.FlexMessage.Margin.lg);
-        // this.view.body.contents.push(this.bodyImage);
     }
     bodyCell(url, type, amount) {
         let image = {
@@ -120,18 +118,6 @@ class ContrubtionView {
             ]
         };
         return cell;
-    }
-    pushBodyContent(data) {
-        // this.view.body.contents.push(data);
-    }
-    pushTimeBar(label) {
-        // this.view.body.contents.push(addTimeBar(label));
-    }
-    pushSeparator() {
-        // this.view.body.contents.push(this.separator.getSeparator());
-    }
-    pushSpacer() {
-        // this.view.body.contents.push(this.spacer.getSpacer());
     }
     getView() {
         return {

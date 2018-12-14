@@ -1,12 +1,11 @@
-import request from 'request';
 import * as client from '../controller/delegate/client';
+import request from 'request';
 import {
     addVerificationSignal,
     deleteSignal,
     bindLineId,
 } from '../models/serviceProcess';
 import { randomHexString } from './tool';
-
 const richMenu = require('./richMenuScript');
 const logFactory = require('./logFactory.js')('linebot:request');
 
@@ -85,10 +84,6 @@ async function verificate(event: any, phone): Promise<any> {
         const message = '伺服器出現問題\n請稍後再試';
         return client.textMessage(event, message);
     });
-}
-
-function request_module(resquestObject, callback) {
-    request(resquestObject, callback);
 }
 
 export { register, verificate };

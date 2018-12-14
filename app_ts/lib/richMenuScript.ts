@@ -1,10 +1,9 @@
 import { RichmenuType } from "./enumManager";
-
-let exec = require('child_process').exec;
-let logFactory = require('./logFactory')('linebot:richmenuScript');
+const exec = require('child_process').exec;
+const logFactory = require('./logFactory')('linebot:richmenuScript');
 const richmenuId = require('../models/richmenuID.json');
-let bot = global.gConfig.bot;
-let env = process.env.NODE_ENV;
+const bot = global.gConfig.bot;
+const env = process.env.NODE_ENV;
 let richmenu = richmenuId[String(env)];
 
 let richmenuType = {

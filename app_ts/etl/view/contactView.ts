@@ -1,10 +1,6 @@
-import { separatorTemplate, FlexMessage, getBodyContent, addTimeBar } from '../models/flexMessage';
+import { separatorTemplate, FlexMessage } from '../models/flexMessage';
 class ContactView {
-
     private separator = separatorTemplate();
-    constructor() {
-        this.separator.setMargin(FlexMessage.Margin.none);
-    }
     private headerText = {
         type: FlexMessage.ComponetType.text,
         text: "聯絡好盒器",
@@ -48,11 +44,9 @@ class ContactView {
         styles: this.styles
     }
 
-    public pushBodyContent(containerType: any, dateAndStore: String) { }
-
-    public pushTimeBar(label: String) { }
-
-    public pushSeparator() { }
+    constructor() {
+        this.separator.setMargin(FlexMessage.Margin.none);
+    }
 
     public getView() {
         return {

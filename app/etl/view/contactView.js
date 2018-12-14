@@ -44,9 +44,6 @@ class ContactView {
         };
         this.separator.setMargin(flexMessage_1.FlexMessage.Margin.none);
     }
-    pushBodyContent(containerType, dateAndStore) { }
-    pushTimeBar(label) { }
-    pushSeparator() { }
     getView() {
         return {
             type: "flex",

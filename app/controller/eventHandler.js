@@ -21,13 +21,11 @@ function postbackAction(event) {
 module.exports = {
     bot: function (event) {
         if ((event.type !== 'message' || event.message.type !== 'text') &&
-            event.type !== 'follow' &&
-            event.type !== 'unfollow' &&
-            event.type !== 'postback') {
+            event.type !== 'follow' && event.type !== 'unfollow' && event.type !== 'postback') {
             logFactory.error('Event Type: Wrong Type');
             return Promise.resolve(null);
         }
-        if (event.type === 'postback') {
+        else if (event.type === 'postback') {
             postbackAction(event);
         }
         else if (event.type === 'follow') {
@@ -50,7 +48,6 @@ module.exports = {
         }
         else if (event.message.text === '綁定手機') {
             event_1.bindingEvent(event);
-            // client.textMessage(event, "請輸入手機號碼");
         }
         else if (event.message.text === '哪裡有好盒器') {
             event_1.getGoodtogo(event);
@@ -62,8 +59,7 @@ module.exports = {
             event_1.verificateEvent(event);
         }
         else {
-            logFactory.log('Event: not our business');
-            // client.textMessage(event, "如果有需要任何服務請點選下列表單哦!");
+            event_1.notOurEvent(event);
         }
     },
 };

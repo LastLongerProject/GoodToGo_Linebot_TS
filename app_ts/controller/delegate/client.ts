@@ -1,8 +1,5 @@
-import {
-    Client
-} from '@line/bot-sdk';
+import { Client } from '@line/bot-sdk';
 import { RegisterState } from '../../lib/enumManager';
-
 const logFactory = require('../../lib/logFactory')('linebot:eventHandler');
 const client = new Client(global.gConfig.bot);
 

@@ -1,6 +1,5 @@
 ﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const container_1 = require("../models/container");
 function header() {
     let header = {
         type: "box",
@@ -63,47 +62,6 @@ function addTimeBar(date) {
     };
 }
 exports.addTimeBar = addTimeBar;
-function getBodyContent(containerType, dateAndStore) {
-    return {
-        type: FlexMessage.ComponetType.box,
-        layout: FlexMessage.Layout.horizontal,
-        contents: [{
-                type: FlexMessage.ComponetType.image,
-                url: container_1.container[containerType].imageUrl,
-                size: FlexMessage.Size.xs,
-                gravity: FlexMessage.Gravity.center,
-                flex: 1
-            },
-            {
-                type: FlexMessage.ComponetType.text,
-                text: container_1.container[containerType].name,
-                size: FlexMessage.Size.md,
-                color: "#565656",
-                margin: FlexMessage.Margin.md,
-                gravity: FlexMessage.Gravity.center,
-                align: FlexMessage.Align.start,
-                weight: FlexMessage.Weight.bold,
-                flex: 4
-            }, {
-                type: FlexMessage.ComponetType.text,
-                text: dateAndStore,
-                size: FlexMessage.Size.xs,
-                color: "#C0C0C8",
-                wrap: true,
-                gravity: FlexMessage.Gravity.bottom,
-                align: FlexMessage.Align.end,
-                flex: 5
-            }]
-    };
-}
-exports.getBodyContent = getBodyContent;
-function buttonStyle() {
-    return {
-        link: "link",
-        primary: "primary",
-        secondary: "secondary"
-    };
-}
 var FlexMessage;
 (function (FlexMessage) {
     let Margin;

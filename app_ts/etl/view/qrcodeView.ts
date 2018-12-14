@@ -1,4 +1,4 @@
-import { headerTemplate, separatorTemplate, FlexMessage, addTimeBar, getBodyContent, spacerTemplate } from "../models/flexMessage"
+import { headerTemplate, separatorTemplate, FlexMessage, spacerTemplate } from "../models/flexMessage"
 class QrcodeView {
     private header = headerTemplate();
     private separator = separatorTemplate();
@@ -77,22 +77,6 @@ class QrcodeView {
         body: this.body,
         footer: this.footer,
         styles: this.styles
-    }
-
-    public pushBodyContent(data) {
-        this.view.body.contents.push(data);
-    }
-
-    public pushTimeBar(label: String) {
-        this.view.body.contents.push(addTimeBar(label));
-    }
-
-    public pushSeparator() {
-        this.view.body.contents.push(this.separator.getSeparator());
-    }
-
-    public pushSpacer() {
-        this.view.body.contents.push(this.spacer.getSpacer());
     }
 
     public getView() {

@@ -1,11 +1,11 @@
 import { isMobilePhone, isVerificationCode } from '../lib/tool';
-
 import { DataType } from '../lib/enumManager';
 import { postbackHandler } from './postback/postbackEventHandler';
-import { followEvent, unfollowOrUnBoundEvent, getContributionEvent, getDataEvent, getQRCodeEvent, getContactWayEvent, bindingEvent, verificateEvent, getGoodtogo } from './delegate/event';
-
+import {
+    followEvent, unfollowOrUnBoundEvent, getContributionEvent, getDataEvent,
+    getQRCodeEvent, getContactWayEvent, bindingEvent, verificateEvent, getGoodtogo, notOurEvent
+} from './delegate/event';
 const logFactory = require('../lib/logFactory')('linebot:eventHandler');
-
 
 async function postbackAction(event: any): Promise<any> {
     let postbackData = event.postback.data;
@@ -14,20 +14,13 @@ async function postbackAction(event: any): Promise<any> {
 
 module.exports = {
     bot: function (event: any): any {
-        if (
-            (event.type !== 'message' || event.message.type !== 'text') &&
-            event.type !== 'follow' &&
-            event.type !== 'unfollow' &&
-            event.type !== 'postback'
-        ) {
+        if ((event.type !== 'message' || event.message.type !== 'text') &&
+            event.type !== 'follow' && event.type !== 'unfollow' && event.type !== 'postback') {
             logFactory.error('Event Type: Wrong Type');
-
             return Promise.resolve(null);
-        }
-        if (event.type === 'postback') {
+        } else if (event.type === 'postback') {
             postbackAction(event);
-        }
-        else if (event.type === 'follow') {
+        } else if (event.type === 'follow') {
             followEvent(event);
         } else if (event.type === 'unfollow' || event.message.text === '解除綁定') {
             unfollowOrUnBoundEvent(event);
@@ -41,7 +34,6 @@ module.exports = {
             getContactWayEvent(event);
         } else if (event.message.text === '綁定手機') {
             bindingEvent(event);
-            // client.textMessage(event, "請輸入手機號碼");
         } else if (event.message.text === '哪裡有好盒器') {
             getGoodtogo(event);
         } else if (isMobilePhone(event.message.text)) {
@@ -49,8 +41,7 @@ module.exports = {
         } else if (isVerificationCode(event.message.text)) {
             verificateEvent(event);
         } else {
-            logFactory.log('Event: not our business');
-            // client.textMessage(event, "如果有需要任何服務請點選下列表單哦!");
+            notOurEvent(event);
         }
     },
 };

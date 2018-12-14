@@ -68,18 +68,6 @@ class QrcodeView {
         this.view.body.contents.push(this.qrcode);
         this.view.body.contents.push(this.spacer.getSpacer());
     }
-    pushBodyContent(data) {
-        this.view.body.contents.push(data);
-    }
-    pushTimeBar(label) {
-        this.view.body.contents.push(flexMessage_1.addTimeBar(label));
-    }
-    pushSeparator() {
-        this.view.body.contents.push(this.separator.getSeparator());
-    }
-    pushSpacer() {
-        this.view.body.contents.push(this.spacer.getSpacer());
-    }
     getView() {
         return {
             type: "flex",

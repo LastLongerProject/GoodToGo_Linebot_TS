@@ -28,7 +28,6 @@ function isVerificationCode(code) {
 }
 exports.isVerificationCode = isVerificationCode;
 function getTimeString(DateObject) {
-    var tmpHour = DateObject.getHours() + 8;
     var dayFormatted = intReLength(dayFormatter(DateObject), 2);
     var monthFormatted = intReLength(DateObject.getMonth() + 1, 2);
     return (DateObject.getFullYear() +

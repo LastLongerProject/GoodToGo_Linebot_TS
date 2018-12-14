@@ -1,5 +1,3 @@
-import { container } from "../models/container"
-
 function header(): any {
     let header = {
         type: "box",
@@ -68,48 +66,6 @@ function addTimeBar(date: String) {
         size: FlexMessage.Size.md,
         weight: FlexMessage.Weight.bold,
         color: "#04B7E6"
-    }
-}
-
-function getBodyContent(containerType, dateAndStore: String): any {
-    return {
-        type: FlexMessage.ComponetType.box,
-        layout: FlexMessage.Layout.horizontal,
-        contents: [{
-            type: FlexMessage.ComponetType.image,
-            url: container[containerType].imageUrl,
-            size: FlexMessage.Size.xs,
-            gravity: FlexMessage.Gravity.center,
-            flex: 1
-        },
-        {
-            type: FlexMessage.ComponetType.text,
-            text: container[containerType].name,
-            size: FlexMessage.Size.md,
-            color: "#565656",
-            margin: FlexMessage.Margin.md,
-            gravity: FlexMessage.Gravity.center,
-            align: FlexMessage.Align.start,
-            weight: FlexMessage.Weight.bold,
-            flex: 4
-        }, {
-            type: FlexMessage.ComponetType.text,
-            text: dateAndStore,
-            size: FlexMessage.Size.xs,
-            color: "#C0C0C8",
-            wrap: true,
-            gravity: FlexMessage.Gravity.bottom,
-            align: FlexMessage.Align.end,
-            flex: 5
-        }]
-    };
-}
-
-function buttonStyle(): any {
-    return {
-        link: "link",
-        primary: "primary",
-        secondary: "secondary"
     }
 }
 
@@ -197,5 +153,4 @@ export {
     spacer as spacerTemplate,
     FlexMessage,
     addTimeBar,
-    getBodyContent
 }

@@ -1,22 +1,18 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import mongoose from 'mongoose';
+import rfs from 'rotating-file-stream';
+import _ = require('lodash');
 import express = require('express');
 import {
     JSONParseError,
     SignatureValidationFailed
 } from '@line/bot-sdk';
-import * as bodyParser from 'body-parser';
-import * as path from 'path';
-import * as fs from 'fs';
-import rfs from 'rotating-file-stream';
-import mongoose from 'mongoose';
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import helmet from 'helmet';
-
+const logFactory = require('./lib/logFactory')('linebot:app');
 // set config
-import _ = require('lodash');
-
 const config = require('./config/config.json');
-
 const defaultConfig: Object = config.development;
 const environment = process.env.NODE_ENV || 'development';
 const environmentConfig = config[environment];
@@ -26,7 +22,6 @@ global.gConfig = finalConfig;
 import { redisClient } from './models/db/redisClient';
 import { lineWebhook } from './router/linebot';
 
-const logFactory = require('./lib/logFactory')('linebot:app');
 const app: express.Application = express();
 const logDirectory = path.join(__dirname, 'log');
 
@@ -40,16 +35,13 @@ const accessLogStream = rfs('access.log', {
 /*
  *  init database
  */
-
 redisClient.select(5, (err, res) => {
     if (err) return logFactory.error(err);
     logFactory.log(res);
 });
-
 redisClient.on('connect', function () {
     logFactory.log('Redis client connected');
 });
-
 redisClient.on('error', function (err) {
     logFactory.error('Something went wrong ' + err);
 });
@@ -57,7 +49,6 @@ redisClient.on('error', function (err) {
 mongoose.connect(global.gConfig.mongodbUrl, { useNewUrlParser: true })
     .then(res => logFactory.log("connect db successfully"))
     .catch(err => logFactory.error(err));
-
 mongoose.set('useCreateIndex', true);
 
 
@@ -65,8 +56,8 @@ mongoose.set('useCreateIndex', true);
  *  router
  */
 app.use(helmet());
-app.use(morgan('combined', { stream: accessLogStream }));
-
+app.use(morgan(':remote-addr - :remote-user [:date[clf]] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent :response-time ms',
+    { stream: accessLogStream }));
 app.use('/webhook', lineWebhook);
 
 /**
