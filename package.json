@@ -5,6 +5,7 @@
     "main": "app.js",
     "dependencies": {
         "aws4": "^1.8.0",
+        "axios": "^0.18.0",
         "bcrypt-nodejs": "0.0.3",
         "body-parser": "~1.18.2",
         "bson": "^2.0.6",
@@ -14,6 +15,7 @@
         "ejs": "^2.6.1",
         "express": "^4.16.4",
         "helmet": "^3.15.0",
+        "jwt-simple": "^0.5.5",
         "kareem": "^2.0.7",
         "mongodb": "^3.1.10",
         "mongoose": "^5.3.14",

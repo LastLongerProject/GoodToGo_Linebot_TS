@@ -8,15 +8,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
-const bot_sdk_1 = require("@line/bot-sdk");
 const router = express.Router();
-exports.linebot = router;
+exports.webhook = router;
 const eventHandler = require('../controller/eventHandler');
 const logFactory = require('../lib/logFactory')('linebot:app');
-router.post('/', bot_sdk_1.middleware(global.gConfig.bot), (req, res) => {
+router.post('/linebot', (req, res) => {
     Promise
         .all(req.body.events.map(eventHandler.bot))
         .then(result => res.json(result))
         .catch(err => logFactory.error(err));
 });
-//# sourceMappingURL=linebot.js.map
+router.post('/serviceEvent', (req, res) => {
+    console.log(req.body);
+});
+//# sourceMappingURL=webhook.js.map

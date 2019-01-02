@@ -8,7 +8,8 @@ import _ = require('lodash');
 import express = require('express');
 import {
     JSONParseError,
-    SignatureValidationFailed
+    SignatureValidationFailed,
+    middleware
 } from '@line/bot-sdk';
 const logFactory = require('./lib/logFactory')('linebot:app');
 // set config
@@ -20,7 +21,9 @@ const finalConfig = _.merge(defaultConfig, environmentConfig);
 global.gConfig = finalConfig;
 
 import { redisClient } from './models/db/redisClient';
-import { lineWebhook } from './router/linebot';
+import { linebot } from './router/linebot';
+import * as bodyParser from 'body-parser';
+import { serviceEvent } from './router/serviceEvent';
 
 const app: express.Application = express();
 const logDirectory = path.join(__dirname, 'log');
@@ -56,10 +59,17 @@ mongoose.set('useCreateIndex', true);
  *  router
  */
 app.use(helmet());
+
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent :response-time ms',
     { stream: accessLogStream }));
-app.use('/webhook', lineWebhook);
+app.use('/webhook/linebot', linebot);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+app.use('/webhook/serviceEvent', serviceEvent);
 
+// app.use('/webhook/serviceEvent', serviceEvent);
 /**
  *  error handler
  */

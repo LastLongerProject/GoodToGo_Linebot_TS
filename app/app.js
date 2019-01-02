@@ -29,6 +29,8 @@ const finalConfig = _.merge(defaultConfig, environmentConfig);
 global.gConfig = finalConfig;
 const redisClient_1 = require("./models/db/redisClient");
 const linebot_1 = require("./router/linebot");
+const bodyParser = __importStar(require("body-parser"));
+const serviceEvent_1 = require("./router/serviceEvent");
 const app = express();
 const logDirectory = path.join(__dirname, 'log');
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
@@ -59,7 +61,13 @@ mongoose_1.default.set('useCreateIndex', true);
  */
 app.use(helmet_1.default());
 app.use(morgan_1.default(':remote-addr - :remote-user [:date[clf]] :method :url HTTP/:http-version :status :res[content-length] :referrer :user-agent :response-time ms', { stream: accessLogStream }));
-app.use('/webhook', linebot_1.lineWebhook);
+app.use('/webhook/linebot', linebot_1.linebot);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+app.use('/webhook/serviceEvent', serviceEvent_1.serviceEvent);
+// app.use('/webhook/serviceEvent', serviceEvent);
 /**
  *  error handler
  */
