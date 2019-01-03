@@ -2,11 +2,12 @@ import * as client from './client';
 import * as request from '../../lib/request';
 import { deleteBinding, bindLineId, findSignal, getData, getQrcode } from "../../models/serviceProcess";
 import { failPromise } from "../../lib/customPromise";
-import { DatabaseState, BindState, RichmenuType } from "../../lib/enumManager";
-import { isMobilePhone } from "../../lib/tool";
+import { DatabaseState, BindState, RichmenuType, GetUserDetail } from "../../lib/enumManager";
+import { isMobilePhone, getUserDetail } from "../../lib/tool";
 import { QrcodeView } from "../../etl/view/qrcodeView";
 import { ContrubtionView } from "../../etl/view/contributionView";
 import { ContactView } from "../../etl/view/contactView";
+
 const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
 const richMenu = require('../../lib/richMenuScript');
 
@@ -48,7 +49,10 @@ async function bindingEvent(event: any): Promise<any> {
                 return client.textMessage(event, message);
             case BindState.SUCCESS:
                 message = '綁定成功！';
-                return client.textMessage(event, message);
+                let result = await getUserDetail(event.message.text);
+                if (result === GetUserDetail.SUCCESS)
+                    return client.textMessage(event, message);
+                return client.textMessage(event, "伺服器出現問題！請向好盒器回報QQ");
             case BindState.IS_NOT_PHONE:
                 message = '請輸入要綁定的手機號碼！';
                 return client.textMessage(event, message);
@@ -143,6 +147,9 @@ function notOurEvent(event: any): Promise<any> {
     let message = "如有需要任何服務請點下列選單！"
     return client.textMessage(event, message);
 }
+
+
+
 
 export {
     unfollowOrUnBoundEvent, bindingEvent, verificateEvent, getDataEvent, getQRCodeEvent

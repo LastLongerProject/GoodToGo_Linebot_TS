@@ -57,8 +57,13 @@ const enum RichmenuType {
 
 }
 
+const enum GetUserDetail {
+    SUCCESS = "Get user detail success",
+    FAIL = "Get user detail failed"
+}
+
 export {
     RegisterState, BindState, DeleteBindState, GetContributeState, QrcodeState, DatabaseState
-    , DataType, RewardType, AddVerificationSignalState, RichmenuType
+    , DataType, RewardType, AddVerificationSignalState, RichmenuType, GetUserDetail
 }
 

@@ -1,5 +1,20 @@
 ﻿"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
+const jwt_simple_1 = __importDefault(require("jwt-simple"));
+const customPromise_1 = require("./customPromise");
+const richMenu = require('./richMenuScript');
 function isMobilePhone(phone) {
     var reg = /^[09]{2}[0-9]{8}$/;
     var res = reg.test(phone);
@@ -78,4 +93,47 @@ function isToday(d) {
     return false;
 }
 exports.isToday = isToday;
+function getUserDetail(phone) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let payload = {
+            jti: 'manager',
+            iat: Date.now(),
+            exp: Date.now() + 86400000 * 3,
+        };
+        let auth = jwt_simple_1.default.encode(payload, global.gConfig.serverKey.secretKey);
+        let result = yield axios_1.default({
+            method: 'get',
+            url: global.gConfig.apiBaseUrl + '/manage/userDetail?id=' + phone,
+            headers: {
+                'Authorization': auth,
+                'Apikey': global.gConfig.serverKey.apiKey
+            }
+        }).then(response => {
+            let usingAmount = response.data.usingAmount;
+            let lineToken = response.data.userLineToken;
+            switchRichmenu(usingAmount, lineToken);
+            return customPromise_1.successPromise("Get user detail success" /* SUCCESS */);
+        }).catch(err => {
+            return customPromise_1.failPromise(err);
+        });
+        return result;
+    });
+}
+exports.getUserDetail = getUserDetail;
+function switchRichmenu(amount, lineToken) {
+    if (amount === 0)
+        richMenu.bindRichmenuToUser("using amount 0" /* _0 */, lineToken);
+    else if (amount === 1)
+        richMenu.bindRichmenuToUser("using amount 1" /* _1 */, lineToken);
+    else if (amount === 2)
+        richMenu.bindRichmenuToUser("using amount 2" /* _2 */, lineToken);
+    else if (amount === 3)
+        richMenu.bindRichmenuToUser("using amount 3" /* _3 */, lineToken);
+    else if (amount === 4)
+        richMenu.bindRichmenuToUser("using amount 4" /* _4 */, lineToken);
+    else if (amount === 5)
+        richMenu.bindRichmenuToUser("using amount 5" /* _5 */, lineToken);
+    else
+        richMenu.bindRichmenuToUser("using lots of" /* MORE */, lineToken);
+}
 //# sourceMappingURL=tool.js.map

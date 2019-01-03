@@ -1,31 +1,19 @@
 import * as express from 'express';
-import request from 'axios';
-import jwt from "jwt-simple";
+import { GetUserDetail } from '../lib/enumManager';
+import { getUserDetail } from '../lib/tool';
 const router = express.Router();
+const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
+router.post('/', async (req, res) => {
+    let result = await getUserDetail(req.body.para);
+    if (result === GetUserDetail.SUCCESS)
+        return res.status(200);
+    logFactory.error(result);
+    res.status(404).json({
+        message: 'Get userDetail failed from linebot'
+    });
 
-router.post('/', (req, res) => {
-
-    let payload = {
-        jti: 'manager',
-        iat: Date.now(),
-        exp: Date.now() + 86400000 * 3,
-    };
-
-    let auth = jwt.encode(payload, global.gConfig.serverKey.secretKey);
-
-    request({
-        method: 'get',
-        url: global.gConfig.apiBaseUrl + '/manage/userDetail?id=' + req.body.para,
-        headers: {
-            'Authorization': auth,
-            'Apikey': global.gConfig.serverKey.apiKey
-        }
-    }).then(res => {
-        console.log(res);
-    }).catch(err => {
-        console.log(err);
-    })
 });
 
 export { router as serviceEvent }
+

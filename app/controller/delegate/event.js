@@ -69,7 +69,10 @@ function bindingEvent(event) {
                     return client.textMessage(event, message);
                 case "Successfullt bound with line" /* SUCCESS */:
                     message = '綁定成功！';
-                    return client.textMessage(event, message);
+                    let result = yield tool_1.getUserDetail(event.message.text);
+                    if (result === "Get user detail success" /* SUCCESS */)
+                        return client.textMessage(event, message);
+                    return client.textMessage(event, "伺服器出現問題！請向好盒器回報QQ");
                 case "The input is not phone number" /* IS_NOT_PHONE */:
                     message = '請輸入要綁定的手機號碼！';
                     return client.textMessage(event, message);

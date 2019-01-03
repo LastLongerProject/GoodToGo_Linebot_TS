@@ -12,7 +12,7 @@ const bot_sdk_1 = require("@line/bot-sdk");
 const router = express.Router();
 exports.linebot = router;
 const eventHandler = require('../controller/eventHandler');
-const logFactory = require('../lib/logFactory')('linebot:app');
+const logFactory = require('../lib/logFactory')('linebot:webhook/linebot');
 router.post('/', bot_sdk_1.middleware(global.gConfig.bot), (req, res) => {
     Promise
         .all(req.body.events.map(eventHandler.bot))

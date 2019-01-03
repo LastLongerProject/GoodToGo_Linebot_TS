@@ -3,7 +3,7 @@ import { middleware } from '@line/bot-sdk';
 
 const router = express.Router();
 const eventHandler = require('../controller/eventHandler');
-const logFactory = require('../lib/logFactory')('linebot:app');
+const logFactory = require('../lib/logFactory')('linebot:webhook/linebot');
 
 router.post('/', middleware(global.gConfig.bot), (req, res) => {
     Promise

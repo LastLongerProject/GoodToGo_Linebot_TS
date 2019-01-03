@@ -1,3 +1,9 @@
+import axois from 'axios';
+import jwt from "jwt-simple";
+import { failPromise, successPromise } from "./customPromise";
+import { RichmenuType, GetUserDetail } from "./enumManager";
+const richMenu = require('./richMenuScript');
+
 function isMobilePhone(phone: string): boolean {
     var reg: RegExp = /^[09]{2}[0-9]{8}$/;
     var res: boolean = reg.test(phone);
@@ -83,6 +89,47 @@ function isToday(d: Date): boolean {
     }
     return false;
 }
+async function getUserDetail(phone): Promise<any> {
+    let payload = {
+        jti: 'manager',
+        iat: Date.now(),
+        exp: Date.now() + 86400000 * 3,
+    };
 
+    let auth = jwt.encode(payload, global.gConfig.serverKey.secretKey);
 
-export { isMobilePhone, randomHexString, isVerificationCode, getTimeString, dayFormatter, intReLength, getYearAndMonthString, isToday, getBorrowTimeInterval };
+    let result = await axois({
+        method: 'get',
+        url: global.gConfig.apiBaseUrl + '/manage/userDetail?id=' + phone,
+        headers: {
+            'Authorization': auth,
+            'Apikey': global.gConfig.serverKey.apiKey
+        }
+    }).then(response => {
+        let usingAmount = response.data.usingAmount;
+        let lineToken = response.data.userLineToken;
+        switchRichmenu(usingAmount, lineToken);
+        return successPromise(GetUserDetail.SUCCESS);
+    }).catch(err => {
+        return failPromise(err);
+    });
+    return result;
+}
+
+function switchRichmenu(amount, lineToken): void {
+    if (amount === 0)
+        richMenu.bindRichmenuToUser(RichmenuType._0, lineToken);
+    else if (amount === 1)
+        richMenu.bindRichmenuToUser(RichmenuType._1, lineToken);
+    else if (amount === 2)
+        richMenu.bindRichmenuToUser(RichmenuType._2, lineToken);
+    else if (amount === 3)
+        richMenu.bindRichmenuToUser(RichmenuType._3, lineToken);
+    else if (amount === 4)
+        richMenu.bindRichmenuToUser(RichmenuType._4, lineToken);
+    else if (amount === 5)
+        richMenu.bindRichmenuToUser(RichmenuType._5, lineToken);
+    else
+        richMenu.bindRichmenuToUser(RichmenuType.MORE, lineToken);
+}
+export { isMobilePhone, randomHexString, isVerificationCode, getTimeString, dayFormatter, intReLength, getYearAndMonthString, isToday, getBorrowTimeInterval, getUserDetail };
