@@ -22,8 +22,10 @@ exports.serviceEvent = router;
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 router.post('/', (req, res) => __awaiter(this, void 0, void 0, function* () {
     let result = yield tool_1.getUserDetail(req.body.para);
-    if (result === "Get user detail success" /* SUCCESS */)
+    if (result === "Get user detail success" /* SUCCESS */) {
+        logFactory.log(result);
         return res.status(200);
+    }
     logFactory.error(result);
     res.status(404).json({
         message: 'Get userDetail failed from linebot'
