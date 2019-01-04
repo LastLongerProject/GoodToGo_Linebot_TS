@@ -9,10 +9,11 @@ const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 router.post('/', async (req, res) => {
     let result = await getUserDetail(req.body.para);
     if (result) {
+        res.status(200);
         return switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
     }
-
     logFactory.error(result);
+    res.status(404);
 });
 
 
