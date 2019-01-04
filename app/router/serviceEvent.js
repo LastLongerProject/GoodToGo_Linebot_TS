@@ -13,7 +13,7 @@ const richMenuScript_1 = require("../lib/richMenuScript");
 const router = express.Router();
 exports.serviceEvent = router;
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
     res.status(200);
     tool_1.getUserDetail(req.body.para)
         .then(result => richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken))
