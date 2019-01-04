@@ -128,7 +128,7 @@ namespace GetDataMethod {
         if (result.view.getView().contents.body.contents.length === 0) {
             result.view.pushBodyContent(container.nothing.toString, container.nothing.toString, '期待您的使用！', "好盒器基地");
             result.view.deleteGetmoreButton();
-        } else if (nextStartIndex >= totalAmount) {
+        } else if (nextStartIndex > totalAmount) {
             result.view.deleteGetmoreButton();
         }
         else {
