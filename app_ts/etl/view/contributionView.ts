@@ -7,36 +7,12 @@ class ContrubtionView {
         tree: "https://imgur.com/WoW1JPY.png",
         co2: "https://imgur.com/CX2OOg0.png"
     }
-    private headerText = [{
-        type: FlexMessage.ComponetType.text,
-        text: "您已減少",
-        size: FlexMessage.Size.xl,
-        weight: FlexMessage.Weight.bold,
-        align: FlexMessage.Align.end,
-        flex: 4,
-        color: "#ffffff"
-    }, {
-        type: FlexMessage.ComponetType.text,
-        text: "82",
-        size: FlexMessage.Size.xl,
-        weight: FlexMessage.Weight.bold,
-        align: FlexMessage.Align.center,
-        flex: 2,
-        color: "#ffe552"
-    }, {
-        type: FlexMessage.ComponetType.text,
-        text: "件垃圾",
-        size: FlexMessage.Size.xl,
-        weight: FlexMessage.Weight.bold,
-        align: FlexMessage.Align.start,
-        flex: 5,
-        color: "#ffffff"
-    }];
+    private headerText = Array<any>();
 
     private header = {
         type: "box",
         layout: FlexMessage.Layout.horizontal,
-        contents: this.headerText
+        contents: Array<any>()
     }
     private styles = {
         header: {
@@ -108,7 +84,7 @@ class ContrubtionView {
         body: this.body,
         styles: this.styles
     }
-    constructor(tree: Number, water: Number, co2: Number) {
+    constructor(totalAmount: Number, tree: Number, water: Number, co2: Number) {
         this.separator.setMargin(FlexMessage.Margin.lg);
         this.bodyContent = [
             {
@@ -129,7 +105,33 @@ class ContrubtionView {
                 color: "#484848"
             }
         ]
+        this.headerText = [{
+            type: FlexMessage.ComponetType.text,
+            text: "您已減少",
+            size: FlexMessage.Size.xl,
+            weight: FlexMessage.Weight.bold,
+            align: FlexMessage.Align.end,
+            flex: 4,
+            color: "#ffffff"
+        }, {
+            type: FlexMessage.ComponetType.text,
+            text: totalAmount.toString(),
+            size: FlexMessage.Size.xl,
+            weight: FlexMessage.Weight.bold,
+            align: FlexMessage.Align.center,
+            flex: 2,
+            color: "#ffe552"
+        }, {
+            type: FlexMessage.ComponetType.text,
+            text: "件垃圾",
+            size: FlexMessage.Size.xl,
+            weight: FlexMessage.Weight.bold,
+            align: FlexMessage.Align.start,
+            flex: 5,
+            color: "#ffffff"
+        }];
         this.body.contents = this.bodyContent;
+        this.header.contents = this.headerText;
     }
 
     public getView() {

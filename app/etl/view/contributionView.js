@@ -2,42 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
 class ContrubtionView {
-    constructor(tree, water, co2) {
+    constructor(totalAmount, tree, water, co2) {
         this.separator = flexMessage_1.separatorTemplate();
         this.image = {
             water: "https://imgur.com/c5Fs3UE.png",
             tree: "https://imgur.com/WoW1JPY.png",
             co2: "https://imgur.com/CX2OOg0.png"
         };
-        this.headerText = [{
-                type: flexMessage_1.FlexMessage.ComponetType.text,
-                text: "您已減少",
-                size: flexMessage_1.FlexMessage.Size.xl,
-                weight: flexMessage_1.FlexMessage.Weight.bold,
-                align: flexMessage_1.FlexMessage.Align.end,
-                flex: 4,
-                color: "#ffffff"
-            }, {
-                type: flexMessage_1.FlexMessage.ComponetType.text,
-                text: "82",
-                size: flexMessage_1.FlexMessage.Size.xl,
-                weight: flexMessage_1.FlexMessage.Weight.bold,
-                align: flexMessage_1.FlexMessage.Align.center,
-                flex: 2,
-                color: "#ffe552"
-            }, {
-                type: flexMessage_1.FlexMessage.ComponetType.text,
-                text: "件垃圾",
-                size: flexMessage_1.FlexMessage.Size.xl,
-                weight: flexMessage_1.FlexMessage.Weight.bold,
-                align: flexMessage_1.FlexMessage.Align.start,
-                flex: 5,
-                color: "#ffffff"
-            }];
+        this.headerText = Array();
         this.header = {
             type: "box",
             layout: flexMessage_1.FlexMessage.Layout.horizontal,
-            contents: this.headerText
+            contents: Array()
         };
         this.styles = {
             header: {
@@ -76,7 +52,33 @@ class ContrubtionView {
                 color: "#484848"
             }
         ];
+        this.headerText = [{
+                type: flexMessage_1.FlexMessage.ComponetType.text,
+                text: "您已減少",
+                size: flexMessage_1.FlexMessage.Size.xl,
+                weight: flexMessage_1.FlexMessage.Weight.bold,
+                align: flexMessage_1.FlexMessage.Align.end,
+                flex: 4,
+                color: "#ffffff"
+            }, {
+                type: flexMessage_1.FlexMessage.ComponetType.text,
+                text: totalAmount.toString(),
+                size: flexMessage_1.FlexMessage.Size.xl,
+                weight: flexMessage_1.FlexMessage.Weight.bold,
+                align: flexMessage_1.FlexMessage.Align.center,
+                flex: 2,
+                color: "#ffe552"
+            }, {
+                type: flexMessage_1.FlexMessage.ComponetType.text,
+                text: "件垃圾",
+                size: flexMessage_1.FlexMessage.Size.xl,
+                weight: flexMessage_1.FlexMessage.Weight.bold,
+                align: flexMessage_1.FlexMessage.Align.start,
+                flex: 5,
+                color: "#ffffff"
+            }];
         this.body.contents = this.bodyContent;
+        this.header.contents = this.headerText;
     }
     bodyCell(url, type, amount) {
         let image = {

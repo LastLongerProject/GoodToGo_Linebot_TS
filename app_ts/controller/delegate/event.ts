@@ -145,7 +145,7 @@ async function getContributionEvent(event: any): Promise<any> {
     var dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
     let result = await getUserDetail(dbUser.user.phone);
     let contribution = result.contribution;
-    let view = new ContrubtionView(contribution.tree, contribution.water, contribution.co2);
+    let view = new ContrubtionView(result.totalUsageAmount, contribution.tree, contribution.water, contribution.co2);
     return client.flexMessage(event, view.getView());
 }
 

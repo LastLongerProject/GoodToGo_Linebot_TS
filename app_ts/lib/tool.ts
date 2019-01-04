@@ -108,11 +108,13 @@ async function getUserDetail(phone): Promise<any> {
         let lostAmount = response.data.lostAmount;
         let lineToken = response.data.userLineToken;
         let contribution = response.data.contribution
+        let totalUsageAmount = response.data.totalUsageAmount;
         return successPromise({
             usingAmount,
             lostAmount,
             lineToken,
-            contribution
+            contribution,
+            totalUsageAmount
         });
     }).catch(err => {
         failPromise(err);

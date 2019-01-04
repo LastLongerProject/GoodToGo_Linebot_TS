@@ -179,7 +179,7 @@ function getContributionEvent(event) {
         var dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
         let result = yield tool_1.getUserDetail(dbUser.user.phone);
         let contribution = result.contribution;
-        let view = new contributionView_1.ContrubtionView(contribution.tree, contribution.water, contribution.co2);
+        let view = new contributionView_1.ContrubtionView(result.totalUsageAmount, contribution.tree, contribution.water, contribution.co2);
         return client.flexMessage(event, view.getView());
     });
 }
