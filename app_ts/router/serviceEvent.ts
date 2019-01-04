@@ -7,13 +7,16 @@ const richMenu = require('../lib/richMenuScript');
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
 router.post('/', async (req, res) => {
-    res.status(200);
-
-    let result = await getUserDetail(req.body.para);
-    if (result) {
-        return switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
+    try {
+        let result = await getUserDetail(req.body.para);
+        res.status(200);
+        if (result) {
+            return switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
+        }
+    } catch (err) {
+        logFactory.error(err);
+        res.status(404);
     }
-    logFactory.error(result);
 });
 
 
