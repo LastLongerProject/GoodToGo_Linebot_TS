@@ -1,13 +1,12 @@
 import * as express from 'express';
 import { getUserDetail } from '../lib/tool';
-import { RichmenuType } from "../lib/enumManager";
 import { switchRichmenu } from '../lib/richMenuScript';
 const router = express.Router();
-const richMenu = require('../lib/richMenuScript');
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
 router.post('/', async (req, res) => {
     try {
+        console.log(res.status(200));
         let result = await getUserDetail(req.body.para);
         res.status(200);
         if (result) {

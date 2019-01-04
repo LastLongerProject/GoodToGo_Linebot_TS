@@ -25,7 +25,6 @@ const contributionView_1 = require("../../etl/view/contributionView");
 const contactView_1 = require("../../etl/view/contactView");
 const richMenuScript_1 = require("../../lib/richMenuScript");
 const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
-const richMenu = require('../../lib/richMenuScript');
 const User = require('../../models/db/userDB.js');
 function followEvent(event) {
     logFactory.log('Event: added or unblocked');

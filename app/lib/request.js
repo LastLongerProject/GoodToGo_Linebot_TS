@@ -23,7 +23,6 @@ const request_1 = __importDefault(require("request"));
 const serviceProcess_1 = require("../models/serviceProcess");
 const tool_1 = require("./tool");
 const richMenuScript_1 = require("./richMenuScript");
-const richMenu = require('./richMenuScript');
 const logFactory = require('./logFactory.js')('linebot:request');
 var RegisterState;
 (function (RegisterState) {

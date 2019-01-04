@@ -7,7 +7,6 @@ import {
 } from '../models/serviceProcess';
 import { randomHexString } from './tool';
 import { bindRichmenuToUser } from './richMenuScript';
-const richMenu = require('./richMenuScript');
 const logFactory = require('./logFactory.js')('linebot:request');
 
 export namespace RegisterState {

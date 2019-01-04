@@ -9,7 +9,6 @@ import express = require('express');
 import {
     JSONParseError,
     SignatureValidationFailed,
-    middleware
 } from '@line/bot-sdk';
 const logFactory = require('./lib/logFactory')('linebot:app');
 // set config

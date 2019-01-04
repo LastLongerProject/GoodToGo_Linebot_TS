@@ -10,7 +10,6 @@ import { ContactView } from "../../etl/view/contactView";
 import { switchRichmenu, bindRichmenuToUser } from '../../lib/richMenuScript';
 
 const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
-const richMenu = require('../../lib/richMenuScript');
 const User = require('../../models/db/userDB.js');
 
 function followEvent(event: any): Promise<any> {
