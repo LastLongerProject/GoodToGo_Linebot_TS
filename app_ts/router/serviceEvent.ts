@@ -5,9 +5,10 @@ const router = express.Router();
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
 router.post('/', async (req, res) => {
+    res.status(200);
+
     try {
         let result = await getUserDetail(req.body.para);
-        res.status(200);
         if (result) {
             return switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
         }
@@ -18,6 +19,12 @@ router.post('/', async (req, res) => {
 });
 
 
-
+function getip(req) {
+    return req.headers["x-real-ip"] ||
+        req.ip ||
+        req._remoteAddress ||
+        (req.connection && req.connection.remoteAddress) ||
+        undefined
+}
 export { router as serviceEvent }
 

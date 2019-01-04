@@ -22,9 +22,9 @@ const router = express.Router();
 exports.serviceEvent = router;
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 router.post('/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    res.status(200);
     try {
         let result = yield tool_1.getUserDetail(req.body.para);
-        res.status(200);
         if (result) {
             return richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
         }
@@ -34,4 +34,11 @@ router.post('/', (req, res) => __awaiter(this, void 0, void 0, function* () {
         res.status(404);
     }
 }));
+function getip(req) {
+    return req.headers["x-real-ip"] ||
+        req.ip ||
+        req._remoteAddress ||
+        (req.connection && req.connection.remoteAddress) ||
+        undefined;
+}
 //# sourceMappingURL=serviceEvent.js.map
