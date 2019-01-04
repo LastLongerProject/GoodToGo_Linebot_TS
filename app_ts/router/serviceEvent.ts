@@ -5,7 +5,7 @@ const router = express.Router();
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
 router.post('/', (req, res, next) => {
-    res.status(200);
+    res.status(200).send({ message: "Webhook get it" });
 
     getUserDetail(req.body.para)
         .then(result => switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken))
