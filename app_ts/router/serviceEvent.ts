@@ -12,13 +12,5 @@ router.post('/', (req, res, next) => {
         .catch(err => logFactory.error("err"));
 });
 
-
-function getip(req) {
-    return req.headers["x-real-ip"] ||
-        req.ip ||
-        req._remoteAddress ||
-        (req.connection && req.connection.remoteAddress) ||
-        undefined
-}
 export { router as serviceEvent }
 

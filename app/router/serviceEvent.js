@@ -19,11 +19,4 @@ router.post('/', (req, res, next) => {
         .then(result => richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken))
         .catch(err => logFactory.error("err"));
 });
-function getip(req) {
-    return req.headers["x-real-ip"] ||
-        req.ip ||
-        req._remoteAddress ||
-        (req.connection && req.connection.remoteAddress) ||
-        undefined;
-}
 //# sourceMappingURL=serviceEvent.js.map
