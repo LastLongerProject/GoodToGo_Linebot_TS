@@ -9,7 +9,10 @@ router.post('/', (req, res, next) => {
 
     getUserDetail(req.body.para)
         .then(result => switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken))
-        .catch(err => logFactory.error("err"));
+        .catch(err => {
+            logFactory.error("err");
+            next(err);
+        });
 });
 
 export { router as serviceEvent }

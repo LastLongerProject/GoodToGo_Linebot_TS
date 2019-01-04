@@ -17,6 +17,9 @@ router.post('/', (req, res, next) => {
     res.status(200);
     tool_1.getUserDetail(req.body.para)
         .then(result => richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken))
-        .catch(err => logFactory.error("err"));
+        .catch(err => {
+        logFactory.error("err");
+        next(err);
+    });
 });
 //# sourceMappingURL=serviceEvent.js.map
