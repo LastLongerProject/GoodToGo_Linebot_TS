@@ -23,12 +23,11 @@ exports.serviceEvent = router;
 const richMenu = require('../lib/richMenuScript');
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 router.post('/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    res.status(200);
     let result = yield tool_1.getUserDetail(req.body.para);
     if (result) {
-        res.status(200);
         return richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
     }
     logFactory.error(result);
-    res.status(404);
 }));
 //# sourceMappingURL=serviceEvent.js.map
