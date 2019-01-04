@@ -23,7 +23,6 @@ exports.serviceEvent = router;
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 router.post('/', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
-        console.log(res.status(200));
         let result = yield tool_1.getUserDetail(req.body.para);
         res.status(200);
         if (result) {

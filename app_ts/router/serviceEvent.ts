@@ -6,7 +6,6 @@ const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
 router.post('/', async (req, res) => {
     try {
-        console.log(res.status(200));
         let result = await getUserDetail(req.body.para);
         res.status(200);
         if (result) {
