@@ -15,6 +15,7 @@ const flexMessage_1 = require("../etl/models/flexMessage");
 const customPromise_1 = require("../lib/customPromise");
 const redisClient_1 = require("./db/redisClient");
 const tool_1 = require("../lib/tool");
+const richMenuScript_1 = require("../lib/richMenuScript");
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
@@ -176,7 +177,7 @@ function bindLineId(event, phone) {
                     dbUser.user.lineId = event.source.userId;
                     var saveRes = yield dbUser.save();
                     if (saveRes) {
-                        richMenu.bindRichmenuToUser('after', event.source.userId);
+                        richMenuScript_1.bindRichmenuToUser('after', event.source.userId);
                         return customPromise_1.successPromise("Successfullt bound with line" /* SUCCESS */);
                     }
                 }

@@ -14,7 +14,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const jwt_simple_1 = __importDefault(require("jwt-simple"));
 const customPromise_1 = require("./customPromise");
-const richMenu = require('./richMenuScript');
 function isMobilePhone(phone) {
     var reg = /^[09]{2}[0-9]{8}$/;
     var res = reg.test(phone);
@@ -110,30 +109,20 @@ function getUserDetail(phone) {
             }
         }).then(response => {
             let usingAmount = response.data.usingAmount;
+            let lostAmount = response.data.lostAmount;
             let lineToken = response.data.userLineToken;
-            switchRichmenu(usingAmount, lineToken);
-            return customPromise_1.successPromise("Get user detail success" /* SUCCESS */);
+            let contribution = response.data.contribution;
+            return customPromise_1.successPromise({
+                usingAmount,
+                lostAmount,
+                lineToken,
+                contribution
+            });
         }).catch(err => {
-            return customPromise_1.failPromise(err);
+            customPromise_1.failPromise(err);
         });
         return result;
     });
 }
 exports.getUserDetail = getUserDetail;
-function switchRichmenu(amount, lineToken) {
-    if (amount === 0)
-        richMenu.bindRichmenuToUser("using amount 0" /* _0 */, lineToken);
-    else if (amount === 1)
-        richMenu.bindRichmenuToUser("using amount 1" /* _1 */, lineToken);
-    else if (amount === 2)
-        richMenu.bindRichmenuToUser("using amount 2" /* _2 */, lineToken);
-    else if (amount === 3)
-        richMenu.bindRichmenuToUser("using amount 3" /* _3 */, lineToken);
-    else if (amount === 4)
-        richMenu.bindRichmenuToUser("using amount 4" /* _4 */, lineToken);
-    else if (amount === 5)
-        richMenu.bindRichmenuToUser("using amount 5" /* _5 */, lineToken);
-    else
-        richMenu.bindRichmenuToUser("using lots of" /* MORE */, lineToken);
-}
 //# sourceMappingURL=tool.js.map

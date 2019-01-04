@@ -23,8 +23,10 @@ const tool_1 = require("../../lib/tool");
 const qrcodeView_1 = require("../../etl/view/qrcodeView");
 const contributionView_1 = require("../../etl/view/contributionView");
 const contactView_1 = require("../../etl/view/contactView");
+const richMenuScript_1 = require("../../lib/richMenuScript");
 const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
 const richMenu = require('../../lib/richMenuScript');
+const User = require('../../models/db/userDB.js');
 function followEvent(event) {
     logFactory.log('Event: added or unblocked');
     const message = '感謝您將本帳號加為好友！\n如果是初次使用請先輸入手機號碼以綁定line帳號綁定完成後即可使用本帳號提供的服務！';
@@ -39,7 +41,7 @@ function unfollowOrUnBoundEvent(event) {
             logFactory.log('Event: delete bind');
         try {
             serviceProcess_1.deleteBinding(event);
-            richMenu.bindRichmenuToUser("before binding" /* BEFORE */, event.source.userId);
+            richMenuScript_1.bindRichmenuToUser("before binding" /* BEFORE */, event.source.userId);
             const message = '已取消綁定';
             return client.textMessage(event, message);
         }
@@ -70,8 +72,10 @@ function bindingEvent(event) {
                 case "Successfullt bound with line" /* SUCCESS */:
                     message = '綁定成功！';
                     let result = yield tool_1.getUserDetail(event.message.text);
-                    if (result === "Get user detail success" /* SUCCESS */)
+                    if (result) {
+                        richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
                         return client.textMessage(event, message);
+                    }
                     return client.textMessage(event, "伺服器出現問題！請向好盒器回報QQ");
                 case "The input is not phone number" /* IS_NOT_PHONE */:
                     message = '請輸入要綁定的手機號碼！';
@@ -170,9 +174,14 @@ function getGoodtogo(event) {
 }
 exports.getGoodtogo = getGoodtogo;
 function getContributionEvent(event) {
-    logFactory.log('Event: get contribution');
-    let view = new contributionView_1.ContrubtionView();
-    return client.flexMessage(event, view.getView());
+    return __awaiter(this, void 0, void 0, function* () {
+        logFactory.log('Event: get contribution');
+        var dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
+        let result = yield tool_1.getUserDetail(dbUser.user.phone);
+        let contribution = result.contribution;
+        let view = new contributionView_1.ContrubtionView(contribution.tree, contribution.water, contribution.co2);
+        return client.flexMessage(event, view.getView());
+    });
 }
 exports.getContributionEvent = getContributionEvent;
 function notOurEvent(event) {

@@ -93,31 +93,13 @@ class ContrubtionView {
 
     }
 
-    private bodyContent = [
-        {
-            type: FlexMessage.ComponetType.text,
-            text: "累計節省了",
-            color: "#484848"
-        },
-        this.separator.getSeparator(),
-        this.bodyCell(this.image.tree, "樹木", "0.038 棵"),
-        this.separator.getSeparator(),
-        this.bodyCell(this.image.water, "水", "73.8 公升"),
-        this.separator.getSeparator(),
-        this.bodyCell(this.image.co2, "碳排放", "8.2 公斤"),
-        this.separator.getSeparator(),
-        {
-            type: FlexMessage.ComponetType.text,
-            text: "謝謝您讓地球更美麗！：）",
-            color: "#484848"
-        }
-    ];
+    private bodyContent: Array<any>;
 
     private body = {
         type: FlexMessage.ComponetType.box,
         layout: FlexMessage.Layout.vertical,
         spacing: FlexMessage.Spacing.xl,
-        contents: this.bodyContent
+        contents: Array<any>()
     };
 
     private view = {
@@ -126,8 +108,28 @@ class ContrubtionView {
         body: this.body,
         styles: this.styles
     }
-    constructor() {
+    constructor(tree: Number, water: Number, co2: Number) {
         this.separator.setMargin(FlexMessage.Margin.lg);
+        this.bodyContent = [
+            {
+                type: FlexMessage.ComponetType.text,
+                text: "累計節省了",
+                color: "#484848"
+            },
+            this.separator.getSeparator(),
+            this.bodyCell(this.image.tree, "樹木", tree + " 棵"),
+            this.separator.getSeparator(),
+            this.bodyCell(this.image.water, "水", water + " 公升"),
+            this.separator.getSeparator(),
+            this.bodyCell(this.image.co2, "碳排放", co2 + " 公斤"),
+            this.separator.getSeparator(),
+            {
+                type: FlexMessage.ComponetType.text,
+                text: "謝謝您讓地球更美麗！：）",
+                color: "#484848"
+            }
+        ]
+        this.body.contents = this.bodyContent;
     }
 
     public getView() {

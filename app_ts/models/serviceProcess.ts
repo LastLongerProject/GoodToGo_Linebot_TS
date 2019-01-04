@@ -7,6 +7,7 @@ import { successPromise, failPromise } from '../lib/customPromise';
 import { redisClient, getAsync, setAsync } from './db/redisClient';
 import { BindState, DatabaseState, DeleteBindState, DataType, AddVerificationSignalState } from '../lib/enumManager';
 import { isMobilePhone, intReLength, getYearAndMonthString, isToday, getTimeString, getBorrowTimeInterval } from '../lib/tool';
+import { bindRichmenuToUser } from '../lib/richMenuScript';
 const User = require('./db/userDB');
 const Trade = require('./db/tradeDB');
 const PlaceID = require('./db/placeIdDB');
@@ -177,7 +178,7 @@ async function bindLineId(event: any, phone: string): Promise<any> {
                 dbUser.user.lineId = event.source.userId;
                 var saveRes = await dbUser.save();
                 if (saveRes) {
-                    richMenu.bindRichmenuToUser('after', event.source.userId);
+                    bindRichmenuToUser('after', event.source.userId);
                     return successPromise(BindState.SUCCESS);
                 }
             }

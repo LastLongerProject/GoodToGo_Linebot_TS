@@ -1,22 +1,21 @@
 import * as express from 'express';
-import { GetUserDetail } from '../lib/enumManager';
 import { getUserDetail } from '../lib/tool';
+import { RichmenuType } from "../lib/enumManager";
+import { switchRichmenu } from '../lib/richMenuScript';
 const router = express.Router();
+const richMenu = require('../lib/richMenuScript');
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 
 router.post('/', async (req, res) => {
     let result = await getUserDetail(req.body.para);
-    if (result === GetUserDetail.SUCCESS) {
-        logFactory.log(result);
-        return res.status(200);
+    if (result) {
+        return switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
     }
 
     logFactory.error(result);
-    res.status(404).json({
-        message: 'Get userDetail failed from linebot'
-    });
-
 });
+
+
 
 export { router as serviceEvent }
 

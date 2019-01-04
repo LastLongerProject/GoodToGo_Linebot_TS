@@ -6,6 +6,7 @@ import {
     bindLineId,
 } from '../models/serviceProcess';
 import { randomHexString } from './tool';
+import { bindRichmenuToUser } from './richMenuScript';
 const richMenu = require('./richMenuScript');
 const logFactory = require('./logFactory.js')('linebot:request');
 
@@ -76,7 +77,7 @@ async function verificate(event: any, phone): Promise<any> {
             deleteSignal(event);
             bindLineId(event, phone);
             const message = '恭喜您成為好盒器會員囉！';
-            richMenu.bindRichmenuToUser('after', event.source.userId);
+            bindRichmenuToUser('after', event.source.userId);
             return client.textMessage(event, message);
         }
 

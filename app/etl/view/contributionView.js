@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const flexMessage_1 = require("../models/flexMessage");
 class ContrubtionView {
-    constructor() {
+    constructor(tree, water, co2) {
         this.separator = flexMessage_1.separatorTemplate();
         this.image = {
             water: "https://imgur.com/c5Fs3UE.png",
@@ -44,30 +44,11 @@ class ContrubtionView {
                 backgroundColor: "#00bbdc"
             }
         };
-        this.bodyContent = [
-            {
-                type: flexMessage_1.FlexMessage.ComponetType.text,
-                text: "累計節省了",
-                color: "#484848"
-            },
-            this.separator.getSeparator(),
-            this.bodyCell(this.image.tree, "樹木", "0.038 棵"),
-            this.separator.getSeparator(),
-            this.bodyCell(this.image.water, "水", "73.8 公升"),
-            this.separator.getSeparator(),
-            this.bodyCell(this.image.co2, "碳排放", "8.2 公斤"),
-            this.separator.getSeparator(),
-            {
-                type: flexMessage_1.FlexMessage.ComponetType.text,
-                text: "謝謝您讓地球更美麗！：）",
-                color: "#484848"
-            }
-        ];
         this.body = {
             type: flexMessage_1.FlexMessage.ComponetType.box,
             layout: flexMessage_1.FlexMessage.Layout.vertical,
             spacing: flexMessage_1.FlexMessage.Spacing.xl,
-            contents: this.bodyContent
+            contents: Array()
         };
         this.view = {
             type: flexMessage_1.FlexMessage.Container.bubble,
@@ -76,6 +57,26 @@ class ContrubtionView {
             styles: this.styles
         };
         this.separator.setMargin(flexMessage_1.FlexMessage.Margin.lg);
+        this.bodyContent = [
+            {
+                type: flexMessage_1.FlexMessage.ComponetType.text,
+                text: "累計節省了",
+                color: "#484848"
+            },
+            this.separator.getSeparator(),
+            this.bodyCell(this.image.tree, "樹木", tree + " 棵"),
+            this.separator.getSeparator(),
+            this.bodyCell(this.image.water, "水", water + " 公升"),
+            this.separator.getSeparator(),
+            this.bodyCell(this.image.co2, "碳排放", co2 + " 公斤"),
+            this.separator.getSeparator(),
+            {
+                type: flexMessage_1.FlexMessage.ComponetType.text,
+                text: "謝謝您讓地球更美麗！：）",
+                color: "#484848"
+            }
+        ];
+        this.body.contents = this.bodyContent;
     }
     bodyCell(url, type, amount) {
         let image = {

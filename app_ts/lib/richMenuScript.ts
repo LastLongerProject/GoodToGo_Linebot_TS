@@ -117,53 +117,72 @@ let richmenuType = {
     }
 };
 
-module.exports = {
-    bindRichmenuToUser: function (type, lineId) {
-        if (type === RichmenuType.BEFORE) {
-            exec(richmenuType.beforeBinding(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType._0) {
-            exec(richmenuType._0(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType._1) {
-            exec(richmenuType._1(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType._2) {
-            exec(richmenuType._2(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType._3) {
-            exec(richmenuType._3(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType._4) {
-            exec(richmenuType._4(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType._5) {
-            exec(richmenuType._5(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === RichmenuType.MORE) {
-            exec(richmenuType.more(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        } else if (type === 'after') {
-            exec(richmenuType.after(lineId), function (err, stdout, stderr) {
-                if (err)
-                    return logFactory.error('get bind rich menu api error:' + stderr);
-            });
-        }
-    },
-};
+function bindRichmenuToUser(type, lineId) {
+    if (type === RichmenuType.BEFORE) {
+        exec(richmenuType.beforeBinding(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType._0) {
+        exec(richmenuType._0(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType._1) {
+        exec(richmenuType._1(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType._2) {
+        exec(richmenuType._2(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType._3) {
+        exec(richmenuType._3(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType._4) {
+        exec(richmenuType._4(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType._5) {
+        exec(richmenuType._5(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === RichmenuType.MORE) {
+        exec(richmenuType.more(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    } else if (type === 'after') {
+        exec(richmenuType.after(lineId), function (err, stdout, stderr) {
+            if (err)
+                return logFactory.error('get bind rich menu api error:' + stderr);
+        });
+    }
+}
+
+function switchRichmenu(amount, lineToken): void {
+    if (amount === 0)
+        bindRichmenuToUser(RichmenuType._0, lineToken);
+    else if (amount === 1)
+        bindRichmenuToUser(RichmenuType._1, lineToken);
+    else if (amount === 2)
+        bindRichmenuToUser(RichmenuType._2, lineToken);
+    else if (amount === 3)
+        bindRichmenuToUser(RichmenuType._3, lineToken);
+    else if (amount === 4)
+        bindRichmenuToUser(RichmenuType._4, lineToken);
+    else if (amount === 5)
+        bindRichmenuToUser(RichmenuType._5, lineToken);
+    else if (amount > 5)
+        bindRichmenuToUser(RichmenuType.MORE, lineToken);
+    else
+        bindRichmenuToUser(RichmenuType.BEFORE, lineToken);
+}
+
+export { switchRichmenu, bindRichmenuToUser }

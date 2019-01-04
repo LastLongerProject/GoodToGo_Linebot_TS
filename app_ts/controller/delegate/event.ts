@@ -7,9 +7,11 @@ import { isMobilePhone, getUserDetail } from "../../lib/tool";
 import { QrcodeView } from "../../etl/view/qrcodeView";
 import { ContrubtionView } from "../../etl/view/contributionView";
 import { ContactView } from "../../etl/view/contactView";
+import { switchRichmenu, bindRichmenuToUser } from '../../lib/richMenuScript';
 
 const logFactory = require('../../lib/logFactory')('linebot:eventDelegate');
 const richMenu = require('../../lib/richMenuScript');
+const User = require('../../models/db/userDB.js');
 
 function followEvent(event: any): Promise<any> {
     logFactory.log('Event: added or unblocked');
@@ -22,7 +24,7 @@ async function unfollowOrUnBoundEvent(event: any): Promise<any> {
     else logFactory.log('Event: delete bind');
     try {
         deleteBinding(event);
-        richMenu.bindRichmenuToUser(RichmenuType.BEFORE, event.source.userId);
+        bindRichmenuToUser(RichmenuType.BEFORE, event.source.userId);
         const message = '已取消綁定';
         return client.textMessage(event, message);
     } catch (err) {
@@ -50,8 +52,10 @@ async function bindingEvent(event: any): Promise<any> {
             case BindState.SUCCESS:
                 message = '綁定成功！';
                 let result = await getUserDetail(event.message.text);
-                if (result === GetUserDetail.SUCCESS)
+                if (result) {
+                    switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
                     return client.textMessage(event, message);
+                }
                 return client.textMessage(event, "伺服器出現問題！請向好盒器回報QQ");
             case BindState.IS_NOT_PHONE:
                 message = '請輸入要綁定的手機號碼！';
@@ -136,9 +140,12 @@ function getGoodtogo(event: any): Promise<any> {
     return client.customMessage(event, message);
 }
 
-function getContributionEvent(event: any): Promise<any> {
+async function getContributionEvent(event: any): Promise<any> {
     logFactory.log('Event: get contribution');
-    let view = new ContrubtionView();
+    var dbUser = await User.findOne({ 'user.lineId': event.source.userId }).exec();
+    let result = await getUserDetail(dbUser.user.phone);
+    let contribution = result.contribution;
+    let view = new ContrubtionView(contribution.tree, contribution.water, contribution.co2);
     return client.flexMessage(event, view.getView());
 }
 

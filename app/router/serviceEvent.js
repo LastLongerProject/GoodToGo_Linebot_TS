@@ -17,18 +17,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
 const tool_1 = require("../lib/tool");
+const richMenuScript_1 = require("../lib/richMenuScript");
 const router = express.Router();
 exports.serviceEvent = router;
+const richMenu = require('../lib/richMenuScript');
 const logFactory = require('../lib/logFactory')('linebot:webhook/serviceEvent');
 router.post('/', (req, res) => __awaiter(this, void 0, void 0, function* () {
     let result = yield tool_1.getUserDetail(req.body.para);
-    if (result === "Get user detail success" /* SUCCESS */) {
-        logFactory.log(result);
-        return res.status(200);
+    if (result) {
+        return richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
     }
     logFactory.error(result);
-    res.status(404).json({
-        message: 'Get userDetail failed from linebot'
-    });
 }));
 //# sourceMappingURL=serviceEvent.js.map

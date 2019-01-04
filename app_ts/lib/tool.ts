@@ -1,8 +1,6 @@
 import axois from 'axios';
 import jwt from "jwt-simple";
 import { failPromise, successPromise } from "./customPromise";
-import { RichmenuType, GetUserDetail } from "./enumManager";
-const richMenu = require('./richMenuScript');
 
 function isMobilePhone(phone: string): boolean {
     var reg: RegExp = /^[09]{2}[0-9]{8}$/;
@@ -107,29 +105,20 @@ async function getUserDetail(phone): Promise<any> {
         }
     }).then(response => {
         let usingAmount = response.data.usingAmount;
+        let lostAmount = response.data.lostAmount;
         let lineToken = response.data.userLineToken;
-        switchRichmenu(usingAmount, lineToken);
-        return successPromise(GetUserDetail.SUCCESS);
+        let contribution = response.data.contribution
+        return successPromise({
+            usingAmount,
+            lostAmount,
+            lineToken,
+            contribution
+        });
     }).catch(err => {
-        return failPromise(err);
+        failPromise(err);
     });
     return result;
 }
 
-function switchRichmenu(amount, lineToken): void {
-    if (amount === 0)
-        richMenu.bindRichmenuToUser(RichmenuType._0, lineToken);
-    else if (amount === 1)
-        richMenu.bindRichmenuToUser(RichmenuType._1, lineToken);
-    else if (amount === 2)
-        richMenu.bindRichmenuToUser(RichmenuType._2, lineToken);
-    else if (amount === 3)
-        richMenu.bindRichmenuToUser(RichmenuType._3, lineToken);
-    else if (amount === 4)
-        richMenu.bindRichmenuToUser(RichmenuType._4, lineToken);
-    else if (amount === 5)
-        richMenu.bindRichmenuToUser(RichmenuType._5, lineToken);
-    else
-        richMenu.bindRichmenuToUser(RichmenuType.MORE, lineToken);
-}
+
 export { isMobilePhone, randomHexString, isVerificationCode, getTimeString, dayFormatter, intReLength, getYearAndMonthString, isToday, getBorrowTimeInterval, getUserDetail };
