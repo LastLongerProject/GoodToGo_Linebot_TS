@@ -115,6 +115,7 @@ namespace GetDataMethod {
         let MAX_DISPLAY_AMOUNT = 5;
         let monthArray = Array<any>();
         let totalAmount = recordCollection['data'].length.toString();
+        console.log(totalAmount);
         let result = await flexViewInit(type, totalAmount, event.source.userId);
         let tempIndex = 0;
 
@@ -329,7 +330,6 @@ async function getDataList(event): Promise<any> {
             cycle: element.container.cycleCtr === undefined ? 0 : element.container.cycleCtr,
             return: false,
         };
-
         inUsed.push(record);
     });
 

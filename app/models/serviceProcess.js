@@ -116,6 +116,7 @@ var GetDataMethod;
             let MAX_DISPLAY_AMOUNT = 5;
             let monthArray = Array();
             let totalAmount = recordCollection['data'].length.toString();
+            console.log(totalAmount);
             let result = yield flexViewInit(type, totalAmount, event.source.userId);
             let tempIndex = 0;
             for (let i = result.index; i < (recordCollection.data.length > result.index + MAX_DISPLAY_AMOUNT ? result.index + MAX_DISPLAY_AMOUNT : recordCollection.data.length); i++) {

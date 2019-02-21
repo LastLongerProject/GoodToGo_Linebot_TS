@@ -2,6 +2,8 @@ import axois from 'axios';
 import jwt from "jwt-simple";
 import { failPromise, successPromise } from "./customPromise";
 
+const debug = require('./logFactory.js')('linebot:tool');
+
 function isMobilePhone(phone: string): boolean {
     var reg: RegExp = /^[09]{2}[0-9]{8}$/;
     var res: boolean = reg.test(phone);
@@ -117,7 +119,8 @@ async function getUserDetail(phone): Promise<any> {
             totalUsageAmount
         });
     }).catch(err => {
-        failPromise(err);
+        debug.error(err);
+        return failPromise(err);
     });
     return result;
 }

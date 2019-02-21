@@ -72,7 +72,7 @@ function bindingEvent(event) {
                     message = '綁定成功！';
                     let result = yield tool_1.getUserDetail(event.message.text);
                     if (result) {
-                        richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, result.lineToken);
+                        richMenuScript_1.switchRichmenu(result.usingAmount + result.lostAmount, event.source.userId);
                         return client.textMessage(event, message);
                     }
                     return client.textMessage(event, "伺服器出現問題！請向好盒器回報QQ");
@@ -178,7 +178,7 @@ function getContributionEvent(event) {
         var dbUser = yield User.findOne({ 'user.lineId': event.source.userId }).exec();
         let result = yield tool_1.getUserDetail(dbUser.user.phone);
         let contribution = result.contribution;
-        let view = new contributionView_1.ContrubtionView(result.totalUsageAmount, contribution.tree, contribution.water, contribution.co2);
+        let view = new contributionView_1.ContrubtionView(result.totalUsageAmount, contribution.tree.toFixed(4), contribution.water.toFixed(1), contribution.co2.toFixed(1));
         return client.flexMessage(event, view.getView());
     });
 }

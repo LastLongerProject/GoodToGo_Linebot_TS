@@ -12,13 +12,13 @@
     },
     "development": {
         "richmenu_before": "richmenu-87c7b14b360ef677530adead84cae4d4",
-        "richMenuId_0": "richmenu-ebe343baf33216d90aba9e2e2d014bb1",
-        "richMenuId_1": "richmenu-06a760e5cbe778cd1c30c20a9ae598c6",
-        "richMenuId_2": "richmenu-90a8dd5b6e1a7076b62a0335eae2473a",
-        "richMenuId_3": "richmenu-f7e807e828fda5b3e0839e4a203552e7",
-        "richMenuId_4": "richmenu-0cef9d8d103bc0bc5eda560514f24c94",
-        "richMenuId_5": "richmenu-f5ae103c8cda9483161abbcf0e22d0fd",
-        "richMenuId_more": "richmenu-0b2e844c5293ca54eae09a635b004a43",
+        "richMenuId_0": "richmenu-fe361c2e2fd6d6a4aac27d44ebee634b",
+        "richMenuId_1": "richmenu-6565dda290b884ee664e81289982f595",
+        "richMenuId_2": "richmenu-932a8676f616ec995bb8b680c276579a",
+        "richMenuId_3": "richmenu-03d1a834d48495de335594a82487acfe",
+        "richMenuId_4": "richmenu-e33eb16818152a629fa1891f3c34ccde",
+        "richMenuId_5": "richmenu-f6f401f0ea3a1e9ad1bb7ec5c933ad01",
+        "richMenuId_more": "richmenu-154347de68490ca9daf200511626548f",
         "richmenu_after": "richmenu-29a45a2f2eaa9fcbc07272ad90527894"
     }
 }

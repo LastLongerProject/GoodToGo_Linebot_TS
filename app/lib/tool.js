@@ -14,6 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const jwt_simple_1 = __importDefault(require("jwt-simple"));
 const customPromise_1 = require("./customPromise");
+const debug = require('./logFactory.js')('linebot:tool');
 function isMobilePhone(phone) {
     var reg = /^[09]{2}[0-9]{8}$/;
     var res = reg.test(phone);
@@ -121,7 +122,8 @@ function getUserDetail(phone) {
                 totalUsageAmount
             });
         }).catch(err => {
-            customPromise_1.failPromise(err);
+            debug.error(err);
+            return customPromise_1.failPromise(err);
         });
         return result;
     });
