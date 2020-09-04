@@ -17,7 +17,7 @@
         "helmet": "^3.15.0",
         "jwt-simple": "^0.5.5",
         "kareem": "^2.0.7",
-        "mongodb": "^3.1.10",
+        "mongodb": "^3.1.13",
         "mongoose": "^5.3.14",
         "morgan": "~1.9.0",
         "nodemon": "^1.18.7",
